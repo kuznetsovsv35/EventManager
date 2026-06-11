@@ -5,16 +5,16 @@ namespace EventManager.Models;
 public class Event
 {
     [Required]
-    public required Guid Id { get; set; } = Guid.NewGuid();
+    public required Guid Id { get; set; }
     
     [Required]
-    public required string Title { get; set; } = string.Empty;
+    public required string Title { get; set; }
     
     public string? Description { get; set; }
     
     [Required]
-    public required DateTime StartAt { get; set; } = DateTime.Now;
+    public required DateTime StartAt { get; set; }
     
     [Required]
-    public DateTime EndAt { get; set; } = DateTime.Now.AddMinutes(30);
+    public DateTime EndAt { get; set; }
 }
