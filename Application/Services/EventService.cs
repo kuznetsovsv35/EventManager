@@ -7,12 +7,11 @@ namespace EventManager.Application.Services;
 
 public class EventService(AppDbContext dbContext) : IEventService
 {
-    public EventOutputData CreateEvent(EventInputData data)
+    public void CreateEvent(EventInputData data)
     {
         var newEvent = data.ToEvent();
         dbContext?.Events.Add(newEvent);
         dbContext?.SaveChanges();
-        return new EventOutputData(newEvent);
     }
 
     public EventOutputData? DeleteEvent(Guid id)

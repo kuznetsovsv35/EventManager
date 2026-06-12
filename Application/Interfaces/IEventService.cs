@@ -5,7 +5,7 @@ namespace EventManager.Application.Infrastructure;
 /// <summary>
 /// Интерфейс управления событиями.
 /// </summary>
-interface IEventService
+public interface IEventService
 {
     /// <summary>
     /// Получить все события.
@@ -25,7 +25,7 @@ interface IEventService
     /// </summary>
     /// <param name="data">Данные о событии.</param>
     /// <returns>СЭкземпляр созданного события.</returns>
-    EventOutputData CreateEvent(EventInputData data);
+    void CreateEvent(EventInputData data);
 
     /// <summary>
     /// Обновление данных о событии.
