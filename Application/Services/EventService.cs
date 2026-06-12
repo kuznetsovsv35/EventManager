@@ -5,6 +5,10 @@ using EventManager.Models;
 
 namespace EventManager.Application.Services;
 
+/// <summary>
+/// Сервис управления событиями.
+/// </summary>
+/// <param name="dbContext"></param>
 public class EventService(AppDbContext dbContext) : IEventService
 {
     public void CreateEvent(EventInputData data)

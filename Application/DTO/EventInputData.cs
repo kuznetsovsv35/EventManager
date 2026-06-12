@@ -3,21 +3,24 @@ using EventManager.Models;
 
 namespace EventManager.Application.DataTransfer;
 
+/// <summary>
+/// Водные данные запроса создания и обновления события.
+/// </summary>
 [DataValidation]
 public class EventInputData
 {
     [Required(AllowEmptyStrings = false, ErrorMessage = $"Свойство \"{nameof(Title)}\" не может быть пустым.")]
     public string? Title { get; set; }
-    
+
     public string? Description { get; set; }
-    
+
     [Required(ErrorMessage = $"Свойство \"{nameof(StartAt)}\" не может быть пустым.")]
     public DateTime StartAt { get; set; }
-    
+
     [Required(ErrorMessage = $"Свойство \"{nameof(EndAt)}\" не может быть пустым.")]
     public DateTime EndAt { get; set; }
 
-    public EventInputData() {}
+    public EventInputData() { }
 
     internal EventInputData(Event source)
     {
@@ -31,7 +34,7 @@ public class EventInputData
     {
         if (string.IsNullOrWhiteSpace(Title))
             throw new ArgumentException(nameof(Title));
-        
+
         if (EndAt <= StartAt)
             throw new ArgumentException("Окончание не может быть раньше начала события.");
     }

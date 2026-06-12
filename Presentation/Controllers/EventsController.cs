@@ -4,6 +4,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EventManager.Infrastructure.Controllers;
 
+/// <summary>
+/// API контроллер управления событиями CRUD.
+/// </summary>
+/// <param name="eventService"></param>
 [ApiController]
 [Route("api/[Controller]")]
 public class EventsController(IEventService eventService) : ControllerBase

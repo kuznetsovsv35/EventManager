@@ -2,6 +2,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace EventManager.Application.DataTransfer;
 
+/// <summary>
+/// Атрибут валидации входных данных.
+/// </summary>
 public class DataValidationAttribute : ValidationAttribute
 {
     protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
@@ -13,9 +16,9 @@ public class DataValidationAttribute : ValidationAttribute
 
             if (data.EndAt <= data.StartAt)
                 return new ValidationResult("Окончание не может быть раньше начала события.");
-            
+
             return ValidationResult.Success;
         }
         return base.IsValid(value, validationContext);
-    } 
+    }
 }

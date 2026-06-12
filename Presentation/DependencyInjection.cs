@@ -1,5 +1,8 @@
 namespace EventManager.Presentation;
 
+/// <summary>
+/// Внедрение зависимости уровня представления.
+/// </summary>
 public static class DependencyInjection
 {
     public static IServiceCollection AddPresentation(this IServiceCollection services)
