@@ -1,0 +1,16 @@
+using EventManager.Application.Interfaces;
+using EventManager.Application.Services;
+
+namespace EventManager.Application;
+
+/// <summary>
+/// Внедрение зависимости функциональности приложения.
+/// </summary>
+public static class DependencyInjection
+{
+    public static IServiceCollection AddApplication(this IServiceCollection services)
+    {
+        services.AddScoped<IEventService, EventService>();
+        return services;
+    }
+}
