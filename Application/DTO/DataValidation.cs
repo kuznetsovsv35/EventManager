@@ -9,6 +9,9 @@ public class DataValidationAttribute : ValidationAttribute
 {
     protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
     {
+        if (value == null)
+            return new ValidationResult($"Объект {nameof(EventInputData)} не может быть null.");
+
         if (value is EventInputData data)
         {
             if (string.IsNullOrWhiteSpace(data.Title))

@@ -1,15 +1,15 @@
 using EventManager.Application.DataTransfer;
-using EventManager.Application.Infrastructure;
+using EventManager.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
-namespace EventManager.Infrastructure.Controllers;
+namespace EventManager.Presentation.Controllers;
 
 /// <summary>
 /// API контроллер управления событиями CRUD.
 /// </summary>
 /// <param name="eventService"></param>
 [ApiController]
-[Route("api/[Controller]")]
+[Route("[controller]")]
 public class EventsController(IEventService eventService) : ControllerBase
 {
     [HttpGet]
@@ -18,7 +18,7 @@ public class EventsController(IEventService eventService) : ControllerBase
         return Ok(eventService.GetAllEvents());
     }
 
-    [HttpGet("{id}")]
+    [HttpGet("{id:guid}")]
     public IActionResult GetEvent(Guid id)
     {
         if (eventService.GetEvent(id) is EventOutputData data)
@@ -29,11 +29,10 @@ public class EventsController(IEventService eventService) : ControllerBase
     [HttpPost]
     public IActionResult PostEvent([FromBody] EventInputData data)
     {
-        eventService.CreateEvent(data);
-        return Created();
+        return Ok(eventService.CreateEvent(data));
     }
 
-    [HttpPut("{id}")]
+    [HttpPut("{id:guid}")]
     public IActionResult UpdateEvent(Guid id, [FromBody] EventInputData data)
     {
         if (eventService.UpdateEvent(id, data) is EventOutputData result)
@@ -41,7 +40,7 @@ public class EventsController(IEventService eventService) : ControllerBase
         return NotFound($"Событие id={id} не найдено.");
     }
 
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:guid}")]
     public IActionResult DeleteEvent(Guid id)
     {
         if (eventService.DeleteEvent(id) is EventOutputData data)

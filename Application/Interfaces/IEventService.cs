@@ -1,6 +1,6 @@
 using EventManager.Application.DataTransfer;
 
-namespace EventManager.Application.Infrastructure;
+namespace EventManager.Application.Interfaces;
 
 /// <summary>
 /// Интерфейс управления событиями.
@@ -25,7 +25,7 @@ public interface IEventService
     /// </summary>
     /// <param name="data">Данные о событии.</param>
     /// <returns>СЭкземпляр созданного события.</returns>
-    void CreateEvent(EventInputData data);
+    EventOutputData CreateEvent(EventInputData data);
 
     /// <summary>
     /// Обновление данных о событии.

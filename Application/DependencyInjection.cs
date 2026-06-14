@@ -1,4 +1,4 @@
-using EventManager.Application.Infrastructure;
+using EventManager.Application.Interfaces;
 using EventManager.Application.Services;
 
 namespace EventManager.Application;

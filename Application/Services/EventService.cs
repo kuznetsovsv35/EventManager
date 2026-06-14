@@ -1,5 +1,5 @@
 using EventManager.Application.DataTransfer;
-using EventManager.Application.Infrastructure;
+using EventManager.Application.Interfaces;
 using EventManager.Data;
 using EventManager.Models;
 
@@ -11,11 +11,12 @@ namespace EventManager.Application.Services;
 /// <param name="dbContext"></param>
 public class EventService(AppDbContext dbContext) : IEventService
 {
-    public void CreateEvent(EventInputData data)
+    public EventOutputData CreateEvent(EventInputData data)
     {
         var newEvent = data.ToEvent();
         dbContext?.Events.Add(newEvent);
         dbContext?.SaveChanges();
+        return new EventOutputData(newEvent);
     }
 
     public EventOutputData? DeleteEvent(Guid id)
