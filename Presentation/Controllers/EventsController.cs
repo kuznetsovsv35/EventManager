@@ -13,13 +13,13 @@ namespace EventManager.Presentation.Controllers;
 public class EventsController(IEventService eventService) : ControllerBase
 {
     [HttpGet]
-    public IActionResult GetEvents()
-    {
-        return Ok(eventService.GetAllEvents());
-    }
+    [ProducesResponseType(typeof(IEnumerable<EventOutputData>), StatusCodes.Status200OK)]
+    public ActionResult<IEnumerable<EventOutputData>> GetEvents() => Ok(eventService.GetAllEvents());
 
     [HttpGet("{id:guid}")]
-    public IActionResult GetEvent(Guid id)
+    [ProducesResponseType(typeof(EventOutputData), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public ActionResult<EventOutputData> GetEvent(Guid id)
     {
         if (eventService.GetEvent(id) is EventOutputData data)
             return Ok(data);
@@ -27,7 +27,8 @@ public class EventsController(IEventService eventService) : ControllerBase
     }
 
     [HttpPost]
-    public IActionResult PostEvent([FromBody] EventInputData inputData)
+    [ProducesResponseType(typeof(EventOutputData), StatusCodes.Status201Created)]
+    public ActionResult<EventOutputData> PostEvent([FromBody] EventInputData inputData)
     {
         var outputData = eventService.CreateEvent(inputData);
         return CreatedAtAction(
@@ -37,7 +38,9 @@ public class EventsController(IEventService eventService) : ControllerBase
     }
 
     [HttpPut("{id:guid}")]
-    public IActionResult UpdateEvent(Guid id, [FromBody] EventInputData data)
+    [ProducesResponseType(typeof(EventOutputData), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public ActionResult<EventOutputData> UpdateEvent(Guid id, [FromBody] EventInputData data)
     {
         if (eventService.UpdateEvent(id, data) is EventOutputData result)
             return Ok(result);
@@ -45,7 +48,9 @@ public class EventsController(IEventService eventService) : ControllerBase
     }
 
     [HttpDelete("{id:guid}")]
-    public IActionResult DeleteEvent(Guid id)
+    [ProducesResponseType(typeof(EventOutputData), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public ActionResult<EventOutputData> DeleteEvent(Guid id)
     {
         if (eventService.DeleteEvent(id) is EventOutputData data)
             return Ok(data);
