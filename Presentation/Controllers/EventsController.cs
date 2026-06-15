@@ -27,9 +27,13 @@ public class EventsController(IEventService eventService) : ControllerBase
     }
 
     [HttpPost]
-    public IActionResult PostEvent([FromBody] EventInputData data)
+    public IActionResult PostEvent([FromBody] EventInputData inputData)
     {
-        return Ok(eventService.CreateEvent(data));
+        var outputData = eventService.CreateEvent(inputData);
+        return CreatedAtAction(
+            nameof(GetEvent), 
+            new { id = outputData.Id },
+            outputData);
     }
 
     [HttpPut("{id:guid}")]
