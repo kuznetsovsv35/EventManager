@@ -17,7 +17,7 @@ public class EventsController(IEventService eventService) : ControllerBase
     public ActionResult<IEnumerable<EventOutputData>> GetEvents() => Ok(eventService.GetAllEvents());
 
     [HttpGet("{id:guid}")]
-    [ProducesResponseType(typeof(EventOutputData), StatusCodes.Status200OK)]
+    [ProducesResponseType<EventOutputData>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public ActionResult<EventOutputData> GetEvent(Guid id)
     {
@@ -27,7 +27,8 @@ public class EventsController(IEventService eventService) : ControllerBase
     }
 
     [HttpPost]
-    [ProducesResponseType(typeof(EventOutputData), StatusCodes.Status201Created)]
+    [ProducesResponseType<EventOutputData>(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public ActionResult<EventOutputData> PostEvent([FromBody] EventInputData inputData)
     {
         var outputData = eventService.CreateEvent(inputData);
@@ -38,8 +39,9 @@ public class EventsController(IEventService eventService) : ControllerBase
     }
 
     [HttpPut("{id:guid}")]
-    [ProducesResponseType(typeof(EventOutputData), StatusCodes.Status200OK)]
+    [ProducesResponseType<EventOutputData>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public ActionResult<EventOutputData> UpdateEvent(Guid id, [FromBody] EventInputData data)
     {
         if (eventService.UpdateEvent(id, data) is EventOutputData result)
