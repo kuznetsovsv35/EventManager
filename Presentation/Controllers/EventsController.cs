@@ -50,7 +50,7 @@ public class EventsController(IEventService eventService) : ControllerBase
     }
 
     [HttpDelete("{id:guid}")]
-    [ProducesResponseType(typeof(EventOutputData), StatusCodes.Status200OK)]
+    [ProducesResponseType<EventOutputData>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public ActionResult<EventOutputData> DeleteEvent(Guid id)
     {
