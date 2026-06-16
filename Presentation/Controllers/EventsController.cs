@@ -13,7 +13,7 @@ namespace EventManager.Presentation.Controllers;
 public class EventsController(IEventService eventService) : ControllerBase
 {
     [HttpGet]
-    [ProducesResponseType(typeof(IEnumerable<EventOutputData>), StatusCodes.Status200OK)]
+    [ProducesResponseType<IEnumerable<EventOutputData>>(StatusCodes.Status200OK)]
     public ActionResult<IEnumerable<EventOutputData>> GetEvents() => Ok(eventService.GetAllEvents());
 
     [HttpGet("{id:guid}")]
