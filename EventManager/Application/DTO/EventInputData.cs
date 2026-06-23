@@ -33,10 +33,10 @@ public class EventInputData
     void Check()
     {
         if (string.IsNullOrWhiteSpace(Title))
-            throw new ArgumentException(nameof(Title));
+            throw new ValidationException($"Свойство \"{nameof(Title)}\" не может быть пустым");
 
         if (EndAt <= StartAt)
-            throw new ArgumentException("Окончание не может быть раньше начала события.");
+            throw new ValidationException($"Окончание не может быть раньше начала события (свойства \"{nameof(EndAt)}\" и \"{nameof(StartAt)}\")");
     }
 
     internal Event ToEvent()

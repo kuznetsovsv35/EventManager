@@ -18,7 +18,7 @@ public class DataValidationAttribute : ValidationAttribute
                 return new ValidationResult($"Свойство \"{nameof(data.Title)}\" не может быть пустым.");
 
             if (data.EndAt <= data.StartAt)
-                return new ValidationResult("Окончание не может быть раньше начала события.");
+                return new ValidationResult($"Окончание не может быть раньше начала события (свойства \"{nameof(data.EndAt)}\" и \"{nameof(data.StartAt)}\")");
 
             return ValidationResult.Success;
         }
