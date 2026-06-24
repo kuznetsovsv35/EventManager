@@ -8,6 +8,12 @@ namespace EventManager.Infrastructure;
 /// </summary>
 public static class DependencyInjection
 {
+    public static IApplicationBuilder UseErrorHandler(this IApplicationBuilder builder)
+    {
+        builder.UseMiddleware<ErrorHandler>();
+        return builder;
+    }
+    
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddDbContext<AppDbContext>(options =>
