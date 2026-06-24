@@ -9,15 +9,12 @@ namespace EventManager.Application.DataTransfer;
 [DataValidation]
 public class EventInputData
 {
-    [Required(AllowEmptyStrings = false, ErrorMessage = $"Свойство \"{nameof(Title)}\" не может быть пустым.")]
     public string? Title { get; set; }
 
     public string? Description { get; set; }
 
-    [Required(ErrorMessage = $"Свойство \"{nameof(StartAt)}\" не может быть пустым.")]
     public DateTime StartAt { get; set; }
 
-    [Required(ErrorMessage = $"Свойство \"{nameof(EndAt)}\" не может быть пустым.")]
     public DateTime EndAt { get; set; }
 
     public EventInputData() { }
@@ -30,13 +27,12 @@ public class EventInputData
         EndAt = source.EndAt;
     }
 
+    static readonly ValidationAttribute _validationAttribute = new DataValidationAttribute();
     void Check()
     {
-        if (string.IsNullOrWhiteSpace(Title))
-            throw new ValidationException($"Свойство \"{nameof(Title)}\" не может быть пустым");
-
-        if (EndAt <= StartAt)
-            throw new ValidationException($"Окончание не может быть раньше начала события (свойства \"{nameof(EndAt)}\" и \"{nameof(StartAt)}\")");
+        var result = DataValidationAttribute.Check(this);
+        if (result != ValidationResult.Success && result?.ErrorMessage is not null)
+            throw new ValidationException(result, _validationAttribute, this);
     }
 
     internal Event ToEvent()

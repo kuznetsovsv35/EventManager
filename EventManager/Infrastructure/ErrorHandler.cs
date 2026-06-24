@@ -28,24 +28,38 @@ public class ErrorHandler(RequestDelegate next, ILogger<ErrorHandler> logger)
     }
 
     void LogException(HttpRequest request, Exception exception)
-        => logger.LogError(exception, $"Unhandled exception, Method: {request.Method}, Path: {request.Path}");
+        => logger.LogError(exception, "Необработанное исключение: Method: {Method}, Path: {Path}", request.Method, request.Path);
 
-    async Task<int> MapStatusCodeToException(Exception exception)
+    static int MapStatusCodeToException(Exception exception)
         => exception switch
         {
             ValidationException => StatusCodes.Status400BadRequest,
             _ => StatusCodes.Status500InternalServerError,
         };
 
-    async Task MakeErrorResponse(HttpResponse response, Exception exception)
+    static async Task MakeErrorResponse(HttpResponse response, Exception exception)
     {
-        response.StatusCode = await MapStatusCodeToException(exception);
+        response.StatusCode = MapStatusCodeToException(exception);
 
         var respBody = new ProblemDetails
         {
             Status = response.StatusCode, 
-            Detail = exception.Message
+            Title = exception.Message,
+            Type = $"{exception.GetType().Namespace}.{exception.GetType().Name}",
+            Detail = exception.InnerException?.Message
         };
+
+        if (exception.Data.Count > 0)
+        {
+            foreach(var key in exception.Data.Keys.Cast<object>())
+            {
+                if (key?.ToString() is string name)
+                {
+                    respBody.Extensions.Add(KeyValuePair.Create(name, exception.Data[key]));
+                }
+            }
+        }
+
         response.ContentType = MediaTypeNames.Application.Json;
         await response.WriteAsJsonAsync(respBody);
     }

@@ -13,15 +13,20 @@ public class DataValidationAttribute : ValidationAttribute
             return new ValidationResult($"Объект {nameof(EventInputData)} не может быть null.");
 
         if (value is EventInputData data)
-        {
-            if (string.IsNullOrWhiteSpace(data.Title))
-                return new ValidationResult($"Свойство \"{nameof(data.Title)}\" не может быть пустым.");
-
-            if (data.EndAt <= data.StartAt)
-                return new ValidationResult($"Окончание не может быть раньше начала события (свойства \"{nameof(data.EndAt)}\" и \"{nameof(data.StartAt)}\")");
-
-            return ValidationResult.Success;
-        }
+            return Check(data);
+        
         return base.IsValid(value, validationContext);
+    }
+
+    internal static ValidationResult? Check(EventInputData data)
+    {
+        if (string.IsNullOrWhiteSpace(data.Title))
+            return new ValidationResult("Заголовок события не может быть пустым.", [nameof(data.Title)]);
+
+        if (data.EndAt <= data.StartAt)
+            return new ValidationResult($"Окончание не может быть раньше начала события.", [nameof(data.EndAt), nameof(data.StartAt)]);
+
+        return ValidationResult.Success;
+
     }
 }
