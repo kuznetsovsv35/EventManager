@@ -16,7 +16,7 @@ public class EventService(AppDbContext dbContext) : IEventService
         var newEvent = data.ToEvent();
         dbContext?.Events.Add(newEvent);
         dbContext?.SaveChanges();
-        return new EventOutputData(newEvent);
+        return newEvent.ToOutputData();
     }
 
     public EventOutputData? DeleteEvent(Guid id)
@@ -25,20 +25,20 @@ public class EventService(AppDbContext dbContext) : IEventService
         {
             dbContext.Events.Remove(e);
             dbContext.SaveChanges();
-            return new EventOutputData(e);
+            return e.ToOutputData();
         }
         return null;
     }
 
     public IList<EventOutputData> GetAllEvents()
     {
-        return [.. dbContext.Events.Select(e => new EventOutputData(e))];
+        return [.. dbContext.Events.Select(e => e.ToOutputData())];
     }
 
     public EventOutputData? GetEvent(Guid id)
     {
         if (dbContext.Events.FirstOrDefault(e => e.Id == id) is Event e)
-            return new EventOutputData(e);
+            return e.ToOutputData();
         return null;
     }
 
@@ -49,7 +49,7 @@ public class EventService(AppDbContext dbContext) : IEventService
             data.Update(e);
             dbContext.Events.Update(e);
             dbContext.SaveChanges();
-            return new EventOutputData(e);
+            return e.ToOutputData();
         }
         return null;
     }

@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace EventManager.Application.DataTransfer;
@@ -10,7 +11,6 @@ public class EventInputDataValidationAttribute : ValidationAttribute
 {
     public EventInputDataValidationAttribute(string errorMessage) : base(errorMessage) {}
     
-
     public EventInputDataValidationAttribute() : this($"Ошибка валидации объекта {nameof(EventInputData)}.") {}
 
     protected override ValidationResult? IsValid(object? value, ValidationContext context)
@@ -41,23 +41,20 @@ public class EventInputDataValidationAttribute : ValidationAttribute
     }
 
     ValidationResult CreateResult(ValidationContext? context)
-        => new(ErrorMessage, context?.MemberName is string memnerName ? [memnerName] : null);
+        => new(ErrorMessage, context?.MemberName is string memberName ? [memberName] : null);
     
-    internal static  ValidationResult? Check(EventInputData data)
+    internal static IReadOnlyCollection<ValidationResult> Check(EventInputData data)
     {
-        var results = new List<ValidationResult>();
+        var results = new Collection<ValidationResult>();
         
         // For validation tests
         // data.Title = string.Empty;
         // data.StartAt = data.EndAt;
         var isValid = Validator.TryValidateObject(data, new ValidationContext(data), results, true);
         
-        if (isValid == false)
-        {
-            if (results.FirstOrDefault() is ValidationResult result)
-                return result;
-        }
-        
-        return ValidationResult.Success;
+        if (isValid)
+            return [];
+            
+        return results;        
     }
 }
