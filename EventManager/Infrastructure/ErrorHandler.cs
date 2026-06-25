@@ -23,7 +23,7 @@ public class ErrorHandler(RequestDelegate next, ILogger<ErrorHandler> logger)
             }
 
             content.Response.Clear();
-            await MakeErrorResponse(content.Response, ex);
+            await CreateErrorResponse(content, ex);
         }
     }
 
@@ -37,30 +37,47 @@ public class ErrorHandler(RequestDelegate next, ILogger<ErrorHandler> logger)
             _ => StatusCodes.Status500InternalServerError,
         };
 
-    static async Task MakeErrorResponse(HttpResponse response, Exception exception)
+    static async Task CreateErrorResponse(HttpContext context, Exception exception)
     {
-        response.StatusCode = MapStatusCodeToException(exception);
+        var request = context.Request;
+        var response = context.Response;
 
-        var respBody = new ProblemDetails
+        ProblemDetails details = exception switch
         {
-            Status = response.StatusCode, 
-            Title = exception.Message,
-            Type = $"{exception.GetType().Namespace}.{exception.GetType().Name}",
-            Detail = exception.InnerException?.Message
+            ValidationException ve => await CreateValidationProblemDetails(ve),
+            _ => await CreateProblemDetails(exception),
         };
-
-        if (exception.Data.Count > 0)
-        {
-            foreach(var key in exception.Data.Keys.Cast<object>())
-            {
-                if (key?.ToString() is string name)
-                {
-                    respBody.Extensions.Add(KeyValuePair.Create(name, exception.Data[key]));
-                }
-            }
-        }
+        
+        details.Instance = request.Path;
+        response.StatusCode = details.Status ?? MapStatusCodeToException(exception);
 
         response.ContentType = MediaTypeNames.Application.Json;
-        await response.WriteAsJsonAsync(respBody);
+        await response.WriteAsJsonAsync(details);
+    }
+
+    static async Task<ProblemDetails> CreateProblemDetails(Exception exception)
+        => new()
+        {
+            Type = "https://tools.ietf.org/html/rfc7231#section-6.6.1",
+            Title = "Внутренняя ошибка сервера",
+            Detail = "Произошла непредвиденная ошибка. Попробуйте повторить запрос позже.",            
+            Status = StatusCodes.Status500InternalServerError,
+        };
+
+    static async Task<ValidationProblemDetails> CreateValidationProblemDetails(ValidationException exception)
+    {
+        var details = new ValidationProblemDetails
+        {
+            Type = "https://tools.ietf.org/html/rfc7807",
+            Title = "Ошибка валидации запроса",
+            Detail = "Один или несколько параметров содержат недопустимые значения.",
+            Status = StatusCodes.Status400BadRequest,
+        };
+
+        foreach (var member in exception.ValidationResult.MemberNames)
+        {
+            details.Errors[member] = [exception.ValidationResult.ErrorMessage ?? exception.Message];
+        }
+        return details;
     }
 }
