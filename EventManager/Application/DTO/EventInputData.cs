@@ -6,15 +6,18 @@ namespace EventManager.Application.DataTransfer;
 /// <summary>
 /// Водные данные запроса создания и обновления события.
 /// </summary>
-[DataValidation]
+[EventInputDataValidation]
 public class EventInputData
 {
+    [EventInputDataValidation("Загаловок события не может быть пустым.")]
     public string? Title { get; set; }
 
     public string? Description { get; set; }
 
+    [EventInputDataValidation("Момент начала события не может быть позже момента окончания.")]
     public DateTime StartAt { get; set; }
 
+    [EventInputDataValidation("Момент окончания события не может быть раньше момента начала.")]
     public DateTime EndAt { get; set; }
 
     public EventInputData() { }
@@ -27,12 +30,10 @@ public class EventInputData
         EndAt = source.EndAt;
     }
 
-    static readonly ValidationAttribute _validationAttribute = new DataValidationAttribute();
     void Check()
     {
-        var result = DataValidationAttribute.Check(this);
-        if (result != ValidationResult.Success && result?.ErrorMessage is not null)
-            throw new ValidationException(result, _validationAttribute, this);
+        if (EventInputDataValidationAttribute.Check(this) is ValidationResult result)
+            throw new ValidationException(result, null, this);
     }
 
     internal Event ToEvent()
