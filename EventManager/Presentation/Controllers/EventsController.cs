@@ -2,6 +2,7 @@ using EventManager.Application.DataTransfer;
 using EventManager.Application.Interfaces;
 using EventManager.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using CustomProblemDetailsFactory = EventManager.Infrastructure.ProblemDetailsFactory;
 
 namespace EventManager.Presentation.Controllers;
@@ -16,7 +17,9 @@ public class EventsController(IEventService eventService) : ControllerBase
 {
     [HttpGet]
     [ProducesResponseType<IEnumerable<EventOutputData>>(StatusCodes.Status200OK)]
-    public ActionResult<IEnumerable<EventOutputData>> GetEvents() => Ok(eventService.GetAllEvents());
+    public ActionResult<IEnumerable<EventOutputData>> GetEvents(
+        [FromQuery] EventQueryParams? queryParams
+        ) => Ok(eventService.GetAllEvents());
 
     [HttpGet("{id:guid}")]
     [ProducesResponseType<EventOutputData>(StatusCodes.Status200OK)]
