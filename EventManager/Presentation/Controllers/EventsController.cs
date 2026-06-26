@@ -1,5 +1,6 @@
 using EventManager.Application.DataTransfer;
 using EventManager.Application.Interfaces;
+using EventManager.Models;
 using Microsoft.AspNetCore.Mvc;
 using CustomProblemDetailsFactory = EventManager.Infrastructure.ProblemDetailsFactory;
 
@@ -22,8 +23,8 @@ public class EventsController(IEventService eventService) : ControllerBase
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public ActionResult<EventOutputData> GetEvent(Guid id)
     {
-        if (eventService.GetEvent(id) is EventOutputData data)
-            return Ok(data);
+        if (eventService.GetEvent(id) is Event e)
+            return Ok(e.ToOutputData());
 
         return EventNotFound(id);
     }
@@ -33,11 +34,11 @@ public class EventsController(IEventService eventService) : ControllerBase
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     public ActionResult<EventOutputData> PostEvent([FromBody] EventInputData inputData)
     {
-        var outputData = eventService.CreateEvent(inputData);
+        var e = eventService.CreateEvent(inputData);
         return CreatedAtAction(
             nameof(GetEvent),
-            new { id = outputData.Id },
-            outputData);
+            new { id = e.Id },
+            e.ToOutputData());
     }
 
     [HttpPut("{id:guid}")]
@@ -46,8 +47,8 @@ public class EventsController(IEventService eventService) : ControllerBase
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     public ActionResult<EventOutputData> UpdateEvent(Guid id, [FromBody] EventInputData data)
     {
-        if (eventService.UpdateEvent(id, data) is EventOutputData result)
-            return Ok(result);
+        if (eventService.UpdateEvent(id, data) is Event e)
+            return Ok(e.ToOutputData());        
         
         return EventNotFound(id);
     }
@@ -57,8 +58,8 @@ public class EventsController(IEventService eventService) : ControllerBase
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public ActionResult<EventOutputData> DeleteEvent(Guid id)
     {
-        if (eventService.DeleteEvent(id) is EventOutputData data)
-            return Ok(data);
+        if (eventService.DeleteEvent(id) is Event e)
+            return Ok(e.ToOutputData());
         
         return EventNotFound(id);
     }

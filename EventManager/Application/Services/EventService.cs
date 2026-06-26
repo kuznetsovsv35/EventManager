@@ -11,45 +11,44 @@ namespace EventManager.Application.Services;
 /// <param name="dbContext"></param>
 public class EventService(AppDbContext dbContext) : IEventService
 {
-    public EventOutputData CreateEvent(EventInputData data)
+    public Event CreateEvent(EventInputData data)
     {
-        var newEvent = data.ToEvent();
-        dbContext?.Events.Add(newEvent);
+        var e = data.ToEvent();
+        dbContext?.Events.Add(e);
         dbContext?.SaveChanges();
-        return newEvent.ToOutputData();
+        return e;
     }
 
-    public EventOutputData? DeleteEvent(Guid id)
+    public Event? DeleteEvent(Guid id)
     {
         if (dbContext.Events.FirstOrDefault(e => e.Id == id) is Event e)
         {
             dbContext.Events.Remove(e);
             dbContext.SaveChanges();
-            return e.ToOutputData();
+            return e;
         }
+        
         return null;
     }
 
-    public IList<EventOutputData> GetAllEvents()
-    {
-        return [.. dbContext.Events.Select(e => e.ToOutputData())];
-    }
-
-    public EventOutputData? GetEvent(Guid id)
+    public IQueryable<Event> GetAllEvents() => dbContext.Events;
+    
+    public Event? GetEvent(Guid id)
     {
         if (dbContext.Events.FirstOrDefault(e => e.Id == id) is Event e)
-            return e.ToOutputData();
+            return e;
+        
         return null;
     }
 
-    public EventOutputData? UpdateEvent(Guid id, EventInputData data)
+    public Event? UpdateEvent(Guid id, EventInputData data)
     {
         if (dbContext.Events.FirstOrDefault(e => e.Id == id) is Event e)
         {
             data.Update(e);
             dbContext.Events.Update(e);
             dbContext.SaveChanges();
-            return e.ToOutputData();
+            return e;
         }
         return null;
     }
