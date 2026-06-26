@@ -42,42 +42,16 @@ public class ErrorHandler(RequestDelegate next, ILogger<ErrorHandler> logger)
         var request = context.Request;
         var response = context.Response;
 
-        ProblemDetails details = exception switch
+        ProblemDetailsBuilder<ProblemDetails> detailsBuilder = exception switch
         {
-            ValidationException ve => await CreateValidationProblemDetails(ve),
-            _ => await CreateProblemDetails(exception),
+            ValidationException ve =>ProblemDetailsFactory.VakidationProblem(ve.ValidationResult, ve.Message),
+            _ => ProblemDetailsFactory.InternalServiceError(exception.Message)
         };
         
-        details.Instance = request.Path;
-        response.StatusCode = details.Status ?? MapStatusCodeToException(exception);
+        detailsBuilder.AddInstance(request.Path);
+        response.StatusCode = detailsBuilder.Problem.Status ?? MapStatusCodeToException(exception);
 
-        response.ContentType = MediaTypeNames.Application.Json;
-        await response.WriteAsJsonAsync(details);
-    }
-
-    static async Task<ProblemDetails> CreateProblemDetails(Exception exception)
-        => new()
-        {
-            Type = "https://tools.ietf.org/html/rfc7231#section-6.6.1",
-            Title = "Внутренняя ошибка сервера",
-            Detail = "Произошла непредвиденная ошибка. Попробуйте повторить запрос позже.",            
-            Status = StatusCodes.Status500InternalServerError,
-        };
-
-    static async Task<ValidationProblemDetails> CreateValidationProblemDetails(ValidationException exception)
-    {
-        var details = new ValidationProblemDetails
-        {
-            Type = "https://tools.ietf.org/html/rfc7807",
-            Title = "Ошибка валидации запроса",
-            Detail = "Один или несколько параметров содержат недопустимые значения.",
-            Status = StatusCodes.Status400BadRequest,
-        };
-
-        foreach (var member in exception.ValidationResult.MemberNames)
-        {
-            details.Errors[member] = [exception.ValidationResult.ErrorMessage ?? exception.Message];
-        }
-        return details;
+        response.ContentType = MediaTypeNames.Application.ProblemJson;
+        await response.WriteAsJsonAsync(detailsBuilder.Problem);
     }
 }

@@ -1,6 +1,7 @@
 using EventManager.Application.DataTransfer;
 using EventManager.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using CustomProblemDetailsFactory = EventManager.Infrastructure.ProblemDetailsFactory;
 
 namespace EventManager.Presentation.Controllers;
 
@@ -23,8 +24,8 @@ public class EventsController(IEventService eventService) : ControllerBase
     {
         if (eventService.GetEvent(id) is EventOutputData data)
             return Ok(data);
-        //return MakeEventNotFound(id);
-        throw new Exception("Unexpected exception");
+
+        return EventNotFound(id);
     }
 
     [HttpPost]
@@ -47,7 +48,8 @@ public class EventsController(IEventService eventService) : ControllerBase
     {
         if (eventService.UpdateEvent(id, data) is EventOutputData result)
             return Ok(result);
-        return MakeEventNotFound(id);
+        
+        return EventNotFound(id);
     }
 
     [HttpDelete("{id:guid}")]
@@ -57,14 +59,12 @@ public class EventsController(IEventService eventService) : ControllerBase
     {
         if (eventService.DeleteEvent(id) is EventOutputData data)
             return Ok(data);
-        return MakeEventNotFound(id);
+        
+        return EventNotFound(id);
     }
 
-    NotFoundObjectResult MakeEventNotFound(Guid id)
-        => NotFound(new ProblemDetails
-        {
-            Status = StatusCodes.Status404NotFound,
-            Title = "Событие е найдено.",
-            Detail = $"ID={id}"
-        });
+    NotFoundObjectResult EventNotFound(Guid id)
+        => NotFound(CustomProblemDetailsFactory
+        .NotFound($"Событие не найдено, ID={id}.")
+        .AddInstance(HttpContext.Request.Path).Problem);
 }
