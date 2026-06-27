@@ -16,10 +16,10 @@ namespace EventManager.Presentation.Controllers;
 public class EventsController(IEventService eventService) : ControllerBase
 {
     [HttpGet]
-    [ProducesResponseType<IEnumerable<EventOutputData>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<PaginateResult>(StatusCodes.Status200OK)]
     public ActionResult<IEnumerable<EventOutputData>> GetEvents(
-        [FromQuery] EventQueryParams? queryParams
-        ) => Ok(eventService.GetAllEvents());
+        [FromQuery] EventQueryParams queryParams
+        ) => Ok(eventService.GetEvents(eventService.GetEvents(queryParams), queryParams));
 
     [HttpGet("{id:guid}")]
     [ProducesResponseType<EventOutputData>(StatusCodes.Status200OK)]

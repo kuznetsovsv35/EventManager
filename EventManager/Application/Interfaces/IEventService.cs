@@ -15,6 +15,21 @@ public interface IEventService
     IQueryable<Event> GetAllEvents();
 
     /// <summary>
+    /// Получить события с учетом фильтра.
+    /// </summary>
+    /// <param name="filterParams">Параметры фильтра.</param>
+    /// <returns></returns>
+    IQueryable<Event> GetEvents(FilterParams? filterParams);
+
+    /// <summary>
+    /// Возвращает результат отбора с разбивкой по страницам.
+    /// </summary>
+    /// <param name="events">Объект запроса, если не указан, берутся все.</param>
+    /// <param name="pageParams">Параметры разбивки по страницам.</param>
+    /// <returns></returns>
+    PaginateResult GetEvents(IQueryable<Event>? events, PageParams pageParams);
+
+    /// <summary>
     /// Получить событие по идентификатору.
     /// </summary>
     /// <param name="id">Идентификатор</param>

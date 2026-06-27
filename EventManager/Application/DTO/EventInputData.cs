@@ -1,7 +1,7 @@
 namespace EventManager.Application.DataTransfer;
 
 /// <summary>
-/// Водные данные запроса создания и обновления события.
+/// Входные данные запроса создания и обновления события.
 /// </summary>
 [EventInputDataValidation]
 public class EventInputData

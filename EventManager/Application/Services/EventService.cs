@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using EventManager.Application.DataTransfer;
 using EventManager.Application.Interfaces;
 using EventManager.Data;
@@ -31,8 +32,20 @@ public class EventService(AppDbContext dbContext) : IEventService
         return null;
     }
 
-    public IQueryable<Event> GetAllEvents() => dbContext.Events;
+    public IQueryable<Event> GetAllEvents() => GetEvents(null);
+
+    public IQueryable<Event> GetEvents(FilterParams? filter)
+    {
+        if (filter == null)
+            return dbContext.Events.AsQueryable();
+        
+        Expression<Func<Event, bool>> filterExpression = _ => true;
+        return dbContext.Events.AsQueryable().Where(filterExpression);
+    }
     
+    public PaginateResult GetEvents(IQueryable<Event>? events, PageParams pageParams)
+        => new(0, [], 1, 0);
+
     public Event? GetEvent(Guid id)
     {
         if (dbContext.Events.FirstOrDefault(e => e.Id == id) is Event e)
