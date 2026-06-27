@@ -23,10 +23,10 @@ public partial class EventQueryParams
     /// <summary>
     /// Текущая страница (разбивка результатов по страницам).
     /// </summary>
-    public int Page { get; set; } = 1;
+    public int Page { get; set; } = PageParams.DefaultPageNumber;
 
     /// <summary>
     /// Количество событий на странице (разбивка по страницам).
     /// </summary>
-    public int PageSize { get; set; } = 10;
+    public int PageSize { get; set; } = PageParams.DefaultPageSize;
 }

@@ -1,6 +1,15 @@
 namespace EventManager.Application.DataTransfer;
 
-public record class PageParams(int CurrentPage, int PageSize);
+public class PageParams(int currentPage, int pageSize)
+{
+    public const int DefaultPageNumber = 1;
+    public const int DefaultPageSize = 10;
+
+    public int CurrentPage { get; } = currentPage;
+    public int PageSize { get; } = pageSize;
+
+    public static readonly PageParams Default = new(DefaultPageNumber, DefaultPageSize);
+}
 
 public partial class EventQueryParams
 {

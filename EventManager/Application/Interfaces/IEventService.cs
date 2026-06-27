@@ -12,22 +12,15 @@ public interface IEventService
     /// Получить все события.
     /// </summary>
     /// <returns>Список событий.</returns>
-    IQueryable<Event> GetAllEvents();
+    PaginateResult GetAllEvents();
 
     /// <summary>
-    /// Получить события с учетом фильтра.
+    /// Возвращает отфильтрованный набор с разбивкой по страницам.
     /// </summary>
     /// <param name="filterParams">Параметры фильтра.</param>
+    /// <param name="pageParams">Параметры разбивки.</param>
     /// <returns></returns>
-    IQueryable<Event> GetEvents(FilterParams? filterParams);
-
-    /// <summary>
-    /// Возвращает результат отбора с разбивкой по страницам.
-    /// </summary>
-    /// <param name="events">Объект запроса, если не указан, берутся все.</param>
-    /// <param name="pageParams">Параметры разбивки по страницам.</param>
-    /// <returns></returns>
-    PaginateResult GetEvents(IQueryable<Event>? events, PageParams pageParams);
+    PaginateResult GetEvents(FilterParams? filterParams, PageParams pageParams);
 
     /// <summary>
     /// Получить событие по идентификатору.

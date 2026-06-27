@@ -19,7 +19,7 @@ public class EventsController(IEventService eventService) : ControllerBase
     [ProducesResponseType<PaginateResult>(StatusCodes.Status200OK)]
     public ActionResult<IEnumerable<EventOutputData>> GetEvents(
         [FromQuery] EventQueryParams queryParams
-        ) => Ok(eventService.GetEvents(eventService.GetEvents(queryParams), queryParams));
+        ) => Ok(eventService.GetEvents(queryParams, queryParams));
 
     [HttpGet("{id:guid}")]
     [ProducesResponseType<EventOutputData>(StatusCodes.Status200OK)]
