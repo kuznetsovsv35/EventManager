@@ -31,7 +31,7 @@ public static class ProblemDetailsFactory
             Status = StatusCodes.Status500InternalServerError,
         });
 
-    public static ProblemDetailsBuilder<ProblemDetails> VakidationProblem(ValidationResult result, string message, string? detail = null, string? title = null)
+    public static ProblemDetailsBuilder<ProblemDetails> ValidationProblem(ValidationResult result, string message, string? detail = null, string? title = null)
     {
         var details = new ValidationProblemDetails
         {
@@ -53,7 +53,7 @@ public static class ProblemDetailsFactory
         => new(new()
         {
             Type = "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.4",
-            Title = title ?? "Ресулс не найден.",
+            Title = title ?? "Ресурс не найден.",
             Detail = detail ?? "Ресурс не найден.",
             Status = StatusCodes.Status404NotFound,
         });
