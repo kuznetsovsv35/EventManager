@@ -1,8 +1,6 @@
 using EventManager.Application.DataTransfer;
 using EventManager.Application.Interfaces;
-using EventManager.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using CustomProblemDetailsFactory = EventManager.Infrastructure.ProblemDetailsFactory;
 
 namespace EventManager.Presentation.Controllers;
@@ -16,7 +14,7 @@ namespace EventManager.Presentation.Controllers;
 public class EventsController(IEventService eventService) : ControllerBase
 {
     [HttpGet]
-    [ProducesResponseType<PaginateResult>(StatusCodes.Status200OK)]
+    [ProducesResponseType<PaginateResult<EventOutputData>>(StatusCodes.Status200OK)]
     public ActionResult<IEnumerable<EventOutputData>> GetEvents(
         [FromQuery] EventQueryParams queryParams
         ) => Ok(eventService.GetEvents(queryParams, queryParams));
@@ -26,8 +24,8 @@ public class EventsController(IEventService eventService) : ControllerBase
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public ActionResult<EventOutputData> GetEvent(Guid id)
     {
-        if (eventService.GetEvent(id) is Event e)
-            return Ok(e.ToOutputData());
+        if (eventService.GetEvent(id) is EventOutputData e)
+            return Ok(e);
 
         return EventNotFound(id);
     }
@@ -41,7 +39,7 @@ public class EventsController(IEventService eventService) : ControllerBase
         return CreatedAtAction(
             nameof(GetEvent),
             new { id = e.Id },
-            e.ToOutputData());
+            e);
     }
 
     [HttpPut("{id:guid}")]
@@ -50,8 +48,8 @@ public class EventsController(IEventService eventService) : ControllerBase
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     public ActionResult<EventOutputData> UpdateEvent(Guid id, [FromBody] EventInputData data)
     {
-        if (eventService.UpdateEvent(id, data) is Event e)
-            return Ok(e.ToOutputData());        
+        if (eventService.UpdateEvent(id, data) is EventOutputData e)
+            return Ok(e);
         
         return EventNotFound(id);
     }
@@ -61,8 +59,8 @@ public class EventsController(IEventService eventService) : ControllerBase
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public ActionResult<EventOutputData> DeleteEvent(Guid id)
     {
-        if (eventService.DeleteEvent(id) is Event e)
-            return Ok(e.ToOutputData());
+        if (eventService.DeleteEvent(id) is EventOutputData e)
+            return Ok(e);
         
         return EventNotFound(id);
     }

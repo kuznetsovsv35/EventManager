@@ -1,3 +1,3 @@
 namespace EventManager.Application.DataTransfer;
 
-public record class PaginateResult(int TotalCount, IEnumerable<EventOutputData> Values, int PageNumber, int PageSize);
+public record class PaginateResult<T>(int TotalCount, IEnumerable<T> Values, int PageNumber, int PageSize);

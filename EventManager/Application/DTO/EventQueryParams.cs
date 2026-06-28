@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace EventManager.Application.DataTransfer;
 
 /// <summary>
@@ -23,10 +25,12 @@ public partial class EventQueryParams
     /// <summary>
     /// Текущая страница (разбивка результатов по страницам).
     /// </summary>
+    [Range(1, int.MaxValue, ErrorMessage = "Значение должно быть положительным.")]
     public int Page { get; set; } = PageParams.DefaultPageNumber;
 
     /// <summary>
     /// Количество событий на странице (разбивка по страницам).
     /// </summary>
+    [Range(1, int.MaxValue, ErrorMessage = "Значение должно быть положительным.")]
     public int PageSize { get; set; } = PageParams.DefaultPageSize;
 }

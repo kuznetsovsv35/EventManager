@@ -1,5 +1,3 @@
-using System.Linq.Expressions;
-using System.Runtime.CompilerServices;
 using EventManager.Application.DataTransfer;
 using EventManager.Application.Interfaces;
 using EventManager.Data;
@@ -13,79 +11,72 @@ namespace EventManager.Application.Services;
 /// <param name="dbContext"></param>
 public class EventService(
     AppDbContext dbContext, 
-    IEventFilter eventFilter,
-    IEventPaginator paginator) : IEventService
+    IFilter<Event> filter,
+    IPaginator<Event> paginator) : IEventService
 {
-    public Event CreateEvent(EventInputData data)
+    public EventOutputData CreateEvent(EventInputData data)
     {
         var e = data.ToEvent();
         dbContext?.Events.Add(e);
         dbContext?.SaveChanges();
-        return e;
+        return e.ToOutputData();
     }
 
-    public Event? DeleteEvent(Guid id)
+    public EventOutputData? DeleteEvent(Guid id)
     {
         if (dbContext.Events.FirstOrDefault(e => e.Id == id) is Event e)
         {
             dbContext.Events.Remove(e);
             dbContext.SaveChanges();
-            return e;
+            return e.ToOutputData();
         }
         
         return null;
     }
 
-    public PaginateResult GetAllEvents()
+    public PaginateResult<EventOutputData> GetAllEvents()
     {  
         return GetEvents(null, PageParams.Default);
     }
-    public PaginateResult GetEvents(FilterParams? filterParams, PageParams pageParams)
+    public PaginateResult<EventOutputData> GetEvents(FilterParams? filterParams, PageParams pageParams)
         => paginator.Paginate(
             FilterEvents(dbContext.Events.AsQueryable<Event>(), filterParams),
-            pageParams); 
+            pageParams.CurrentPage, pageParams.PageSize,
+            e => e.ToOutputData()); 
         
-    IQueryable<Event> FilterEvents(IQueryable<Event> events, FilterParams? filter)
+    IQueryable<Event> FilterEvents(IQueryable<Event> events, FilterParams? filterParams)
     {
-        eventFilter.Clear();
+        var f = filter.Reset();
 
-        if (filter is { Title: not null })
+        if (filterParams is { Title: string title }) 
+            f.AddCondition(e => e.Title.Contains(title));
+        if (filterParams is { From: DateTime from }) 
+            f.AddCondition(e => e.StartAt >= from);
+        if (filterParams is { To: DateTime to })
         {
-            eventFilter.TitleContains(filter.Title);
+            to.AddDays(1);
+            f.AddCondition(e => e.EndAt < to);
         }
 
-        if (filter is { From: not null })
-        {
-            eventFilter.UseFromDate(filter.From.Value);
-        }
-
-        if (filter is { To: not null })
-        {
-            eventFilter.UseToDate(filter.To.Value);
-        }
-        
-        if (eventFilter.Expression is Expression<Func<Event, bool>> expression)
-            return events.Where(expression);
-
-        return events;
+        return f.ApplyFilter(events);
     }
 
-    public Event? GetEvent(Guid id)
+    public EventOutputData? GetEvent(Guid id)
     {
         if (dbContext.Events.FirstOrDefault(e => e.Id == id) is Event e)
-            return e;
+            return e.ToOutputData();
         
         return null;
     }
 
-    public Event? UpdateEvent(Guid id, EventInputData data)
+    public EventOutputData? UpdateEvent(Guid id, EventInputData data)
     {
         if (dbContext.Events.FirstOrDefault(e => e.Id == id) is Event e)
         {
             data.Update(e);
             dbContext.Events.Update(e);
             dbContext.SaveChanges();
-            return e;
+            return e.ToOutputData();
         }
         return null;
     }
