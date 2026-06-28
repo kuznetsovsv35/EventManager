@@ -1,3 +1,5 @@
+using System.Linq.Expressions;
+
 namespace EventManager.Application.Interfaces;
 
 public interface IFilter<T>
@@ -12,7 +14,7 @@ public interface IFilter<T>
     /// </summary>
     /// <param name="predicate"></param>
     /// <returns></returns>
-    IFilter<T> AddCondition(Func<T, bool> predicate);
+    IFilter<T> AddCondition(Expression<Func<T, bool>> predicate);
 
     /// <summary>
     /// Применить фильтр к данным.

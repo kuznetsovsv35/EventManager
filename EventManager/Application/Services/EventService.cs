@@ -50,12 +50,17 @@ public class EventService(
 
         if (filterParams is { Title: string title }) 
             f.AddCondition(e => e.Title.Contains(title));
+
         if (filterParams is { From: DateTime from }) 
-            f.AddCondition(e => e.StartAt >= from);
+        {
+            DateTime fromDate = from.Date;
+            f.AddCondition(e => e.StartAt >= fromDate);
+        }
+
         if (filterParams is { To: DateTime to })
         {
-            to.AddDays(1);
-            f.AddCondition(e => e.EndAt < to);
+            DateTime toDate = to.AddDays(1).Date;
+            f.AddCondition(e => e.EndAt < toDate);
         }
 
         return f.ApplyFilter(events);
