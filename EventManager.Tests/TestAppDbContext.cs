@@ -1,3 +1,4 @@
+using System.Data;
 using EventManager.Data;
 using EventManager.Models;
 using Microsoft.EntityFrameworkCore;
@@ -14,9 +15,13 @@ public class TestAppDbContext : AppDbContext
         modelBuilder.Entity<Event>().HasData(TestData);
     }
 
-    public static readonly DateTime StartAt = DateTime.Now;
-
     public static readonly int EventCount = 30;
+
+    public static readonly int EventDuration = 45;  
+
+    public static readonly DateTime StartAt = new(2026, 6, 28, 10, 0, 0);
+
+    public static readonly DateTime EndAt = StartAt.AddDays(EventCount);
 
     public static readonly Event[] TestData = CreateTestData();
 
@@ -27,7 +32,7 @@ public class TestAppDbContext : AppDbContext
                 Id = Guid.NewGuid(),
                 Title = $"Event Title {i}",
                 StartAt = StartAt.AddDays(i - 1),
-                EndAt = StartAt.AddDays(i - 1).AddMinutes(30),
+                EndAt = StartAt.AddDays(i - 1).AddMinutes(EventDuration),
                 Description = $"Event Description {i}"
             })];
 }
