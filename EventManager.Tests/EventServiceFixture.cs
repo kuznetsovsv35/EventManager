@@ -9,6 +9,7 @@ namespace EventManager.Tests;
 public class EventServiceFixture
 {
     public IEventService Service { get; }
+    
     public AppDbContext DbContext { get; }
     
     public EventServiceFixture()
@@ -16,7 +17,8 @@ public class EventServiceFixture
         var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
-        DbContext = new AppDbContext(options);
+        
+        DbContext = new TestAppDbContext(options);
         Service = new EventService(DbContext, new FilterService<Event>(), new PaginateService<Event>());
     }
 }

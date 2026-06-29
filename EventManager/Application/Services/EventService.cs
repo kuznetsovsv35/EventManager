@@ -34,10 +34,9 @@ public class EventService(
         return null;
     }
 
-    public PaginateResult<EventOutputData> GetAllEvents()
-    {  
-        return GetEvents(null, PageParams.Default);
-    }
+    public PaginateResult<EventOutputData> GetAllEvents() 
+        => GetEvents(null, PageParams.NoPages);
+
     public PaginateResult<EventOutputData> GetEvents(FilterParams? filterParams, PageParams pageParams)
         => paginator.Paginate(
             FilterEvents(dbContext.Events.AsQueryable<Event>(), filterParams),

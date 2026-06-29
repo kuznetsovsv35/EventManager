@@ -9,6 +9,8 @@ public class PageParams(int currentPage, int pageSize)
     public int PageSize { get; } = pageSize;
 
     public static readonly PageParams Default = new(DefaultPageNumber, DefaultPageSize);
+
+    public static readonly PageParams NoPages = new(1, int.MaxValue);
 }
 
 public partial class EventQueryParams
