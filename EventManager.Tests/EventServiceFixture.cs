@@ -8,7 +8,11 @@ namespace EventManager.Tests;
 
 public class EventServiceFixture
 {
-    public IEventService Service { get; }
+    public IEventService AppService { get; }
+
+    public IFilter<Event> FilterService { get; }
+
+    public IPaginator<Event> Paginator { get; }
     
     public AppDbContext DbContext { get; }
     
@@ -19,6 +23,8 @@ public class EventServiceFixture
             .Options;
         
         DbContext = new TestAppDbContext(options);
-        Service = new EventService(DbContext, new FilterService<Event>(), new PaginateService<Event>());
+        FilterService = new FilterService<Event>();
+        Paginator = new PaginateService<Event>();
+        AppService = new EventService(DbContext, FilterService, Paginator);
     }
 }

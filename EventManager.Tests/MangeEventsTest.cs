@@ -23,7 +23,7 @@ public class ManageEventTest(EventServiceFixture fixture) : IClassFixture<EventS
         };
     
         // When
-        var outData = fixture.Service.CreateEvent(inData);
+        var outData = fixture.AppService.CreateEvent(inData);
     
         // Then
         var actualCount = fixture.DbContext.Events.Count();
@@ -38,7 +38,7 @@ public class ManageEventTest(EventServiceFixture fixture) : IClassFixture<EventS
         var expected = fixture.DbContext.Events.AsEnumerable().Select(x => x.ToOutputData());
     
         // When
-        var actual = fixture.Service.GetAllEvents().Values;
+        var actual = fixture.AppService.GetAllEvents().Values;
     
         // Then
         Assert.Equal(expected, actual);
@@ -52,7 +52,7 @@ public class ManageEventTest(EventServiceFixture fixture) : IClassFixture<EventS
         var requestedId = firstEvent.Id;
     
         // When
-        var foundEvent = fixture.Service.GetEvent(requestedId);
+        var foundEvent = fixture.AppService.GetEvent(requestedId);
 
         // Then
         Assert.NotNull(foundEvent);
@@ -74,7 +74,7 @@ public class ManageEventTest(EventServiceFixture fixture) : IClassFixture<EventS
         var requestedId = fixture.DbContext.Events.AsEnumerable().Last().Id;
     
         // When
-        var outData = fixture.Service.UpdateEvent(requestedId, inputData);
+        var outData = fixture.AppService.UpdateEvent(requestedId, inputData);
     
         // Then
         Assert.NotNull(outData);
@@ -83,7 +83,7 @@ public class ManageEventTest(EventServiceFixture fixture) : IClassFixture<EventS
     }
 
     [Fact]
-    public void DeleteEvent_Siccess()
+    public void DeleteEvent_Success()
     {
         // Given
         var requestedEvent = fixture.DbContext.Events.AsEnumerable().First();
@@ -92,7 +92,7 @@ public class ManageEventTest(EventServiceFixture fixture) : IClassFixture<EventS
         var expectedCount = fixture.DbContext.Events.Count() -1;
     
         // When
-        var deletedEvent = fixture.Service.DeleteEvent(requestedId);
+        var deletedEvent = fixture.AppService.DeleteEvent(requestedId);
     
         // Then
         var actualCount = fixture.DbContext.Events.Count();

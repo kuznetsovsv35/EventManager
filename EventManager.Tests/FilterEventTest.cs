@@ -10,38 +10,146 @@ public class FilterEventTest(EventServiceFixture fixture) : IClassFixture<EventS
         // Given
         const string titleAll = "Event Title";  // all event expected
         const string titleNone = "AbcDeF";      // No events        
-        var expectedAll = fixture.DbContext.Events.AsEnumerable().Select(x => x.ToOutputData());
+        var expectedAll = TestAppDbContext.TestData.Select(x => x.ToOutputData());
+        var expectedCount = TestAppDbContext.TestData.Length;
     
         // When
-        var actualAll = fixture.Service.GetEvents(new FilterParams(titleAll, null, null), PageParams.NoPages).Values;
-        var actualdNone = fixture.Service.GetEvents(new FilterParams(titleNone, null, null), PageParams.NoPages).Values;
+        var actualAll = fixture.AppService.GetEvents(new FilterParams(titleAll, null, null), PageParams.NoPages).Values;
+        var actualNone = fixture.AppService.GetEvents(new FilterParams(titleNone, null, null), PageParams.NoPages).Values;
     
         // Then
         Assert.Equal(expectedAll, actualAll);
-        Assert.Empty(actualdNone);
+        Assert.All(actualAll, item => Assert.Contains(titleAll, item.Title));
+        Assert.Equal(expectedCount, actualAll.Count());
+        Assert.Empty(actualNone);
     }
 
-    public static readonly IEnumerable<object[]> Titles = Enumerable.Range(1, TestAppDbContext.EventCount)
-        .Select(i => new object[]{$"Event Title {i}"})
-        .ToArray();
+    [Theory]
+    [InlineData(["Event Title 1", 11])]
+    [InlineData(["Event Title 2", 11])]
+    [InlineData(["Event Title 3", 2])]
+    public void PartialFilterByTitle_Success(string title, int expectedCount)
+    {
+        var expected = TestAppDbContext.TestData.Where(x => x.Title.Contains(title)).Select(x => x.ToOutputData());
+        
+        var actual = fixture.AppService.GetEvents(new(title, null, null), PageParams.NoPages).Values;
+
+        Assert.All(actual, item => Assert.Contains(title, item.Title));
+        Assert.Equal(expected, actual);
+        Assert.Equal(expectedCount, actual.Count());
+    }
+
+    public static readonly IEnumerable<object[]> Titles 
+        = [.. Enumerable.Range(1, TestAppDbContext.EventCount).Select(i => new object[]{$"Event Title {i}"})];
 
     [Theory]
     [MemberData(nameof(Titles))]
     public void IterationFilterByTitle_Success(string title)
     {
-        var expected = fixture.DbContext.Events.Where(x => x.Title.Contains(title)).AsEnumerable().Select(x => x.ToOutputData());
-        var actual = fixture.Service.GetEvents(new FilterParams(title, null, null), PageParams.NoPages).Values;
+        var expected = TestAppDbContext.TestData.Where(x => x.Title.Contains(title)).Select(x => x.ToOutputData());
+        
+        var actual = fixture.AppService.GetEvents(new FilterParams(title, null, null), PageParams.NoPages).Values;
 
+        Assert.All(actual, item => Assert.Contains(title, item.Title));
         Assert.Equal(expected, actual);
+        Assert.True(actual.Any());
     }
 
-    [Fact]
-    public void FilterByDate_Success()
+    public static readonly IEnumerable<object[]> StartDates =
+        [
+            [new DateTime(2026, 1, 1), 30],
+            [new DateTime(2026, 6, 28), 30],
+            [new DateTime(2026, 6, 30), 28],
+            [new DateTime(2026, 7, 10), 18],
+            [new DateTime(2026, 7, 20), 8],
+            [new DateTime(2026, 7, 28), 0],
+            [new DateTime(2026, 8, 10), 0],
+        ];
+    [Theory]
+    [MemberData(nameof(StartDates))]
+    public void FilterByStartDate_Success(DateTime startAt, int expectedCount)
     {
         // Given
-    
+        var expected = TestAppDbContext.TestData.Where(x => x.StartAt >= startAt).Select(x => x.ToOutputData());
+
         // When
+        var actual = fixture.AppService.GetEvents(new(null, startAt, null), PageParams.NoPages).Values;
     
         // Then
+        Assert.Equal(expected, actual);
+        Assert.All(actual, item => Assert.True(item.StartAt >= startAt));
+        Assert.Equal(expectedCount, expected.Count());
+    }
+
+    public static readonly IEnumerable<object[]> EndDates =
+        [
+            [new DateTime(2026, 1, 1), 0],
+            [new DateTime(2026, 6, 28), 1],
+            [new DateTime(2026, 6, 30), 3],
+            [new DateTime(2026, 7, 10), 13],
+            [new DateTime(2026, 7, 20), 23],
+            [new DateTime(2026, 7, 28), 30],
+            [new DateTime(2026, 8, 10), 30],
+        ];
+    [Theory]
+    [MemberData(nameof(EndDates))]
+    public void FilterByEndDate_Success(DateTime endAt, int expectedCount)
+    {
+        // Given
+        var endNextDay = endAt.AddDays(1).Date;
+        var expected = TestAppDbContext.TestData.Where(x => x.EndAt < endNextDay).Select(x => x.ToOutputData());
+
+        // When
+        var actual = fixture.AppService.GetEvents(new(null, null, endAt), PageParams.NoPages).Values;
+    
+        // Then
+        Assert.Equal(expected, actual);
+        Assert.All(actual, item => Assert.True(item.EndAt < endNextDay));
+        Assert.Equal(expectedCount, actual.Count());
+    }
+
+    public static readonly IEnumerable<object[]> Combined =
+        [
+            ["Event", new DateTime(2026, 5, 1), new DateTime(2026, 5, 2), 0],
+            ["Title", new DateTime(2026, 6, 28), new DateTime(2026, 6, 30), 3],
+            [null!, new DateTime(2026, 6, 30), null!, 28],
+            ["bcd", new DateTime(2026, 7, 10), new DateTime(2026, 7, 15), 0],
+            ["Ev", null!, new DateTime(2026, 7, 21), 24],
+            ["Ti", new DateTime(2026, 7, 27), new DateTime(2026, 7, 20), 0],
+            ["nt Ti", new DateTime(2026, 8, 10), new DateTime(2026, 8, 10), 0],
+        ];
+
+    [Theory]
+    [MemberData(nameof(Combined))]
+    public void CombinedFilter_Success(string? title, DateTime? startAt, DateTime? endAt, int expectedCount)
+    {
+        // Given
+        var endNextDay = endAt?.AddDays(1).Date;
+        
+        var expected = TestAppDbContext.TestData
+            .Where(x => (string.IsNullOrEmpty(title) || x.Title.Contains(title))
+                && (startAt == null || x.StartAt >= startAt.Value)
+                && (endNextDay == null || x.EndAt < endNextDay.Value))
+            .Select(x => x.ToOutputData());
+
+        // When
+        var actual = fixture.AppService.GetEvents(new(title, startAt, endAt), PageParams.NoPages).Values;
+    
+        // Then
+        Assert.Equal(expected, actual);
+        
+        Assert.All(actual, item => 
+            {
+                if (title != null)
+                    Assert.Contains(title, item.Title);
+                
+                if (startAt.HasValue)
+                    Assert.True(item.StartAt >= startAt);
+
+                if (endNextDay.HasValue)
+                    Assert.True(item.EndAt < endNextDay);
+            });
+
+        Assert.Equal(expectedCount, actual.Count());
     }
 }
