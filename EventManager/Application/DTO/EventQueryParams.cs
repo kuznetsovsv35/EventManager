@@ -25,12 +25,12 @@ public partial class EventQueryParams
     /// <summary>
     /// Текущая страница (разбивка результатов по страницам).
     /// </summary>
-    [Range(1, int.MaxValue, ErrorMessage = "Значение должно быть положительным.")]
+    [Range(PageParams.MinPageNumber, PageParams.MaxPageNumber, ErrorMessage = PageParams.ErrorMessage)]
     public int Page { get; set; } = PageParams.DefaultPageNumber;
 
     /// <summary>
     /// Количество событий на странице (разбивка по страницам).
     /// </summary>
-    [Range(1, int.MaxValue, ErrorMessage = "Значение должно быть положительным.")]
+    [Range(PageParams.MinPageSize, PageParams.MaxPageSize, ErrorMessage = PageParams.ErrorMessage)]
     public int PageSize { get; set; } = PageParams.DefaultPageSize;
 }

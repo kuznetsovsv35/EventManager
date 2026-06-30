@@ -1,20 +1,48 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace EventManager.Application.DataTransfer;
 
-public class PageParams(int currentPage, int pageSize)
+public class PageParams
 {
     public const int DefaultPageNumber = 1;
+
     public const int DefaultPageSize = 10;
 
-    public int CurrentPage { get; } = currentPage;
-    public int PageSize { get; } = pageSize;
+    public const int MinPageNumber = 1;
 
-    public static readonly PageParams Default = new(DefaultPageNumber, DefaultPageSize);
+    public const int MaxPageNumber = int.MaxValue / 2;
 
-    public static readonly PageParams NoPages = new(1, int.MaxValue);
+    public const int MinPageSize = 1;
+
+    public const int MaxPageSize = int.MaxValue / 2;
+
+    public const string ErrorMessage = "Значение должно быть положительным.";
+
+    [Range(MinPageNumber, MaxPageNumber, ErrorMessage = PageParams.ErrorMessage)]
+    public int CurrentPage { get; init; } = DefaultPageNumber;
+
+    [Range(MinPageSize, MaxPageSize, ErrorMessage = PageParams.ErrorMessage)]
+    public int PageSize { get; init; } = DefaultPageSize;
+
+    public static readonly PageParams Default = new()
+    {
+        CurrentPage = DefaultPageNumber,
+        PageSize = DefaultPageSize
+    };
+
+    public static readonly PageParams NoPages = new()
+    {
+        CurrentPage = MinPageNumber,
+        PageSize = MaxPageSize
+    };
 }
 
 public partial class EventQueryParams
 {
     public static implicit operator PageParams(EventQueryParams queryParams)
-        => new (queryParams.Page, queryParams.PageSize);
+        => new() 
+        { 
+            CurrentPage =queryParams.Page, 
+            PageSize = queryParams.PageSize
+        };
 }

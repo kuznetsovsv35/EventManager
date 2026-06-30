@@ -14,8 +14,15 @@ public class FilterEventTest(EventServiceFixture fixture) : IClassFixture<EventS
         var expectedCount = TestAppDbContext.TestData.Length;
     
         // When
-        var actualAll = fixture.AppService.GetEvents(new FilterParams(titleAll, null, null), PageParams.NoPages).Values;
-        var actualNone = fixture.AppService.GetEvents(new FilterParams(titleNone, null, null), PageParams.NoPages).Values;
+        var actualAll = fixture.AppService.GetEvents(
+            new() { Title = titleAll }, 
+            PageParams.NoPages)
+            .Values;
+        
+        var actualNone = fixture.AppService.GetEvents(
+            new () { Title = titleNone }, 
+            PageParams.NoPages)
+            .Values;
     
         // Then
         Assert.Equal(expectedAll, actualAll);
@@ -32,7 +39,10 @@ public class FilterEventTest(EventServiceFixture fixture) : IClassFixture<EventS
     {
         var expected = TestAppDbContext.TestData.Where(x => x.Title.Contains(title)).Select(x => x.ToOutputData());
         
-        var actual = fixture.AppService.GetEvents(new(title, null, null), PageParams.NoPages).Values;
+        var actual = fixture.AppService.GetEvents(
+            new() { Title = title}, 
+            PageParams.NoPages)
+            .Values;
 
         Assert.All(actual, item => Assert.Contains(title, item.Title));
         Assert.Equal(expected, actual);
@@ -48,7 +58,10 @@ public class FilterEventTest(EventServiceFixture fixture) : IClassFixture<EventS
     {
         var expected = TestAppDbContext.TestData.Where(x => x.Title.Contains(title)).Select(x => x.ToOutputData());
         
-        var actual = fixture.AppService.GetEvents(new FilterParams(title, null, null), PageParams.NoPages).Values;
+        var actual = fixture.AppService.GetEvents(
+            new() { Title =title }, 
+            PageParams.NoPages)
+            .Values;
 
         Assert.All(actual, item => Assert.Contains(title, item.Title));
         Assert.Equal(expected, actual);
@@ -73,7 +86,9 @@ public class FilterEventTest(EventServiceFixture fixture) : IClassFixture<EventS
         var expected = TestAppDbContext.TestData.Where(x => x.StartAt >= startAt).Select(x => x.ToOutputData());
 
         // When
-        var actual = fixture.AppService.GetEvents(new(null, startAt, null), PageParams.NoPages).Values;
+        var actual = fixture.AppService.GetEvents(
+            new() { From = startAt }
+            , PageParams.NoPages).Values;
     
         // Then
         Assert.Equal(expected, actual);
@@ -100,7 +115,9 @@ public class FilterEventTest(EventServiceFixture fixture) : IClassFixture<EventS
         var expected = TestAppDbContext.TestData.Where(x => x.EndAt < endNextDay).Select(x => x.ToOutputData());
 
         // When
-        var actual = fixture.AppService.GetEvents(new(null, null, endAt), PageParams.NoPages).Values;
+        var actual = fixture.AppService.GetEvents(
+            new(){ To = endAt }
+            , PageParams.NoPages).Values;
     
         // Then
         Assert.Equal(expected, actual);
@@ -133,7 +150,9 @@ public class FilterEventTest(EventServiceFixture fixture) : IClassFixture<EventS
             .Select(x => x.ToOutputData());
 
         // When
-        var actual = fixture.AppService.GetEvents(new(title, startAt, endAt), PageParams.NoPages).Values;
+        var actual = fixture.AppService.GetEvents(
+            new() { Title = title, From = startAt, To = endAt}
+            , PageParams.NoPages).Values;
     
         // Then
         Assert.Equal(expected, actual);

@@ -10,13 +10,19 @@ public class PaginateService<T> : IPaginator<T>
     {
         if (page <= 0)
             throw new PaginatorParamException(nameof(page), page);
-        
+
         if (pageSize <= 0)
             throw new PaginatorParamException(nameof(pageSize), pageSize);
-        
-        return new(
-            (int)Math.Ceiling((double)values.Count() / pageSize),
-            values.Skip((page - 1) * pageSize).Take(pageSize).ToList().Select(v => viewFactory(v)),
-            page, pageSize);
+
+        var totalCount = values.Count();
+        var pageCount = (int)Math.Ceiling((double)totalCount / pageSize);        
+        var pageValues = values.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
+        return new(            
+            totalCount,
+            pageValues.Select(v => viewFactory(v)),
+            page, 
+            pageCount,
+            pageValues.Count);
     }
 }
