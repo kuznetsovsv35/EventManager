@@ -11,7 +11,7 @@ public interface IEventService
     /// Получить все события.
     /// </summary>
     /// <returns>Список событий.</returns>
-    PaginateResult<EventOutputData> GetAllEvents();
+    IEnumerable<EventOutputData> GetAllEvents();
 
     /// <summary>
     /// Возвращает отфильтрованный набор с разбивкой по страницам.

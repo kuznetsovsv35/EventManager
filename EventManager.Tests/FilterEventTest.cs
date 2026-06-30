@@ -2,7 +2,7 @@ using EventManager.Application.DataTransfer;
 
 namespace EventManager.Tests;
 
-public class FilterEventTest(EventServiceFixture fixture) : IClassFixture<EventServiceFixture>
+public class FilterEventTest(FilterFixture fixture) : IClassFixture<PaginatorFixture>
 {
     [Fact]
     public void SimpleFilterByTitle_Success()
@@ -10,8 +10,8 @@ public class FilterEventTest(EventServiceFixture fixture) : IClassFixture<EventS
         // Given
         const string titleAll = "Event Title";  // all event expected
         const string titleNone = "AbcDeF";      // No events        
-        var expectedAll = TestAppDbContext.TestData.Select(x => x.ToOutputData());
-        var expectedCount = TestAppDbContext.TestData.Length;
+        var expectedAll = fixture.Events.Select(x => x.ToOutputData());
+        var expectedCount = fixture.Events.Count();
     
         // When
         var actualAll = fixture.AppService.GetEvents(
@@ -37,7 +37,7 @@ public class FilterEventTest(EventServiceFixture fixture) : IClassFixture<EventS
     [InlineData(["Event Title 3", 2])]
     public void PartialFilterByTitle_Success(string title, int expectedCount)
     {
-        var expected = TestAppDbContext.TestData.Where(x => x.Title.Contains(title)).Select(x => x.ToOutputData());
+        var expected = fixture.Events.Where(x => x.Title.Contains(title)).Select(x => x.ToOutputData());
         
         var actual = fixture.AppService.GetEvents(
             new() { Title = title}, 
@@ -56,7 +56,7 @@ public class FilterEventTest(EventServiceFixture fixture) : IClassFixture<EventS
     [MemberData(nameof(Titles))]
     public void IterationFilterByTitle_Success(string title)
     {
-        var expected = TestAppDbContext.TestData.Where(x => x.Title.Contains(title)).Select(x => x.ToOutputData());
+        var expected = fixture.Events.Where(x => x.Title.Contains(title)).Select(x => x.ToOutputData());
         
         var actual = fixture.AppService.GetEvents(
             new() { Title =title }, 
@@ -83,7 +83,7 @@ public class FilterEventTest(EventServiceFixture fixture) : IClassFixture<EventS
     public void FilterByStartDate_Success(DateTime startAt, int expectedCount)
     {
         // Given
-        var expected = TestAppDbContext.TestData.Where(x => x.StartAt >= startAt).Select(x => x.ToOutputData());
+        var expected = fixture.Events.Where(x => x.StartAt >= startAt).Select(x => x.ToOutputData());
 
         // When
         var actual = fixture.AppService.GetEvents(
@@ -112,7 +112,7 @@ public class FilterEventTest(EventServiceFixture fixture) : IClassFixture<EventS
     {
         // Given
         var endNextDay = endAt.AddDays(1).Date;
-        var expected = TestAppDbContext.TestData.Where(x => x.EndAt < endNextDay).Select(x => x.ToOutputData());
+        var expected = fixture.Events.Where(x => x.EndAt < endNextDay).Select(x => x.ToOutputData());
 
         // When
         var actual = fixture.AppService.GetEvents(
@@ -143,7 +143,7 @@ public class FilterEventTest(EventServiceFixture fixture) : IClassFixture<EventS
         // Given
         var endNextDay = endAt?.AddDays(1).Date;
         
-        var expected = TestAppDbContext.TestData
+        var expected = fixture.Events
             .Where(x => (string.IsNullOrEmpty(title) || x.Title.Contains(title))
                 && (startAt == null || x.StartAt >= startAt.Value)
                 && (endNextDay == null || x.EndAt < endNextDay.Value))

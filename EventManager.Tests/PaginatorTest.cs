@@ -4,10 +4,10 @@ using EventManager.Infrastructure;
 namespace EventManager.Tests;
 
 /// <summary>
-/// Тест разбивки на чираницы.
+/// Тест разбивки на страницы.
 /// </summary>
 /// <param name="fixture"></param>
-public class PaginatorTest(EventServiceFixture fixture) : IClassFixture<EventServiceFixture>
+public class PaginatorTest(PaginatorFixture fixture) : IClassFixture<PaginatorFixture>
 {
     /// <summary>
     /// Тест валидации параметров на страницы.
@@ -22,18 +22,18 @@ public class PaginatorTest(EventServiceFixture fixture) : IClassFixture<EventSer
     public void ValidateParameters_Fail(int page, int pageSize)
     {
         // Given
-        PageParams p = new() { CurrentPage = page, PageSize = pageSize };
     
         // When
     
         // Then
-        Assert.Throws<PaginatorParamException>(() => fixture.AppService.GetEvents(null, p));
+        Assert.Throws<PaginatorParamException>(
+            () => fixture.Paginator.Paginate(fixture.Events, page, pageSize, x => x));
     }
 
     /// <summary>
-    /// Тест разбизвки на страницы.
+    /// Тест разбивки на страницы.
     /// </summary>
-    /// <param name="page">Запращиваемая страница.</param>
+    /// <param name="page">Запрашиваемая страница.</param>
     /// <param name="pageSize">Требуемый размер страницы.</param>
     /// <param name="expectedPageCount">Ожидаемое количество страниц.</param>
     /// <param name="expectedPageSize">Ожидаемое выведенных элементов на запрашиваемой страницы.</param>
@@ -46,14 +46,16 @@ public class PaginatorTest(EventServiceFixture fixture) : IClassFixture<EventSer
     [InlineData([1, 30, 1, 30])]
     public void PaginateResult_Success(int page, int pageSize, int expectedPageCount, int expectedPageSize)
     {
-        var expectedTotalCount = TestAppDbContext.TestData.Length;
-        var expectedValues = TestAppDbContext.TestData
+        // Given
+        var expectedTotalCount = fixture.Events.Count();
+        var expectedValues = fixture.Events
             .Skip((page -1) * pageSize)
-            .Take(pageSize)
-            .Select(x => x.ToOutputData());
+            .Take(pageSize);
 
-        var pageResult = fixture.AppService.GetEvents(null, new(){ CurrentPage = page, PageSize = pageSize });
+        // When
+        var pageResult = fixture.Paginator.Paginate(fixture.Events, page, pageSize, x => x);
         
+        // Then
         Assert.Equal(expectedPageCount, pageResult.PageCount);
         Assert.Equal(page, pageResult.PageNumber);
         Assert.Equal(expectedPageSize, pageResult.PageSize);

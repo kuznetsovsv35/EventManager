@@ -1,3 +1,4 @@
+using EventManager.Application.Interfaces;
 using EventManager.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,6 +21,8 @@ public static class DependencyInjection
         {
            options.UseInMemoryDatabase("EventDb"); 
         });
+
+        services.AddScoped<IAppDbContext, DbContextWrapper>();
         return services;
     }
 }
