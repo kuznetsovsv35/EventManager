@@ -1,5 +1,4 @@
 using System.Linq.Expressions;
-using System.Reflection;
 using EventManager.Application.Interfaces;
 using EventManager.Infrastructure;
 
@@ -9,27 +8,20 @@ public class FilterService<T> : IFilter<T>
 {
     public IFilter<T> AddCondition(Expression<Func<T, bool>> predicate)
     {
-        _expression = null;
+        if (predicate is null)
+            throw new ArgumentNullException(nameof(predicate));
+        
+        _expression = null;        
         _conditions.Add(predicate);
         return this;
     }
 
     public IQueryable<T> ApplyFilter(IQueryable<T> values)
     {
-        if (_expression is null)
-            _expression = _conditions.Aggregate(_expression, (a, c) => a == null ? c : a.And(c) );
+        if (Expression is Expression<Func<T, bool>> expression)
+            return values.Where(expression);
         
-        if (_expression is not null)
-        {
-            return values.Where(_expression);
-        }
-        else
-        {
-            if (_conditions.Count == 0)
-                return values;
-        }
-
-        throw new InvalidFilterCriteriaException();
+        return values;
     }
 
     public IFilter<T> Reset()
@@ -38,6 +30,11 @@ public class FilterService<T> : IFilter<T>
         _conditions.Clear();
         return this;
     }
+
+    public Expression<Func<T, bool>>? Expression => _expression ??= CreateExpression();
+
+    Expression<Func<T, bool>>? CreateExpression()
+        => _conditions.Aggregate(_expression, (a, c) => a == null ? c : a.And(c));
 
     readonly List<Expression<Func<T, bool>>> _conditions = [];
     Expression<Func<T, bool>>? _expression;

@@ -1,4 +1,4 @@
-using EventManager.Application.DataTransfer;
+using System.ComponentModel;
 using EventManager.Infrastructure;
 
 namespace EventManager.Tests;
@@ -7,13 +7,14 @@ namespace EventManager.Tests;
 /// Тест разбивки на страницы.
 /// </summary>
 /// <param name="fixture"></param>
-public class PaginatorTest(PaginatorFixture fixture) : IClassFixture<PaginatorFixture>
+public class PaginatorTest(PaginatorFixture fixture) : TraitAttributes, IClassFixture<PaginatorFixture>
 {
     /// <summary>
     /// Тест валидации параметров на страницы.
     /// </summary>
     /// <param name="page"></param>
     /// <param name="pageSize"></param>
+    [Trait(Category, Category_Paginator)]
     [Theory]
     [InlineData([-1, 10])]
     [InlineData([0, 10])]
@@ -37,6 +38,7 @@ public class PaginatorTest(PaginatorFixture fixture) : IClassFixture<PaginatorFi
     /// <param name="pageSize">Требуемый размер страницы.</param>
     /// <param name="expectedPageCount">Ожидаемое количество страниц.</param>
     /// <param name="expectedPageSize">Ожидаемое выведенных элементов на запрашиваемой страницы.</param>
+    [Trait(Category, Category_Paginator)]
     [Theory]
     [InlineData([1, 10, 3, 10])]
     [InlineData([3, 10, 3, 10])]

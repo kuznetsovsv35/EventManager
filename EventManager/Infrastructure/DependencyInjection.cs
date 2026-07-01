@@ -22,7 +22,7 @@ public static class DependencyInjection
            options.UseInMemoryDatabase("EventDb"); 
         });
 
-        services.AddScoped<IAppDbContext, DbContextWrapper>();
+        services.AddScoped<IAppDbContext>(provider => provider.GetRequiredService<AppDbContext>());
         return services;
     }
 }

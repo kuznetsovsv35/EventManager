@@ -15,6 +15,9 @@ public class EventService(
 {
     public EventOutputData CreateEvent(EventInputData data)
     {
+        if (data == null)
+            throw new ArgumentOutOfRangeException(nameof(data));
+            
         var e = data.ToEvent();
         dbContext.Add(e);
         return e.ToOutputData();
@@ -36,10 +39,15 @@ public class EventService(
 
     public PaginateResult<EventOutputData> GetEvents(FilterParams? filterParams, PageParams pageParams)
         => paginator.Paginate(
-            FilterEvents(dbContext.Events.AsQueryable(), filterParams),
+            FilterEvents(dbContext.Events, filterParams),
             pageParams.CurrentPage, pageParams.PageSize,
             e => e.ToOutputData()); 
         
+    public IEnumerable<EventOutputData> GetEvents(FilterParams? filterParams)
+        => FilterEvents(dbContext.Events, filterParams)
+            .AsEnumerable()
+            .Select(e => e.ToOutputData()); 
+
     IQueryable<Event> FilterEvents(IQueryable<Event> events, FilterParams? filterParams)
     {
         var f = filter.Reset();

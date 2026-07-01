@@ -29,12 +29,6 @@ public class PageParams
         CurrentPage = DefaultPageNumber,
         PageSize = DefaultPageSize
     };
-
-    public static readonly PageParams NoPages = new()
-    {
-        CurrentPage = MinPageNumber,
-        PageSize = MaxPageSize
-    };
 }
 
 public partial class EventQueryParams

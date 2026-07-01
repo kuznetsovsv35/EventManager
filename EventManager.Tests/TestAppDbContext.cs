@@ -1,11 +1,12 @@
 using System.Data;
-using EventManager.Application.Interfaces;
+using EventManager.Data;
 using EventManager.Models;
+using EventManager.Tests;
 using Microsoft.EntityFrameworkCore;
 
 namespace EventManager.Tests;
 
-public class TestAppDbContext : DbContext, IAppDbContext
+public class TestAppDbContext : AppDbContext
 {
     public static readonly int EventCount = 30;
 
@@ -16,7 +17,7 @@ public class TestAppDbContext : DbContext, IAppDbContext
     public static readonly DateTime EndAt = StartAt.AddDays(EventCount);
     
     public TestAppDbContext() : base(
-        new DbContextOptionsBuilder<TestAppDbContext>()
+        new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options) => Database.EnsureCreated();
 
@@ -34,37 +35,5 @@ public class TestAppDbContext : DbContext, IAppDbContext
                 Description = $"Event Description {i}"
             })]
         );
-    }
-
-    public DbSet<Event> Events { get; set; }
-    IQueryable<Event> IAppDbContext.Events => Events;
-
-    static Event[] CreateTestData()
-        => [.. Enumerable.Range(1, EventCount)
-            .Select(i => new Event()
-            {
-                Id = Guid.NewGuid(),
-                Title = $"Event Title {i}",
-                StartAt = StartAt.AddDays(i - 1),
-                EndAt = StartAt.AddDays(i - 1).AddMinutes(EventDuration),
-                Description = $"Event Description {i}"
-            })];
-
-    public void Add(Event @event)
-    {
-        Events.Add(@event);
-        SaveChanges();
-    }
-
-    public void Update(Event @event)
-    {
-        Events.Update(@event);
-        SaveChanges();
-    }
-
-    public void Delete(Event @event)
-    {
-        Events.Remove(@event);
-        SaveChanges();
     }
 }

@@ -17,6 +17,11 @@ public interface IFilter<T>
     IFilter<T> AddCondition(Expression<Func<T, bool>> predicate);
 
     /// <summary>
+    /// Возвращает итоговое выражение.
+    /// </summary>
+    Expression<Func<T, bool>>? Expression { get; }
+
+    /// <summary>
     /// Применить фильтр к данным.
     /// </summary>
     /// <param name="values"></param>

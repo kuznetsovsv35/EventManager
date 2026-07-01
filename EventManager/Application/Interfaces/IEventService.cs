@@ -22,6 +22,13 @@ public interface IEventService
     PaginateResult<EventOutputData> GetEvents(FilterParams? filterParams, PageParams pageParams);
 
     /// <summary>
+    /// Возвращает отфильтрованный набор.
+    /// </summary>
+    /// <param name="filterParams">Параметры фильтра.</param>
+    /// <returns></returns>
+    IEnumerable<EventOutputData> GetEvents(FilterParams? filterParams);
+
+    /// <summary>
     /// Получить событие по идентификатору.
     /// </summary>
     /// <param name="id">Идентификатор</param>

@@ -1,71 +1,124 @@
-using EventManager.Application.DataTransfer;
+using System.Linq.Expressions;
+using EventManager.Models;
 
 namespace EventManager.Tests;
 
-public class FilterEventTest(FilterFixture fixture) : IClassFixture<PaginatorFixture>
+/// <summary>
+/// Модульные тесты сервиса фильтрации.
+/// </summary>
+/// <param name="fixture"></param>
+public class FilterEventTest(FilterEventFixture fixture) : TraitAttributes, IClassFixture<FilterEventFixture>
 {
+    [Trait(Category, Category_Filters)]
+    [Fact]
+    public void Reset_Success()
+    {
+        // Given
+    
+        // When
+        var filter = fixture.FilterService.Reset();        
+    
+        // Then
+        Assert.Null(filter.Expression);
+    }
+
+    [Trait(Category, Category_Filters)]
+    [Fact]
+    public void AddNullCondition_Fail()
+    {
+        // Given
+        var filter = fixture.FilterService.Reset();
+        
+        // Then
+        var ex = Assert.Throws<ArgumentNullException>(() => filter.AddCondition(null!));
+        Assert.NotNull(ex.ParamName);
+        Assert.NotEmpty(ex.ParamName);
+    }
+
+    [Trait(Category, Category_Filters)]
     [Fact]
     public void SimpleFilterByTitle_Success()
     {
         // Given
-        const string titleAll = "Event Title";  // all event expected
-        const string titleNone = "AbcDeF";      // No events        
-        var expectedAll = fixture.Events.Select(x => x.ToOutputData());
-        var expectedCount = fixture.Events.Count();
+        const string titleAll = "Event Title";
+        const string titleNone = "AbcDeF";
+
+        Expression<Func<Event, bool>> exprTitleAll = x => x.Title.Contains(titleAll);  // all event expected
+        Expression<Func<Event, bool>> exprTitleNone = x => x.Title.Contains(titleNone);      // No events        
+        
+        var expectedAll = fixture.Events.Where(exprTitleAll) .ToList();
+        var expectedAllCount = expectedAll.Count;
     
         // When
-        var actualAll = fixture.AppService.GetEvents(
-            new() { Title = titleAll }, 
-            PageParams.NoPages)
-            .Values;
+        var actualAll = fixture.FilterService
+            .Reset()
+            .AddCondition(exprTitleAll)
+            .ApplyFilter(fixture.Events)
+            .ToList();
         
-        var actualNone = fixture.AppService.GetEvents(
-            new () { Title = titleNone }, 
-            PageParams.NoPages)
-            .Values;
+        var actualAllCount = actualAll.Count;
+        
+        var actualNone = fixture.FilterService
+            .Reset()
+            .AddCondition(exprTitleNone)
+            .ApplyFilter(fixture.Events)
+            .ToList();
     
         // Then
         Assert.Equal(expectedAll, actualAll);
         Assert.All(actualAll, item => Assert.Contains(titleAll, item.Title));
-        Assert.Equal(expectedCount, actualAll.Count());
+        Assert.Equal(expectedAllCount, actualAllCount);
         Assert.Empty(actualNone);
     }
 
+    [Trait(Category, Category_Filters)]
     [Theory]
     [InlineData(["Event Title 1", 11])]
     [InlineData(["Event Title 2", 11])]
     [InlineData(["Event Title 3", 2])]
     public void PartialFilterByTitle_Success(string title, int expectedCount)
     {
-        var expected = fixture.Events.Where(x => x.Title.Contains(title)).Select(x => x.ToOutputData());
-        
-        var actual = fixture.AppService.GetEvents(
-            new() { Title = title}, 
-            PageParams.NoPages)
-            .Values;
+        // Given
+        Expression<Func<Event, bool>> expr = x => x.Title.Contains(title);
+        var expected = fixture.Events.Where(expr).ToList();
 
-        Assert.All(actual, item => Assert.Contains(title, item.Title));
+        // When        
+        var actual = fixture.FilterService.Reset()
+            .AddCondition(expr)
+            .ApplyFilter(fixture.Events)
+            .ToList();
+        var actualCount = actual.Count;
+
+        // Then
+        Assert.Equal(expectedCount, expected.Count);
+        Assert.All(actual, (item) => Assert.Contains(title, item.Title));
         Assert.Equal(expected, actual);
-        Assert.Equal(expectedCount, actual.Count());
+        Assert.Equal(expectedCount, actualCount);
     }
-
+    
     public static readonly IEnumerable<object[]> Titles 
         = [.. Enumerable.Range(1, TestAppDbContext.EventCount).Select(i => new object[]{$"Event Title {i}"})];
 
+    [Trait(Category, Category_Filters)]
     [Theory]
     [MemberData(nameof(Titles))]
     public void IterationFilterByTitle_Success(string title)
     {
-        var expected = fixture.Events.Where(x => x.Title.Contains(title)).Select(x => x.ToOutputData());
+        // Givent
+        Expression<Func<Event, bool>> expression = x => x.Title.Contains(title);
+        var expected = fixture.Events.Where(expression).ToList();
+        var expectedCount = expected.Count;
         
-        var actual = fixture.AppService.GetEvents(
-            new() { Title =title }, 
-            PageParams.NoPages)
-            .Values;
+        // When
+        var actual = fixture.FilterService.Reset()
+            .AddCondition(expression)
+            .ApplyFilter(fixture.Events)
+            .ToList();
+        var actualCount = actual.Count;
 
-        Assert.All(actual, item => Assert.Contains(title, item.Title));
+        Assert.Equal(expectedCount, actualCount);
         Assert.Equal(expected, actual);
-        Assert.True(actual.Any());
+        Assert.All(actual, item => Assert.Contains(title, item.Title));
     }
 
     public static readonly IEnumerable<object[]> StartDates =
@@ -78,22 +131,28 @@ public class FilterEventTest(FilterFixture fixture) : IClassFixture<PaginatorFix
             [new DateTime(2026, 7, 28), 0],
             [new DateTime(2026, 8, 10), 0],
         ];
+    [Trait(Category, Category_Filters)]
     [Theory]
     [MemberData(nameof(StartDates))]
     public void FilterByStartDate_Success(DateTime startAt, int expectedCount)
     {
         // Given
-        var expected = fixture.Events.Where(x => x.StartAt >= startAt).Select(x => x.ToOutputData());
+        startAt = startAt.AddDays(1).Date;
+        Expression<Func<Event, bool>> expression = x => x.StartAt >= startAt;
+        var expected = fixture.Events.Where(expression).ToList();
 
         // When
-        var actual = fixture.AppService.GetEvents(
-            new() { From = startAt }
-            , PageParams.NoPages).Values;
+        var actual = fixture.FilterService.Reset()
+            .AddCondition(expression)
+            .ApplyFilter(fixture.Events)
+            .ToList();
+        var actualCount = actual.Count;
     
         // Then
+        Assert.Equal(expectedCount, expected.Count);
         Assert.Equal(expected, actual);
         Assert.All(actual, item => Assert.True(item.StartAt >= startAt));
-        Assert.Equal(expectedCount, expected.Count());
+        Assert.Equal(expectedCount, actualCount);
     }
 
     public static readonly IEnumerable<object[]> EndDates =
@@ -106,22 +165,27 @@ public class FilterEventTest(FilterFixture fixture) : IClassFixture<PaginatorFix
             [new DateTime(2026, 7, 28), 30],
             [new DateTime(2026, 8, 10), 30],
         ];
+    [Trait(Category, Category_Filters)]
     [Theory]
     [MemberData(nameof(EndDates))]
     public void FilterByEndDate_Success(DateTime endAt, int expectedCount)
     {
         // Given
-        var endNextDay = endAt.AddDays(1).Date;
-        var expected = fixture.Events.Where(x => x.EndAt < endNextDay).Select(x => x.ToOutputData());
+        endAt = endAt.AddDays(1).Date;
+        Expression<Func<Event, bool>> expression = x => x.EndAt < endAt;
+        var expected = fixture.Events.Where(expression).ToList();
 
         // When
-        var actual = fixture.AppService.GetEvents(
-            new(){ To = endAt }
-            , PageParams.NoPages).Values;
+        var actual = fixture.FilterService.Reset()
+            .AddCondition(expression)
+            .ApplyFilter(fixture.Events)
+            .ToList();
+        var actualCount = actual.Count;
     
         // Then
+        Assert.Equal(expectedCount, expected.Count);
         Assert.Equal(expected, actual);
-        Assert.All(actual, item => Assert.True(item.EndAt < endNextDay));
+        Assert.All(actual, item => Assert.True(item.EndAt < endAt));
         Assert.Equal(expectedCount, actual.Count());
     }
 
@@ -136,25 +200,42 @@ public class FilterEventTest(FilterFixture fixture) : IClassFixture<PaginatorFix
             ["nt Ti", new DateTime(2026, 8, 10), new DateTime(2026, 8, 10), 0],
         ];
 
+    [Trait(Category, Category_Filters)]
     [Theory]
     [MemberData(nameof(Combined))]
     public void CombinedFilter_Success(string? title, DateTime? startAt, DateTime? endAt, int expectedCount)
     {
         // Given
-        var endNextDay = endAt?.AddDays(1).Date;
-        
+        endAt = endAt?.AddDays(1).Date;
+                
         var expected = fixture.Events
             .Where(x => (string.IsNullOrEmpty(title) || x.Title.Contains(title))
                 && (startAt == null || x.StartAt >= startAt.Value)
-                && (endNextDay == null || x.EndAt < endNextDay.Value))
-            .Select(x => x.ToOutputData());
+                && (endAt == null || x.EndAt < endAt.Value))
+            .ToList();
+        
+        Expression<Func<Event, bool>>? exprTitle = title is null ? null : x => x.Title.Contains(title);
+        Expression<Func<Event, bool>>? exprStartAt = startAt is null ? null : x => x.StartAt >= startAt.Value;
+        Expression<Func<Event, bool>>? exprEndAt = endAt is null ? null : x => x.EndAt <= endAt;
 
         // When
-        var actual = fixture.AppService.GetEvents(
-            new() { Title = title, From = startAt, To = endAt}
-            , PageParams.NoPages).Values;
+        var filter = fixture.FilterService.Reset();
+
+        if (exprTitle != null)
+            filter.AddCondition(exprTitle);
+        
+        if (exprStartAt != null)
+            filter.AddCondition(exprStartAt);
+
+        if (exprEndAt != null)
+            filter.AddCondition(exprEndAt);
+        
+        var actual = filter.ApplyFilter(fixture.Events).ToList();
+        var actualCount = actual.Count;
     
         // Then
+        Assert.Equal(expectedCount, expected.Count);
+        
         Assert.Equal(expected, actual);
         
         Assert.All(actual, item => 
@@ -165,8 +246,8 @@ public class FilterEventTest(FilterFixture fixture) : IClassFixture<PaginatorFix
                 if (startAt.HasValue)
                     Assert.True(item.StartAt >= startAt);
 
-                if (endNextDay.HasValue)
-                    Assert.True(item.EndAt < endNextDay);
+                if (endAt.HasValue)
+                    Assert.True(item.EndAt < endAt);
             });
 
         Assert.Equal(expectedCount, actual.Count());

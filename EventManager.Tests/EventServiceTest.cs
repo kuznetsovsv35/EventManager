@@ -1,12 +1,18 @@
+using System.ComponentModel.DataAnnotations;
 using EventManager.Application.DataTransfer;
 
 namespace EventManager.Tests;
 
-public class EventServiceTest(EventServiceFixture fixture) : IClassFixture<EventServiceFixture>
+public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IClassFixture<EventServiceFixture>
 {
     ////////////////////////////////////////////////////////////////////////////////////////////
     /// Тесты управления событиями.
     ////////////////////////////////////////////////////////////////////////////////////////////
+    
+    /// <summary>
+    ///  Успешное добавления события.
+    /// </summary>
+    [Trait(Category, Category_Service)]
     [Fact]
     public void CreateEvent_Success()
     {
@@ -26,7 +32,7 @@ public class EventServiceTest(EventServiceFixture fixture) : IClassFixture<Event
         };
     
         // When
-        var outData = fixture.AppService.CreateEvent(inData);
+        var outData = fixture.EventService.CreateEvent(inData);
     
         // Then
         var actualCount = fixture.Events.Count();
@@ -34,6 +40,42 @@ public class EventServiceTest(EventServiceFixture fixture) : IClassFixture<Event
         Assert.Equal(inData, outData);
     }
 
+    /// <summary>
+    /// Попытка создать событие по нулвой ссцлке на входне данные.
+    /// </summary>
+    [Trait(Category, Category_Service)]
+    [Fact]    
+    public void CreateEvent_Null()
+    {
+        var ex = Assert.Throws<ArgumentNullException>(() => fixture.EventService.CreateEvent(null!));
+    }
+
+    /// <summary>
+    /// Набор некоррктных данных для теста попытки создать/обновить.
+    /// </summary>
+    public static readonly IEnumerable<object?[]> InvalidEventInputData = [
+        [new EventInputData()], // Пустой заголовок, равные моменты начала и окончания события.
+        [new EventInputData(){Title = null, EndAt = new DateTime(2026, 1, 15), StartAt = new DateTime(2026, 1, 14)}],
+        [new EventInputData(){Title = "Title", EndAt = new DateTime(2026, 1, 14), StartAt = new DateTime(2026, 1, 15)}]
+    ];
+    /// <summary>
+    /// Тест неудачных попыток создать/обновить некоректными данными.
+    /// </summary>
+    /// <param name="inputData"></param>
+    [Trait(Category, Category_Service)]
+    [Theory]
+    [MemberData(nameof(InvalidEventInputData))]
+    void CreateEvent_Fail(EventInputData inputData)
+    {
+        var ex = Assert.Throws<ValidationException>(() => fixture.EventService.CreateEvent(inputData));
+        Assert.NotNull(ex?.ValidationResult?.MemberNames);
+        Assert.NotEmpty(ex.ValidationResult.MemberNames);
+    }
+
+    /// <summary>
+    /// Получить все события с представлением в DTO (выход).
+    /// </summary>
+    [Trait(Category, Category_Service)]
     [Fact]
     public void GetAllEvents_Success()
     {
@@ -41,12 +83,16 @@ public class EventServiceTest(EventServiceFixture fixture) : IClassFixture<Event
         var expected = fixture.Events.Select(x => x.ToOutputData());
     
         // When
-        var actual = fixture.AppService.GetAllEvents();
+        var actual = fixture.EventService.GetAllEvents();
     
         // Then
         Assert.Equal(expected, actual);
     }
 
+    /// <summary>
+    /// Получть событие с существующим ID.
+    /// </summary>
+    [Trait(Category, Category_Service)]
     [Fact]
     public void GetEventByID_Success()
     {
@@ -55,13 +101,34 @@ public class EventServiceTest(EventServiceFixture fixture) : IClassFixture<Event
         var requestedId = firstEvent.Id;
     
         // When
-        var foundEvent = fixture.AppService.GetEvent(requestedId);
+        var foundEvent = fixture.EventService.GetEvent(requestedId);
 
         // Then
         Assert.NotNull(foundEvent);
         Assert.Equal(requestedId, foundEvent.Id);
     }
 
+    /// <summary>
+    /// Тест неудачнай попытки получить событие по несуществуюшему ID.
+    /// </summary>
+    [Trait(Category, Category_Service)]
+    [Fact]
+    public void GetEventByID_Fail()
+    {
+        // Given
+        var requestedId = Guid.Empty;
+    
+        // When
+        var foundEvent = fixture.EventService.GetEvent(requestedId);
+
+        // Then
+        Assert.Null(foundEvent);
+    }
+
+    /// <summary>
+    /// Тест успошнго обновление события.
+    /// </summary>
+    [Trait(Category, Category_Service)]
     [Fact]
     public void UpdateEvent_Success()
     {
@@ -77,7 +144,7 @@ public class EventServiceTest(EventServiceFixture fixture) : IClassFixture<Event
         var requestedId = fixture.Events.Last().Id;
     
         // When
-        var outData = fixture.AppService.UpdateEvent(requestedId, inputData);
+        var outData = fixture.EventService.UpdateEvent(requestedId, inputData);
     
         // Then
         Assert.NotNull(outData);
@@ -85,6 +152,52 @@ public class EventServiceTest(EventServiceFixture fixture) : IClassFixture<Event
         Assert.Equal(inputData, outData);
     }
 
+    /// <summary>
+    /// Тест неудачноо обновление обытия по несуществующему ID.
+    /// </summary>
+    [Trait(Category, Category_Service)]
+    [Fact]
+    public void UpdateEventByID_Fail()
+    {
+        // Given
+        EventInputData inputData = new()
+        {
+            Title = "Title updated",
+            StartAt = new DateTime(1976, 1, 15, 15, 34, 0),
+            EndAt = new DateTime(1976, 1, 15, 16, 34, 0),
+            Description = "Description updated"
+        };
+
+        var requestedId = Guid.Empty;
+    
+        // When
+        var outData = fixture.EventService.UpdateEvent(requestedId, inputData);
+    
+        // Then
+        Assert.Null(outData);
+    }
+
+    /// <summary>
+    /// Тест неудачного обновления с некоректными входными данными.
+    /// </summary>
+    [Trait(Category, Category_Service)]
+    [Theory]
+    [MemberData(nameof(InvalidEventInputData))]
+    public void UpdateEven_Fail(EventInputData inputData)
+    {
+        // Given
+        var requestedId = fixture.Events.Last().Id;
+    
+        // When
+    
+        // Then
+        Assert.Throws<ValidationException>(() => fixture.EventService.UpdateEvent(requestedId, inputData));
+    }
+
+    /// <summary>
+    /// Тест успешного удаления события.
+    /// </summary>
+    [Trait(Category, Category_Service)]
     [Fact]
     public void DeleteEvent_Success()
     {
@@ -95,7 +208,7 @@ public class EventServiceTest(EventServiceFixture fixture) : IClassFixture<Event
         var expectedCount = fixture.Events.Count() -1;
     
         // When
-        var deletedEvent = fixture.AppService.DeleteEvent(requestedId);
+        var deletedEvent = fixture.EventService.DeleteEvent(requestedId);
     
         // Then
         var actualCount = fixture.Events.Count();
@@ -105,74 +218,84 @@ public class EventServiceTest(EventServiceFixture fixture) : IClassFixture<Event
         Assert.Null(foundEvent);
     }
 
+    /// <summary>
+    /// Тест неуспешного удаления события по несуществующему ID.
+    /// </summary>
+    [Trait(Category, Category_Service)]
+    [Fact]
+    public void DeleteEventByID_Fail()
+    {
+        // Given
+        var requestedId = Guid.Empty;
+        var expectedCount = fixture.Events.Count();
+    
+        // When
+        var deletedEvent = fixture.EventService.DeleteEvent(requestedId);
+    
+        // Then
+        var actualCount = fixture.Events.Count();
+        Assert.Equal(expectedCount, actualCount);
+        Assert.Null(deletedEvent);
+    }
+
     ////////////////////////////////////////////////////////////////////////////////////////////
     /// Тесты фильтров в комплексе.
     ////////////////////////////////////////////////////////////////////////////////////////////
+        
+    /// <summary>
+    ///  Тест применения простейшего фильтра по заголовку.
+    /// </summary>
+    [Trait(Category, Category_Filters)]
     [Fact]
     public void SimpleFilterByTitle_Success()
     {
         // Given
         const string titleAll = "Event Title";  // all event expected
         const string titleNone = "AbcDeF";      // No events        
+        
         var expectedAll = fixture.Events
             .Where(x => x.Title.Contains(titleAll))
-            .Select(x => x.ToOutputData());
-        var expectedCount = expectedAll.Count();
+            .Select(x => x.ToOutputData())
+            .ToList();
     
         // When
-        var actualAll = fixture.AppService.GetEvents(
-            new() { Title = titleAll }, 
-            PageParams.NoPages)
-            .Values;
-        
-        var actualNone = fixture.AppService.GetEvents(
-            new () { Title = titleNone }, 
-            PageParams.NoPages)
-            .Values;
+        var actualAll = fixture.EventService.GetEvents(new() { Title = titleAll }).ToList();        
+        var actualNone = fixture.EventService.GetEvents(new () { Title = titleNone }).ToList();
     
         // Then
         Assert.Equal(expectedAll, actualAll);
         Assert.All(actualAll, item => Assert.Contains(titleAll, item.Title));
-        Assert.Equal(expectedCount, actualAll.Count());
+        Assert.Equal(expectedAll.Count, actualAll.Count);
         Assert.Empty(actualNone);
-    }
-
-    [Theory]
-    [InlineData(["Event Title 1"])]
-    [InlineData(["Event Title 2"])]
-    [InlineData(["Event Title 3"])]
-    public void PartialFilterByTitle_Success(string title)
-    {
-        var expected = fixture.Events.Where(x => x.Title.Contains(title)).Select(x => x.ToOutputData());
-        
-        var actual = fixture.AppService.GetEvents(
-            new() { Title = title}, 
-            PageParams.NoPages)
-            .Values;
-
-        Assert.All(actual, item => Assert.Contains(title, item.Title));
-        Assert.Equal(expected, actual);
     }
 
     public static readonly IEnumerable<object[]> Titles 
         = [.. Enumerable.Range(1, TestAppDbContext.EventCount).Select(i => new object[]{$"Event Title {i}"})];
 
+    /// <summary>
+    /// Тест фильтров по заголовку.
+    /// </summary>
+    /// <param name="title"></param>
+    [Trait(Category, Category_Filters)]
     [Theory]
     [MemberData(nameof(Titles))]
     public void IterationFilterByTitle_Success(string title)
     {
-        var expected = fixture.Events.Where(x => x.Title.Contains(title)).Select(x => x.ToOutputData());
+        var expected = fixture.Events
+            .Where(x => x.Title.Contains(title))
+            .Select(x => x.ToOutputData())
+            .ToList();
         
-        var actual = fixture.AppService.GetEvents(
-            new() { Title =title }, 
-            PageParams.NoPages)
-            .Values;
+        var actual = fixture.EventService.GetEvents(new() { Title =title }).ToList();
 
         Assert.All(actual, item => Assert.Contains(title, item.Title));
         Assert.Equal(expected, actual);
         Assert.True(actual.Any());
     }
 
+    /// <summary>
+    /// Тестовый набор дат для начала.
+    /// </summary>
     public static readonly IEnumerable<object[]> StartDates =
         [
             [new DateTime(2026, 1, 1)],
@@ -183,23 +306,33 @@ public class EventServiceTest(EventServiceFixture fixture) : IClassFixture<Event
             [new DateTime(2026, 7, 28)],
             [new DateTime(2026, 8, 10)],
         ];
+    
+    /// <summary>
+    /// Тест фильтрации по нвчалу события.
+    /// </summary>
+    /// <param name="startAt"></param>
+    [Trait(Category, Category_Filters)]
     [Theory]
     [MemberData(nameof(StartDates))]
     public void FilterByStartDate_Success(DateTime startAt)
     {
         // Given
-        var expected = fixture.Events.Where(x => x.StartAt >= startAt).Select(x => x.ToOutputData());
+        var expected = fixture.Events
+            .Where(x => x.StartAt >= startAt)
+            .Select(x => x.ToOutputData())
+            .ToList();
 
         // When
-        var actual = fixture.AppService.GetEvents(
-            new() { From = startAt }
-            , PageParams.NoPages).Values;
+        var actual = fixture.EventService.GetEvents(new() { From = startAt }).ToList();
     
         // Then
         Assert.Equal(expected, actual);
         Assert.All(actual, item => Assert.True(item.StartAt >= startAt));
     }
 
+    /// <summary>
+    /// Тестовы набор дат для фильтров окончания.
+    /// </summary>
     public static readonly IEnumerable<object[]> EndDates =
         [
             [new DateTime(2026, 1, 1)],
@@ -210,24 +343,31 @@ public class EventServiceTest(EventServiceFixture fixture) : IClassFixture<Event
             [new DateTime(2026, 7, 28)],
             [new DateTime(2026, 8, 10)],
         ];
+    
+    /// <summary>
+    /// Тест фильтра по окончанию события.
+    /// </summary>
+    /// <param name="endAt"></param>
+    [Trait(Category, Category_Filters)]
     [Theory]
     [MemberData(nameof(EndDates))]
     public void FilterByEndDate_Success(DateTime endAt)
     {
         // Given
-        var endNextDay = endAt.AddDays(1).Date;
-        var expected = fixture.Events.Where(x => x.EndAt < endNextDay).Select(x => x.ToOutputData());
+        endAt = endAt.AddDays(1).Date;
+        var expected = fixture.Events.Where(x => x.EndAt < endAt).Select(x => x.ToOutputData()).ToList();
 
         // When
-        var actual = fixture.AppService.GetEvents(
-            new(){ To = endAt }
-            , PageParams.NoPages).Values;
+        var actual = fixture.EventService.GetEvents(new(){ To = endAt }).ToList();
     
         // Then
         Assert.Equal(expected, actual);
-        Assert.All(actual, item => Assert.True(item.EndAt < endNextDay));
+        Assert.All(actual, item => Assert.True(item.EndAt < endAt));
     }
 
+    /// <summary>
+    /// Тестовый набор данных для тетовв комбинированных фильтров.
+    /// </summary>
     public static readonly IEnumerable<object[]> Combined =
         [
             ["Event", new DateTime(2026, 5, 1), new DateTime(2026, 5, 2)],
@@ -239,23 +379,29 @@ public class EventServiceTest(EventServiceFixture fixture) : IClassFixture<Event
             ["nt Ti", new DateTime(2026, 8, 10), new DateTime(2026, 8, 10)],
         ];
 
+    /// <summary>
+    /// Тест комбинированных фильтров.
+    /// </summary>
+    /// <param name="title"></param>
+    /// <param name="startAt"></param>
+    /// <param name="endAt"></param>
+    [Trait(Category, Category_Filters)]
     [Theory]
     [MemberData(nameof(Combined))]
     public void CombinedFilter_Success(string? title, DateTime? startAt, DateTime? endAt)
     {
         // Given
-        var endNextDay = endAt?.AddDays(1).Date;
+        endAt = endAt?.AddDays(1).Date;
         
         var expected = fixture.Events
             .Where(x => (string.IsNullOrEmpty(title) || x.Title.Contains(title))
                 && (startAt == null || x.StartAt >= startAt.Value)
-                && (endNextDay == null || x.EndAt < endNextDay.Value))
-            .Select(x => x.ToOutputData());
+                && (endAt == null || x.EndAt < endAt.Value))
+            .Select(x => x.ToOutputData())
+            .ToList();
 
         // When
-        var actual = fixture.AppService.GetEvents(
-            new() { Title = title, From = startAt, To = endAt}
-            , PageParams.NoPages).Values;
+        var actual = fixture.EventService.GetEvents(new() { Title = title, From = startAt, To = endAt }).ToList();
     
         // Then
         Assert.Equal(expected, actual);
@@ -268,8 +414,8 @@ public class EventServiceTest(EventServiceFixture fixture) : IClassFixture<Event
                 if (startAt.HasValue)
                     Assert.True(item.StartAt >= startAt);
 
-                if (endNextDay.HasValue)
-                    Assert.True(item.EndAt < endNextDay);
+                if (endAt.HasValue)
+                    Assert.True(item.EndAt < endAt);
             });
     }
 
@@ -284,6 +430,7 @@ public class EventServiceTest(EventServiceFixture fixture) : IClassFixture<Event
     /// <param name="pageSize">Требуемый размер страницы.</param>
     /// <param name="expectedPageCount">Ожидаемое количество страниц.</param>
     /// <param name="expectedPageSize">Ожидаемое выведенных элементов на запрашиваемой страницы.</param>
+    [Trait(Category, Category_Paginator)]
     [Theory]
     [InlineData([1, 10, 3, 10])]
     [InlineData([3, 10, 3, 10])]
@@ -294,14 +441,16 @@ public class EventServiceTest(EventServiceFixture fixture) : IClassFixture<Event
     public void PaginateResult_Success(int page, int pageSize, int expectedPageCount, int expectedPageSize)
     {
         // Given
-        var allValues = fixture.AppService.GetAllEvents().ToList();
+        var allValues = fixture.EventService.GetAllEvents().ToList();
         var expectedTotalCount = allValues.Count;
+        
         var expectedValues = allValues
             .Skip((page -1) * pageSize)
-            .Take(pageSize);
+            .Take(pageSize)
+            .ToList();
 
         // When
-        var pageResult = fixture.AppService.GetEvents(null, new(){ CurrentPage = page, PageSize = pageSize });
+        var pageResult = fixture.EventService.GetEvents(null, new(){ CurrentPage = page, PageSize = pageSize });
         
         // Then
         Assert.Equal(expectedPageCount, pageResult.PageCount);
