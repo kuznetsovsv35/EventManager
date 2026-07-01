@@ -47,12 +47,12 @@ public class ErrorHandler(RequestDelegate next, ILogger<ErrorHandler> logger)
             ValidationException ve => ProblemDetailsFactory.ValidationProblem(ve.ValidationResult, ve.Message),
             PaginatorParamException pe => ProblemDetailsFactory.ValidationProblem(
                 new ValidationResult(
-                    pe.Message, (pe.ParamName is string pn) ? new[] {pn} : null), 
+                    pe.Message, (pe.ParamName is string pn) ? new[] { pn } : null),
                 pe.Message, $"параметр: {pe.ParamName}, значение: {pe.ParamValue}"),
-            
+
             _ => ProblemDetailsFactory.InternalServiceError(exception.Message)
         };
-        
+
         detailsBuilder.AddInstance(request.Path);
         response.StatusCode = detailsBuilder.Problem.Status ?? MapStatusCodeToException(exception);
 

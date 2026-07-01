@@ -50,7 +50,7 @@ public class EventsController(IEventService eventService) : ControllerBase
     {
         if (eventService.UpdateEvent(id, data) is EventOutputData e)
             return Ok(e);
-        
+
         return EventNotFound(id);
     }
 
@@ -61,7 +61,7 @@ public class EventsController(IEventService eventService) : ControllerBase
     {
         if (eventService.DeleteEvent(id) is EventOutputData e)
             return Ok(e);
-        
+
         return EventNotFound(id);
     }
 

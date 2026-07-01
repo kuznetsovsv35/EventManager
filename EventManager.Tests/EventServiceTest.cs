@@ -8,7 +8,7 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
     ////////////////////////////////////////////////////////////////////////////////////////////
     /// Тесты управления событиями.
     ////////////////////////////////////////////////////////////////////////////////////////////
-    
+
     /// <summary>
     ///  Успешное добавления события.
     /// </summary>
@@ -30,10 +30,10 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
             EndAt = endAt,
             Description = description
         };
-    
+
         // When
         var outData = fixture.EventService.CreateEvent(inData);
-    
+
         // Then
         var actualCount = fixture.Events.Count();
         Assert.Equal(expectedCount, actualCount);
@@ -44,7 +44,7 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
     /// Попытка создать событие по нулвой ссцлке на входне данные.
     /// </summary>
     [Trait(Category, Category_Service)]
-    [Fact]    
+    [Fact]
     public void CreateEvent_Null()
     {
         var ex = Assert.Throws<ArgumentNullException>(() => fixture.EventService.CreateEvent(null!));
@@ -81,10 +81,10 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
     {
         // Given
         var expected = fixture.Events.Select(x => x.ToOutputData());
-    
+
         // When
         var actual = fixture.EventService.GetAllEvents();
-    
+
         // Then
         Assert.Equal(expected, actual);
     }
@@ -99,7 +99,7 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
         // Given
         var firstEvent = fixture.Events.First();
         var requestedId = firstEvent.Id;
-    
+
         // When
         var foundEvent = fixture.EventService.GetEvent(requestedId);
 
@@ -117,7 +117,7 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
     {
         // Given
         var requestedId = Guid.Empty;
-    
+
         // When
         var foundEvent = fixture.EventService.GetEvent(requestedId);
 
@@ -142,10 +142,10 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
         };
 
         var requestedId = fixture.Events.Last().Id;
-    
+
         // When
         var outData = fixture.EventService.UpdateEvent(requestedId, inputData);
-    
+
         // Then
         Assert.NotNull(outData);
         Assert.Equal(requestedId, outData.Id);
@@ -169,10 +169,10 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
         };
 
         var requestedId = Guid.Empty;
-    
+
         // When
         var outData = fixture.EventService.UpdateEvent(requestedId, inputData);
-    
+
         // Then
         Assert.Null(outData);
     }
@@ -187,9 +187,9 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
     {
         // Given
         var requestedId = fixture.Events.Last().Id;
-    
+
         // When
-    
+
         // Then
         Assert.Throws<ValidationException>(() => fixture.EventService.UpdateEvent(requestedId, inputData));
     }
@@ -205,11 +205,11 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
         var requestedEvent = fixture.Events.First();
         var requestedId = requestedEvent.Id;
         var expectedEvent = requestedEvent.ToOutputData();
-        var expectedCount = fixture.Events.Count() -1;
-    
+        var expectedCount = fixture.Events.Count() - 1;
+
         // When
         var deletedEvent = fixture.EventService.DeleteEvent(requestedId);
-    
+
         // Then
         var actualCount = fixture.Events.Count();
         var foundEvent = fixture.Events.FirstOrDefault(e => e.Id == requestedId);
@@ -228,10 +228,10 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
         // Given
         var requestedId = Guid.Empty;
         var expectedCount = fixture.Events.Count();
-    
+
         // When
         var deletedEvent = fixture.EventService.DeleteEvent(requestedId);
-    
+
         // Then
         var actualCount = fixture.Events.Count();
         Assert.Equal(expectedCount, actualCount);
@@ -241,7 +241,7 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
     ////////////////////////////////////////////////////////////////////////////////////////////
     /// Тесты фильтров в комплексе.
     ////////////////////////////////////////////////////////////////////////////////////////////
-        
+
     /// <summary>
     ///  Тест применения простейшего фильтра по заголовку.
     /// </summary>
@@ -252,16 +252,16 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
         // Given
         const string titleAll = "Event Title";  // all event expected
         const string titleNone = "AbcDeF";      // No events        
-        
+
         var expectedAll = fixture.Events
             .Where(x => x.Title.Contains(titleAll))
             .Select(x => x.ToOutputData())
             .ToList();
-    
+
         // When
-        var actualAll = fixture.EventService.GetEvents(new() { Title = titleAll }).ToList();        
-        var actualNone = fixture.EventService.GetEvents(new () { Title = titleNone }).ToList();
-    
+        var actualAll = fixture.EventService.GetEvents(new() { Title = titleAll }).ToList();
+        var actualNone = fixture.EventService.GetEvents(new() { Title = titleNone }).ToList();
+
         // Then
         Assert.Equal(expectedAll, actualAll);
         Assert.All(actualAll, item => Assert.Contains(titleAll, item.Title));
@@ -269,8 +269,8 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
         Assert.Empty(actualNone);
     }
 
-    public static readonly IEnumerable<object[]> Titles 
-        = [.. Enumerable.Range(1, TestAppDbContext.EventCount).Select(i => new object[]{$"Event Title {i}"})];
+    public static readonly IEnumerable<object[]> Titles
+        = [.. Enumerable.Range(1, TestAppDbContext.EventCount).Select(i => new object[] { $"Event Title {i}" })];
 
     /// <summary>
     /// Тест фильтров по заголовку.
@@ -285,8 +285,8 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
             .Where(x => x.Title.Contains(title))
             .Select(x => x.ToOutputData())
             .ToList();
-        
-        var actual = fixture.EventService.GetEvents(new() { Title =title }).ToList();
+
+        var actual = fixture.EventService.GetEvents(new() { Title = title }).ToList();
 
         Assert.All(actual, item => Assert.Contains(title, item.Title));
         Assert.Equal(expected, actual);
@@ -306,7 +306,7 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
             [new DateTime(2026, 7, 28)],
             [new DateTime(2026, 8, 10)],
         ];
-    
+
     /// <summary>
     /// Тест фильтрации по нвчалу события.
     /// </summary>
@@ -324,7 +324,7 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
 
         // When
         var actual = fixture.EventService.GetEvents(new() { From = startAt }).ToList();
-    
+
         // Then
         Assert.Equal(expected, actual);
         Assert.All(actual, item => Assert.True(item.StartAt >= startAt));
@@ -343,7 +343,7 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
             [new DateTime(2026, 7, 28)],
             [new DateTime(2026, 8, 10)],
         ];
-    
+
     /// <summary>
     /// Тест фильтра по окончанию события.
     /// </summary>
@@ -358,8 +358,8 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
         var expected = fixture.Events.Where(x => x.EndAt < endDate).Select(x => x.ToOutputData()).ToList();
 
         // When
-        var actual = fixture.EventService.GetEvents(new(){ To = endAt }).ToList();
-    
+        var actual = fixture.EventService.GetEvents(new() { To = endAt }).ToList();
+
         // Then
         Assert.Equal(expected, actual);
         Assert.All(actual, item => Assert.True(item.EndAt < endDate));
@@ -392,7 +392,7 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
     {
         // Given
         var endDate = endAt?.AddDays(1).Date;
-        
+
         var expected = fixture.Events
             .Where(x => (string.IsNullOrEmpty(title) || x.Title.Contains(title))
                 && (startAt == null || x.StartAt >= startAt.Value)
@@ -402,15 +402,15 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
 
         // When
         var actual = fixture.EventService.GetEvents(new() { Title = title, From = startAt, To = endAt }).ToList();
-    
+
         // Then
         Assert.Equal(expected, actual);
-        
-        Assert.All(actual, item => 
+
+        Assert.All(actual, item =>
             {
                 if (title != null)
                     Assert.Contains(title, item.Title);
-                
+
                 if (startAt.HasValue)
                     Assert.True(item.StartAt >= startAt);
 
@@ -443,15 +443,15 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
         // Given
         var allValues = fixture.EventService.GetAllEvents().ToList();
         var expectedTotalCount = allValues.Count;
-        
+
         var expectedValues = allValues
-            .Skip((page -1) * pageSize)
+            .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToList();
 
         // When
-        var pageResult = fixture.EventService.GetEvents(null, new(){ CurrentPage = page, PageSize = pageSize });
-        
+        var pageResult = fixture.EventService.GetEvents(null, new() { CurrentPage = page, PageSize = pageSize });
+
         // Then
         Assert.Equal(expectedPageCount, pageResult.PageCount);
         Assert.Equal(page, pageResult.PageNumber);

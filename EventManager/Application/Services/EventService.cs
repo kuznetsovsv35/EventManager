@@ -9,7 +9,7 @@ namespace EventManager.Application.Services;
 /// </summary>
 /// <param name="dbContext"></param>
 public class EventService(
-    IAppDbContext dbContext, 
+    IAppDbContext dbContext,
     IFilter<Event> filter,
     IPaginator<Event> paginator) : IEventService
 {
@@ -17,7 +17,7 @@ public class EventService(
     {
         if (data == null)
             throw new ArgumentNullException(nameof(data));
-            
+
         var e = data.ToEvent();
         dbContext.Add(e);
         return e.ToOutputData();
@@ -30,32 +30,32 @@ public class EventService(
             dbContext.Delete(e);
             return e.ToOutputData();
         }
-        
+
         return null;
     }
 
-    public IEnumerable<EventOutputData> GetAllEvents() 
+    public IEnumerable<EventOutputData> GetAllEvents()
         => dbContext.Events.AsEnumerable().Select(x => x.ToOutputData());
 
     public PaginateResult<EventOutputData> GetEvents(FilterParams? filterParams, PageParams pageParams)
         => paginator.Paginate(
             FilterEvents(dbContext.Events, filterParams),
             pageParams.CurrentPage, pageParams.PageSize,
-            e => e.ToOutputData()); 
-        
+            e => e.ToOutputData());
+
     public IEnumerable<EventOutputData> GetEvents(FilterParams? filterParams)
         => FilterEvents(dbContext.Events, filterParams)
             .AsEnumerable()
-            .Select(e => e.ToOutputData()); 
+            .Select(e => e.ToOutputData());
 
     IQueryable<Event> FilterEvents(IQueryable<Event> events, FilterParams? filterParams)
     {
         var f = filter.Reset();
 
-        if (filterParams is { Title: string title }) 
+        if (filterParams is { Title: string title })
             f.AddCondition(e => e.Title.Contains(title));
 
-        if (filterParams is { From: DateTime from }) 
+        if (filterParams is { From: DateTime from })
         {
             DateTime fromDate = from.Date;
             f.AddCondition(e => e.StartAt >= fromDate);
@@ -74,7 +74,7 @@ public class EventService(
     {
         if (dbContext.Events.FirstOrDefault(e => e.Id == id) is Event e)
             return e.ToOutputData();
-        
+
         return null;
     }
 

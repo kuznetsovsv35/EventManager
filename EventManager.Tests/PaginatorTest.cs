@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using EventManager.Infrastructure;
 
 namespace EventManager.Tests;
@@ -23,9 +22,9 @@ public class PaginatorTest(PaginatorFixture fixture) : TraitAttributes, IClassFi
     public void ValidateParameters_Fail(int page, int pageSize)
     {
         // Given
-    
+
         // When
-    
+
         // Then
         Assert.Throws<PaginatorParamException>(
             () => fixture.Paginator.Paginate(fixture.Events, page, pageSize, x => x));
@@ -51,12 +50,12 @@ public class PaginatorTest(PaginatorFixture fixture) : TraitAttributes, IClassFi
         // Given
         var expectedTotalCount = fixture.Events.Count();
         var expectedValues = fixture.Events
-            .Skip((page -1) * pageSize)
+            .Skip((page - 1) * pageSize)
             .Take(pageSize);
 
         // When
         var pageResult = fixture.Paginator.Paginate(fixture.Events, page, pageSize, x => x);
-        
+
         // Then
         Assert.Equal(expectedPageCount, pageResult.PageCount);
         Assert.Equal(page, pageResult.PageNumber);

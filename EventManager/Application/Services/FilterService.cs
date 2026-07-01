@@ -10,8 +10,8 @@ public class FilterService<T> : IFilter<T>
     {
         if (predicate is null)
             throw new ArgumentNullException(nameof(predicate));
-        
-        _expression = null;        
+
+        _expression = null;
         _conditions.Add(predicate);
         return this;
     }
@@ -20,7 +20,7 @@ public class FilterService<T> : IFilter<T>
     {
         if (Expression is Expression<Func<T, bool>> expression)
             return values.Where(expression);
-        
+
         return values;
     }
 

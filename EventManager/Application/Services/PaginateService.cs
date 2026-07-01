@@ -15,13 +15,13 @@ public class PaginateService<T> : IPaginator<T>
             throw new PaginatorParamException(nameof(pageSize), pageSize);
 
         var totalCount = values.Count();
-        var pageCount = (int)Math.Ceiling((double)totalCount / pageSize);        
+        var pageCount = (int)Math.Ceiling((double)totalCount / pageSize);
         var pageValues = values.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
-        return new(            
+        return new(
             totalCount,
             pageValues.Select(v => viewFactory(v)),
-            page, 
+            page,
             pageCount,
             pageValues.Count);
     }

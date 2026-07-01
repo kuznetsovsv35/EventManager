@@ -9,9 +9,9 @@ namespace EventManager.Application.DataTransfer;
 [AttributeUsage(AttributeTargets.Property | AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
 public class EventInputDataValidationAttribute : ValidationAttribute
 {
-    public EventInputDataValidationAttribute(string errorMessage) : base(errorMessage) {}
-    
-    public EventInputDataValidationAttribute() : this($"Ошибка валидации объекта {nameof(EventInputData)}.") {}
+    public EventInputDataValidationAttribute(string errorMessage) : base(errorMessage) { }
+
+    public EventInputDataValidationAttribute() : this($"Ошибка валидации объекта {nameof(EventInputData)}.") { }
 
     protected override ValidationResult? IsValid(object? value, ValidationContext context)
     {
@@ -19,8 +19,8 @@ public class EventInputDataValidationAttribute : ValidationAttribute
         if (context?.ObjectInstance is EventInputData data)
         {
             switch (context.MemberName)
-            {                
-                case nameof(data.Title): 
+            {
+                case nameof(data.Title):
                     if (string.IsNullOrWhiteSpace(value as string))
                         return CreateResult(context);
                     break;
@@ -33,7 +33,7 @@ public class EventInputDataValidationAttribute : ValidationAttribute
                         return CreateResult(context);
                     break;
             }
-            
+
             return ValidationResult.Success;
         }
 
@@ -42,19 +42,19 @@ public class EventInputDataValidationAttribute : ValidationAttribute
 
     ValidationResult CreateResult(ValidationContext? context)
         => new(ErrorMessage, context?.MemberName is string memberName ? [memberName] : null);
-    
+
     internal static IReadOnlyCollection<ValidationResult> Check(EventInputData data)
     {
         var results = new Collection<ValidationResult>();
-        
+
         // For validation tests
         // data.Title = string.Empty;
         // data.StartAt = data.EndAt;
         var isValid = Validator.TryValidateObject(data, new ValidationContext(data), results, true);
-        
+
         if (isValid)
             return [];
-            
-        return results;        
+
+        return results;
     }
 }

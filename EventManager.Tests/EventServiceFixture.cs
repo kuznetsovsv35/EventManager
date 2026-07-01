@@ -10,7 +10,7 @@ public class EventServiceFixture : TestAppDbContext
 
     public EventServiceFixture()
         => EventService = new EventService(
-            this, 
-            new FilterService<Event>(), 
+            this,
+            new FilterService<Event>(),
             new PaginateService<Event>());
 }

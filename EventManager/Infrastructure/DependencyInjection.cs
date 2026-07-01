@@ -14,12 +14,12 @@ public static class DependencyInjection
         builder.UseMiddleware<ErrorHandler>();
         return builder;
     }
-    
+
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddDbContext<AppDbContext>(options =>
         {
-           options.UseInMemoryDatabase("EventDb"); 
+            options.UseInMemoryDatabase("EventDb");
         });
 
         services.AddScoped<IAppDbContext>(provider => provider.GetRequiredService<AppDbContext>());

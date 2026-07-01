@@ -14,10 +14,10 @@ public class FilterEventTest(FilterEventFixture fixture) : TraitAttributes, ICla
     public void Reset_Success()
     {
         // Given
-    
+
         // When
-        var filter = fixture.FilterService.Reset();        
-    
+        var filter = fixture.FilterService.Reset();
+
         // Then
         Assert.Null(filter.Expression);
     }
@@ -28,7 +28,7 @@ public class FilterEventTest(FilterEventFixture fixture) : TraitAttributes, ICla
     {
         // Given
         var filter = fixture.FilterService.Reset();
-        
+
         // Then
         var ex = Assert.Throws<ArgumentNullException>(() => filter.AddCondition(null!));
         Assert.NotNull(ex.ParamName);
@@ -45,25 +45,25 @@ public class FilterEventTest(FilterEventFixture fixture) : TraitAttributes, ICla
 
         Expression<Func<Event, bool>> exprTitleAll = x => x.Title.Contains(titleAll);  // all event expected
         Expression<Func<Event, bool>> exprTitleNone = x => x.Title.Contains(titleNone);      // No events        
-        
-        var expectedAll = fixture.Events.Where(exprTitleAll) .ToList();
+
+        var expectedAll = fixture.Events.Where(exprTitleAll).ToList();
         var expectedAllCount = expectedAll.Count;
-    
+
         // When
         var actualAll = fixture.FilterService
             .Reset()
             .AddCondition(exprTitleAll)
             .ApplyFilter(fixture.Events)
             .ToList();
-        
+
         var actualAllCount = actualAll.Count;
-        
+
         var actualNone = fixture.FilterService
             .Reset()
             .AddCondition(exprTitleNone)
             .ApplyFilter(fixture.Events)
             .ToList();
-    
+
         // Then
         Assert.Equal(expectedAll, actualAll);
         Assert.All(actualAll, item => Assert.Contains(titleAll, item.Title));
@@ -95,9 +95,9 @@ public class FilterEventTest(FilterEventFixture fixture) : TraitAttributes, ICla
         Assert.Equal(expected, actual);
         Assert.Equal(expectedCount, actualCount);
     }
-    
-    public static readonly IEnumerable<object[]> Titles 
-        = [.. Enumerable.Range(1, TestAppDbContext.EventCount).Select(i => new object[]{$"Event Title {i}"})];
+
+    public static readonly IEnumerable<object[]> Titles
+        = [.. Enumerable.Range(1, TestAppDbContext.EventCount).Select(i => new object[] { $"Event Title {i}" })];
 
     [Trait(Category, Category_Filters)]
     [Theory]
@@ -108,7 +108,7 @@ public class FilterEventTest(FilterEventFixture fixture) : TraitAttributes, ICla
         Expression<Func<Event, bool>> expression = x => x.Title.Contains(title);
         var expected = fixture.Events.Where(expression).ToList();
         var expectedCount = expected.Count;
-        
+
         // When
         var actual = fixture.FilterService.Reset()
             .AddCondition(expression)
@@ -146,7 +146,7 @@ public class FilterEventTest(FilterEventFixture fixture) : TraitAttributes, ICla
             .ApplyFilter(fixture.Events)
             .ToList();
         var actualCount = actual.Count;
-    
+
         // Then
         Assert.Equal(expectedCount, expected.Count);
         Assert.Equal(expected, actual);
@@ -180,7 +180,7 @@ public class FilterEventTest(FilterEventFixture fixture) : TraitAttributes, ICla
             .ApplyFilter(fixture.Events)
             .ToList();
         var actualCount = actual.Count;
-    
+
         // Then
         Assert.Equal(expectedCount, expected.Count);
         Assert.Equal(expected, actual);
@@ -206,13 +206,13 @@ public class FilterEventTest(FilterEventFixture fixture) : TraitAttributes, ICla
     {
         // Given
         endAt = endAt?.AddDays(1).Date;
-                
+
         var expected = fixture.Events
             .Where(x => (string.IsNullOrEmpty(title) || x.Title.Contains(title))
                 && (startAt == null || x.StartAt >= startAt.Value)
                 && (endAt == null || x.EndAt < endAt.Value))
             .ToList();
-        
+
         Expression<Func<Event, bool>>? exprTitle = title is null ? null : x => x.Title.Contains(title);
         Expression<Func<Event, bool>>? exprStartAt = startAt is null ? null : x => x.StartAt >= startAt.Value;
         Expression<Func<Event, bool>>? exprEndAt = endAt is null ? null : x => x.EndAt <= endAt;
@@ -222,26 +222,26 @@ public class FilterEventTest(FilterEventFixture fixture) : TraitAttributes, ICla
 
         if (exprTitle != null)
             filter.AddCondition(exprTitle);
-        
+
         if (exprStartAt != null)
             filter.AddCondition(exprStartAt);
 
         if (exprEndAt != null)
             filter.AddCondition(exprEndAt);
-        
+
         var actual = filter.ApplyFilter(fixture.Events).ToList();
         var actualCount = actual.Count;
-    
+
         // Then
         Assert.Equal(expectedCount, expected.Count);
-        
+
         Assert.Equal(expected, actual);
-        
-        Assert.All(actual, item => 
+
+        Assert.All(actual, item =>
             {
                 if (title != null)
                     Assert.Contains(title, item.Title);
-                
+
                 if (startAt.HasValue)
                     Assert.True(item.StartAt >= startAt);
 

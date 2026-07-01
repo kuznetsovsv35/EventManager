@@ -27,7 +27,7 @@ public class EventInputData
                 && StartAt == inputData.StartAt
                 && EndAt == inputData.EndAt
                 && Description == inputData.Description;
-        
+
         return base.Equals(obj);
     }
 

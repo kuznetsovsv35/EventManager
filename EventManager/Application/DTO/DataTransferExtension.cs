@@ -44,6 +44,6 @@ public static class DataTransferExtension
     public static void Check(this EventInputData data)
     {
         if (EventInputDataValidationAttribute.Check(data).FirstOrDefault() is ValidationResult result)
-            throw new ValidationException(result, null, data);        
+            throw new ValidationException(result, null, data);
     }
 }

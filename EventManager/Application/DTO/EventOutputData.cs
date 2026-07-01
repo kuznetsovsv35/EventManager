@@ -4,7 +4,7 @@ namespace EventManager.Application.DataTransfer;
 /// Выходные данные запросов GET.
 /// </summary>
 /// <param name="source"></param>
-public class EventOutputData: EventInputData
+public class EventOutputData : EventInputData
 {
     public Guid Id { get; internal init; }
 
@@ -15,7 +15,7 @@ public class EventOutputData: EventInputData
 
         if (obj is EventOutputData outputData)
             return Id == outputData.Id && base.Equals((EventInputData)obj);
-        
+
         return base.Equals(obj);
     }
 

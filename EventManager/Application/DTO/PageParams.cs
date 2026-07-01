@@ -34,9 +34,9 @@ public class PageParams
 public partial class EventQueryParams
 {
     public static implicit operator PageParams(EventQueryParams queryParams)
-        => new() 
-        { 
-            CurrentPage =queryParams.Page, 
+        => new()
+        {
+            CurrentPage = queryParams.Page,
             PageSize = queryParams.PageSize
         };
 }
