@@ -137,7 +137,6 @@ public class FilterEventTest(FilterEventFixture fixture) : TraitAttributes, ICla
     public void FilterByStartDate_Success(DateTime startAt, int expectedCount)
     {
         // Given
-        startAt = startAt.AddDays(1).Date;
         Expression<Func<Event, bool>> expression = x => x.StartAt >= startAt;
         var expected = fixture.Events.Where(expression).ToList();
 

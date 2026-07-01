@@ -353,16 +353,16 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
     [MemberData(nameof(EndDates))]
     public void FilterByEndDate_Success(DateTime endAt)
     {
-        // Given
-        endAt = endAt.AddDays(1).Date;
-        var expected = fixture.Events.Where(x => x.EndAt < endAt).Select(x => x.ToOutputData()).ToList();
+        var endDate = endAt.AddDays(1).Date;
+        // Given        
+        var expected = fixture.Events.Where(x => x.EndAt < endDate).Select(x => x.ToOutputData()).ToList();
 
         // When
         var actual = fixture.EventService.GetEvents(new(){ To = endAt }).ToList();
     
         // Then
         Assert.Equal(expected, actual);
-        Assert.All(actual, item => Assert.True(item.EndAt < endAt));
+        Assert.All(actual, item => Assert.True(item.EndAt < endDate));
     }
 
     /// <summary>
@@ -391,12 +391,12 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
     public void CombinedFilter_Success(string? title, DateTime? startAt, DateTime? endAt)
     {
         // Given
-        endAt = endAt?.AddDays(1).Date;
+        var endDate = endAt?.AddDays(1).Date;
         
         var expected = fixture.Events
             .Where(x => (string.IsNullOrEmpty(title) || x.Title.Contains(title))
                 && (startAt == null || x.StartAt >= startAt.Value)
-                && (endAt == null || x.EndAt < endAt.Value))
+                && (endDate == null || x.EndAt < endDate.Value))
             .Select(x => x.ToOutputData())
             .ToList();
 
@@ -415,7 +415,7 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
                     Assert.True(item.StartAt >= startAt);
 
                 if (endAt.HasValue)
-                    Assert.True(item.EndAt < endAt);
+                    Assert.True(item.EndAt < endDate);
             });
     }
 

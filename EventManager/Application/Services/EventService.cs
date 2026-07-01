@@ -16,7 +16,7 @@ public class EventService(
     public EventOutputData CreateEvent(EventInputData data)
     {
         if (data == null)
-            throw new ArgumentOutOfRangeException(nameof(data));
+            throw new ArgumentNullException(nameof(data));
             
         var e = data.ToEvent();
         dbContext.Add(e);
