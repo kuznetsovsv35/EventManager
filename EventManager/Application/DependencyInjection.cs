@@ -14,6 +14,7 @@ public static class DependencyInjection
         services.AddScoped<IFilter<Event>, FilterService<Event>>();
         services.AddScoped<IPaginator<Event>, PaginateService<Event>>();
         services.AddScoped<IEventService, EventService>();
+        services.AddScoped<IBookingService, BookingService>();
         return services;
     }
 }
