@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using EventManager.Application.DataTransfer;
+using EventManager.Infrastructure;
 
 namespace EventManager.Tests;
 
@@ -119,10 +120,10 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
         var requestedId = Guid.Empty;
 
         // When
-        var foundEvent = fixture.EventService.GetEvent(requestedId);
 
         // Then
-        Assert.Null(foundEvent);
+        var ex = Assert.Throws<EventNotFoundException>(() => fixture.EventService.GetEvent(requestedId));
+        Assert.Equal(requestedId, ex.EventId);
     }
 
     /// <summary>
@@ -171,10 +172,10 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
         var requestedId = Guid.Empty;
 
         // When
-        var outData = fixture.EventService.UpdateEvent(requestedId, inputData);
 
         // Then
-        Assert.Null(outData);
+        var ex = Assert.Throws<EventNotFoundException>(() => fixture.EventService.UpdateEvent(requestedId, inputData));
+        Assert.Equal(requestedId, ex.EventId);
     }
 
     /// <summary>
@@ -230,12 +231,12 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
         var expectedCount = fixture.Events.Count();
 
         // When
-        var deletedEvent = fixture.EventService.DeleteEvent(requestedId);
 
         // Then
+        var ex = Assert.Throws<EventNotFoundException>(() => fixture.EventService.DeleteEvent(requestedId));
         var actualCount = fixture.Events.Count();
         Assert.Equal(expectedCount, actualCount);
-        Assert.Null(deletedEvent);
+        Assert.Equal(requestedId, ex.EventId);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////
