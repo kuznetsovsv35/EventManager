@@ -1,5 +1,6 @@
 using EventManager.Application.DataTransfer;
 using EventManager.Application.Interfaces;
+using EventManager.Infrastructure;
 using EventManager.Models;
 
 namespace EventManager.Application.Services;
@@ -23,7 +24,7 @@ public class EventService(
         return e.ToOutputData();
     }
 
-    public EventOutputData? DeleteEvent(Guid id)
+    public EventOutputData DeleteEvent(Guid id)
     {
         if (dbContext.Events.FirstOrDefault(e => e.Id == id) is Event e)
         {
@@ -31,7 +32,7 @@ public class EventService(
             return e.ToOutputData();
         }
 
-        return null;
+        throw new EventNotFoundException(nameof(id), id);
     }
 
     public IEnumerable<EventOutputData> GetAllEvents()
@@ -73,15 +74,15 @@ public class EventService(
         return f.ApplyFilter(events);
     }
 
-    public EventOutputData? GetEvent(Guid id)
+    public EventOutputData GetEvent(Guid id)
     {
         if (dbContext.Events.FirstOrDefault(e => e.Id == id) is Event e)
             return e.ToOutputData();
 
-        return null;
+        throw new EventNotFoundException(nameof(id), id);
     }
 
-    public EventOutputData? UpdateEvent(Guid id, EventInputData data)
+    public EventOutputData UpdateEvent(Guid id, EventInputData data)
     {
         if (dbContext.Events.FirstOrDefault(e => e.Id == id) is Event e)
         {
@@ -89,6 +90,6 @@ public class EventService(
             dbContext.Update(e);
             return e.ToOutputData();
         }
-        return null;
+        throw new EventNotFoundException(nameof(id), id);
     }
 }

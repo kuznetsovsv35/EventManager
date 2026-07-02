@@ -33,7 +33,7 @@ public interface IEventService
     /// </summary>
     /// <param name="id">Идентификатор</param>
     /// <returns>Экземпляр найденного события или null (если не найдено).</returns>
-    EventOutputData? GetEvent(Guid id);
+    EventOutputData GetEvent(Guid id);
 
     /// <summary>
     /// Создает новое событие.
@@ -48,12 +48,12 @@ public interface IEventService
     /// <param name="id">Идентификатор обновляемого события.</param>
     /// <param name="data">Данные события.</param>
     /// <returns>Данные о событии после обновления.</returns>
-    EventOutputData? UpdateEvent(Guid id, EventInputData data);
+    EventOutputData UpdateEvent(Guid id, EventInputData data);
 
     /// <summary>
     /// Удаляет событие с идентификатором.
     /// </summary>
     /// <param name="id">Идентификатор.</param>
     /// <returns>Информация о удаленном событии.</returns>
-    EventOutputData? DeleteEvent(Guid id);
+    EventOutputData DeleteEvent(Guid id);
 }

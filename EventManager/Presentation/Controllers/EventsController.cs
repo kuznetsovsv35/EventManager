@@ -23,12 +23,7 @@ public class EventsController(IEventService eventService) : ControllerBase
     [ProducesResponseType<EventOutputData>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public ActionResult<EventOutputData> GetEvent(Guid id)
-    {
-        if (eventService.GetEvent(id) is EventOutputData e)
-            return Ok(e);
-
-        return EventNotFound(id);
-    }
+        => Ok(eventService.GetEvent(id));
 
     [HttpPost]
     [ProducesResponseType<EventOutputData>(StatusCodes.Status201Created)]
@@ -47,26 +42,11 @@ public class EventsController(IEventService eventService) : ControllerBase
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     public ActionResult<EventOutputData> UpdateEvent(Guid id, [FromBody] EventInputData data)
-    {
-        if (eventService.UpdateEvent(id, data) is EventOutputData e)
-            return Ok(e);
-
-        return EventNotFound(id);
-    }
+        => Ok(eventService.UpdateEvent(id, data));
 
     [HttpDelete("{id:guid}")]
     [ProducesResponseType<EventOutputData>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public ActionResult<EventOutputData> DeleteEvent(Guid id)
-    {
-        if (eventService.DeleteEvent(id) is EventOutputData e)
-            return Ok(e);
-
-        return EventNotFound(id);
-    }
-
-    NotFoundObjectResult EventNotFound(Guid id)
-        => NotFound(CustomProblemDetailsFactory
-        .NotFound($"Событие не найдено, ID={id}.")
-        .AddInstance(HttpContext.Request.Path).Problem);
+        => Ok(eventService.DeleteEvent(id));
 }

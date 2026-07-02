@@ -34,10 +34,11 @@ public class ErrorHandler(RequestDelegate next, ILogger<ErrorHandler> logger)
         => exception switch
         {
             ValidationException => StatusCodes.Status400BadRequest,
+            EventNotFoundException => StatusCodes.Status404NotFound,
             _ => StatusCodes.Status500InternalServerError,
         };
 
-    static async Task CreateErrorResponse(HttpContext context, Exception exception)
+    static async Task CreateErrorResponse(HttpContent context, Exception exception)
     {
         var request = context.Request;
         var response = context.Response;
@@ -45,10 +46,13 @@ public class ErrorHandler(RequestDelegate next, ILogger<ErrorHandler> logger)
         ProblemDetailsBuilder<ProblemDetails> detailsBuilder = exception switch
         {
             ValidationException ve => ProblemDetailsFactory.ValidationProblem(ve.ValidationResult, ve.Message),
+            
             PaginatorParamException pe => ProblemDetailsFactory.ValidationProblem(
                 new ValidationResult(
                     pe.Message, (pe.ParamName is string pn) ? new[] { pn } : null),
                 pe.Message, $"параметр: {pe.ParamName}, значение: {pe.ParamValue}"),
+            
+            EventNotFoundException eventNotFound => ProblemDetailsFactory.NotFound($"{eventNotFound.Message}: (ID={eventNotFound.EventId})."),
 
             _ => ProblemDetailsFactory.InternalServiceError(exception.Message)
         };
