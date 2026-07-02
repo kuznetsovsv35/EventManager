@@ -40,11 +40,13 @@ public class FilterEventTest(FilterEventFixture fixture) : TraitAttributes, ICla
     public void SimpleFilterByTitle_Success()
     {
         // Given
-        const string titleAll = "Event Title";
+        const string titleAll = "Event title";
         const string titleNone = "AbcDeF";
+        var titleAllLowCase = titleAll.ToLower();
+        var titleNoneLowCase = titleNone.ToLower();
 
-        Expression<Func<Event, bool>> exprTitleAll = x => x.Title.Contains(titleAll);  // all event expected
-        Expression<Func<Event, bool>> exprTitleNone = x => x.Title.Contains(titleNone);      // No events        
+        Expression<Func<Event, bool>> exprTitleAll = x => x.Title.ToLower().Contains(titleAllLowCase);  // all event expected
+        Expression<Func<Event, bool>> exprTitleNone = x => x.Title.ToLower().Contains(titleNoneLowCase);      // No events        
 
         var expectedAll = fixture.Events.Where(exprTitleAll).ToList();
         var expectedAllCount = expectedAll.Count;
@@ -66,20 +68,21 @@ public class FilterEventTest(FilterEventFixture fixture) : TraitAttributes, ICla
 
         // Then
         Assert.Equal(expectedAll, actualAll);
-        Assert.All(actualAll, item => Assert.Contains(titleAll, item.Title));
+        Assert.All(actualAll, item => Assert.Contains(titleAll, item.Title, StringComparison.OrdinalIgnoreCase));
         Assert.Equal(expectedAllCount, actualAllCount);
         Assert.Empty(actualNone);
     }
 
     [Trait(Category, Category_Filters)]
     [Theory]
-    [InlineData(["Event Title 1", 11])]
-    [InlineData(["Event Title 2", 11])]
-    [InlineData(["Event Title 3", 2])]
+    [InlineData(["event Title 1", 11])]
+    [InlineData(["Event title 2", 11])]
+    [InlineData(["event Title 3", 2])]
     public void PartialFilterByTitle_Success(string title, int expectedCount)
     {
         // Given
-        Expression<Func<Event, bool>> expr = x => x.Title.Contains(title);
+        var titleLowCase = title.ToLower();
+        Expression<Func<Event, bool>> expr = x => x.Title.ToLower().Contains(titleLowCase);
         var expected = fixture.Events.Where(expr).ToList();
 
         // When        
@@ -91,7 +94,7 @@ public class FilterEventTest(FilterEventFixture fixture) : TraitAttributes, ICla
 
         // Then
         Assert.Equal(expectedCount, expected.Count);
-        Assert.All(actual, (item) => Assert.Contains(title, item.Title));
+        Assert.All(actual, (item) => Assert.Contains(title, item.Title, StringComparison.OrdinalIgnoreCase));
         Assert.Equal(expected, actual);
         Assert.Equal(expectedCount, actualCount);
     }
@@ -105,7 +108,8 @@ public class FilterEventTest(FilterEventFixture fixture) : TraitAttributes, ICla
     public void IterationFilterByTitle_Success(string title)
     {
         // Givent
-        Expression<Func<Event, bool>> expression = x => x.Title.Contains(title);
+        var titleLowCase = title.ToLower();
+        Expression<Func<Event, bool>> expression = x => x.Title.ToLower().Contains(titleLowCase);
         var expected = fixture.Events.Where(expression).ToList();
         var expectedCount = expected.Count;
 
@@ -118,7 +122,7 @@ public class FilterEventTest(FilterEventFixture fixture) : TraitAttributes, ICla
 
         Assert.Equal(expectedCount, actualCount);
         Assert.Equal(expected, actual);
-        Assert.All(actual, item => Assert.Contains(title, item.Title));
+        Assert.All(actual, item => Assert.Contains(title, item.Title, StringComparison.OrdinalIgnoreCase));
     }
 
     public static readonly IEnumerable<object[]> StartDates =
@@ -205,15 +209,16 @@ public class FilterEventTest(FilterEventFixture fixture) : TraitAttributes, ICla
     public void CombinedFilter_Success(string? title, DateTime? startAt, DateTime? endAt, int expectedCount)
     {
         // Given
+        var titleLowCase = title?.ToLower();
         endAt = endAt?.AddDays(1).Date;
 
         var expected = fixture.Events
-            .Where(x => (string.IsNullOrEmpty(title) || x.Title.Contains(title))
+            .Where(x => (string.IsNullOrEmpty(titleLowCase) || x.Title.ToLower().Contains(titleLowCase))
                 && (startAt == null || x.StartAt >= startAt.Value)
                 && (endAt == null || x.EndAt < endAt.Value))
             .ToList();
 
-        Expression<Func<Event, bool>>? exprTitle = title is null ? null : x => x.Title.Contains(title);
+        Expression<Func<Event, bool>>? exprTitle = titleLowCase is null ? null : x => x.Title.ToLower().Contains(titleLowCase);
         Expression<Func<Event, bool>>? exprStartAt = startAt is null ? null : x => x.StartAt >= startAt.Value;
         Expression<Func<Event, bool>>? exprEndAt = endAt is null ? null : x => x.EndAt <= endAt;
 
@@ -240,7 +245,7 @@ public class FilterEventTest(FilterEventFixture fixture) : TraitAttributes, ICla
         Assert.All(actual, item =>
             {
                 if (title != null)
-                    Assert.Contains(title, item.Title);
+                    Assert.Contains(title, item.Title, StringComparison.OrdinalIgnoreCase);
 
                 if (startAt.HasValue)
                     Assert.True(item.StartAt >= startAt);

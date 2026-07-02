@@ -250,11 +250,13 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
     public void SimpleFilterByTitle_Success()
     {
         // Given
-        const string titleAll = "Event Title";  // all event expected
-        const string titleNone = "AbcDeF";      // No events        
+        const string titleAll = "Event title";  // all event expected
+        const string titleNone = "AbcDeF";      // No events
+        var titleAllLowCase = titleAll.ToLower();
+        var titleNoneLowcase = titleNone.ToLower();
 
         var expectedAll = fixture.Events
-            .Where(x => x.Title.Contains(titleAll))
+            .Where(x => x.Title.ToLower().Contains(titleAllLowCase))
             .Select(x => x.ToOutputData())
             .ToList();
 
@@ -264,13 +266,13 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
 
         // Then
         Assert.Equal(expectedAll, actualAll);
-        Assert.All(actualAll, item => Assert.Contains(titleAll, item.Title));
+        Assert.All(actualAll, item => Assert.Contains(titleAll, item.Title, StringComparison.OrdinalIgnoreCase));
         Assert.Equal(expectedAll.Count, actualAll.Count);
         Assert.Empty(actualNone);
     }
 
     public static readonly IEnumerable<object[]> Titles
-        = [.. Enumerable.Range(1, TestAppDbContext.EventCount).Select(i => new object[] { $"Event Title {i}" })];
+        = [.. Enumerable.Range(1, TestAppDbContext.EventCount).Select(i => new object[] { $"eVeNt TiTlE {i}" })];
 
     /// <summary>
     /// Тест фильтров по заголовку.
@@ -281,14 +283,15 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
     [MemberData(nameof(Titles))]
     public void IterationFilterByTitle_Success(string title)
     {
+        var titleLowCase = title.ToLower();
         var expected = fixture.Events
-            .Where(x => x.Title.Contains(title))
+            .Where(x => x.Title.ToLower().Contains(titleLowCase))
             .Select(x => x.ToOutputData())
             .ToList();
 
         var actual = fixture.EventService.GetEvents(new() { Title = title }).ToList();
 
-        Assert.All(actual, item => Assert.Contains(title, item.Title));
+        Assert.All(actual, item => Assert.Contains(title, item.Title, StringComparison.OrdinalIgnoreCase));
         Assert.Equal(expected, actual);
         Assert.True(actual.Any());
     }
@@ -392,9 +395,10 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
     {
         // Given
         var endDate = endAt?.AddDays(1).Date;
+        var titleLowCase = title?.ToLower();
 
         var expected = fixture.Events
-            .Where(x => (string.IsNullOrEmpty(title) || x.Title.Contains(title))
+            .Where(x => (string.IsNullOrEmpty(titleLowCase) || x.Title.ToLower().Contains(titleLowCase))
                 && (startAt == null || x.StartAt >= startAt.Value)
                 && (endDate == null || x.EndAt < endDate.Value))
             .Select(x => x.ToOutputData())
@@ -409,7 +413,7 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
         Assert.All(actual, item =>
             {
                 if (title != null)
-                    Assert.Contains(title, item.Title);
+                    Assert.Contains(title, item.Title, StringComparison.OrdinalIgnoreCase);
 
                 if (startAt.HasValue)
                     Assert.True(item.StartAt >= startAt);

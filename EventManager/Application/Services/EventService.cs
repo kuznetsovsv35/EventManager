@@ -53,7 +53,10 @@ public class EventService(
         var f = filter.Reset();
 
         if (filterParams is { Title: string title })
-            f.AddCondition(e => e.Title.Contains(title));
+        {
+            string titleLowCase = title.ToLower();  
+            f.AddCondition(e => e.Title.ToLower().Contains(titleLowCase));
+        }
 
         if (filterParams is { From: DateTime from })
         {
