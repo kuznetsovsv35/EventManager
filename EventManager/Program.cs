@@ -23,6 +23,8 @@ if (builder.Environment.IsDevelopment())
 
 // Строим приложение.
 var app = builder.Build();
+// Обработчик ошибок
+app.UseErrorHandler();
 
 // В разработке работа с API в веб-интерфейсе.
 if (app.Environment.IsDevelopment())

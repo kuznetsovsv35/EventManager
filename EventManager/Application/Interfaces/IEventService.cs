@@ -11,14 +11,29 @@ public interface IEventService
     /// Получить все события.
     /// </summary>
     /// <returns>Список событий.</returns>
-    IList<EventOutputData> GetAllEvents();
+    IEnumerable<EventOutputData> GetAllEvents();
+
+    /// <summary>
+    /// Возвращает отфильтрованный набор с разбивкой по страницам.
+    /// </summary>
+    /// <param name="filterParams">Параметры фильтра.</param>
+    /// <param name="pageParams">Параметры разбивки.</param>
+    /// <returns></returns>
+    PaginateResult<EventOutputData> GetEvents(FilterParams? filterParams, PageParams pageParams);
+
+    /// <summary>
+    /// Возвращает отфильтрованный набор.
+    /// </summary>
+    /// <param name="filterParams">Параметры фильтра.</param>
+    /// <returns></returns>
+    IEnumerable<EventOutputData> GetEvents(FilterParams? filterParams);
 
     /// <summary>
     /// Получить событие по идентификатору.
     /// </summary>
     /// <param name="id">Идентификатор</param>
     /// <returns>Экземпляр найденного события или null (если не найдено).</returns>
-    EventOutputData? GetEvent(Guid id);
+    EventOutputData GetEvent(Guid id);
 
     /// <summary>
     /// Создает новое событие.
@@ -33,12 +48,12 @@ public interface IEventService
     /// <param name="id">Идентификатор обновляемого события.</param>
     /// <param name="data">Данные события.</param>
     /// <returns>Данные о событии после обновления.</returns>
-    EventOutputData? UpdateEvent(Guid id, EventInputData data);
+    EventOutputData UpdateEvent(Guid id, EventInputData data);
 
     /// <summary>
     /// Удаляет событие с идентификатором.
     /// </summary>
     /// <param name="id">Идентификатор.</param>
     /// <returns>Информация о удаленном событии.</returns>
-    EventOutputData? DeleteEvent(Guid id);
+    EventOutputData DeleteEvent(Guid id);
 }
