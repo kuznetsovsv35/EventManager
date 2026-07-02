@@ -11,6 +11,8 @@ public interface IAppDbContext
     /// Вовзращает queryable объект набора данных.
     /// </summary>
     IQueryable<Event> Events { get; }
+
+    IQueryable<Booking> Bookings { get; }
     
     /// <summary>
     /// Добавляет событие в набор данных.

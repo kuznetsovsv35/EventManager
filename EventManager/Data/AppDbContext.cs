@@ -12,7 +12,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 {
     public DbSet<Event> Events { get; set; }
 
+    public DbSet<Booking> Bookings { get; set; }
+
     IQueryable<Event> IAppDbContext.Events => Events;
+
+    IQueryable<Booking> IAppDbContext.Bookings => Bookings;
 
     public void Add(Event @event)
     {
