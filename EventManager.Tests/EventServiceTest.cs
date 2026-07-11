@@ -123,7 +123,7 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
 
         // Then
         var ex = Assert.Throws<EventNotFoundException>(() => fixture.EventService.GetEvent(requestedId));
-        Assert.Equal(requestedId, ex.EventId);
+        Assert.Equal(requestedId, ex.ObjectKey);
     }
 
     /// <summary>
@@ -175,7 +175,7 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
 
         // Then
         var ex = Assert.Throws<EventNotFoundException>(() => fixture.EventService.UpdateEvent(requestedId, inputData));
-        Assert.Equal(requestedId, ex.EventId);
+        Assert.Equal(requestedId, ex.ObjectKey);
     }
 
     /// <summary>
@@ -236,7 +236,7 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
         var ex = Assert.Throws<EventNotFoundException>(() => fixture.EventService.DeleteEvent(requestedId));
         var actualCount = fixture.Events.Count();
         Assert.Equal(expectedCount, actualCount);
-        Assert.Equal(requestedId, ex.EventId);
+        Assert.Equal(requestedId, ex.ObjectKey);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////
