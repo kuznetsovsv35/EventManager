@@ -24,15 +24,33 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         SaveChanges();
     }
 
+    public async Task AddBookingAsync(Booking booking)
+    {
+        await Bookings.AddAsync(booking);
+        await SaveChangesAsync();
+    }
+
     public void Delete(Event @event)
     {
         Events.Remove(@event);
         SaveChanges();
     }
 
+    public async Task DeleteBookingAsync(Booking booking)
+    {
+        Bookings.Remove(booking);
+        await SaveChangesAsync();
+    }
+
     public void Update(Event @event)
     {
         Events.Update(@event);
         SaveChanges();
+    }
+
+    public async Task UpdateBookingAsync(Booking booking)
+    {
+        Bookings.Remove(booking);
+        await SaveChangesAsync();
     }
 }
