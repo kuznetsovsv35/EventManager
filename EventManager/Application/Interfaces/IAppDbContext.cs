@@ -31,4 +31,25 @@ public interface IAppDbContext
     /// </summary>
     /// <param name="event"></param>
     void Delete(Event @event);
+
+    /// <summary>
+    /// Добавляет бронирование в хранилище.
+    /// </summary>
+    /// <param name="booking"></param>
+    /// <returns></returns>
+    Task AddBookingAsync(Booking booking);
+
+    /// <summary>
+    /// Обновляет бронирование.
+    /// </summary>
+    /// <param name="booking"></param>
+    /// <returns></returns>
+    Task UpdateBookingAsync(Booking booking);
+
+    /// <summary>
+    /// Удаляет бронь.
+    /// </summary>
+    /// <param name="booking"></param>
+    /// <returns></returns>
+    Task DeleteBookingAsync(Booking booking);
 }
