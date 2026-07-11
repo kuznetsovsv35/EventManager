@@ -6,9 +6,19 @@ public class AppBackgroundService(IServiceProvider provider) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        while(!stoppingToken.IsCancellationRequested)
+        var scope = provider.CreateAsyncScope();
+        try
         {
-            await Task.Delay(2000);
+            var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+            while(!stoppingToken.IsCancellationRequested)
+            {
+
+                await Task.Delay(2000);
+            }
+        }
+        finally
+        {
+            await scope.DisposeAsync();
         }
     }
 }
