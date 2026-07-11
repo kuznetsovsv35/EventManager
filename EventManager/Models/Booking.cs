@@ -1,3 +1,6 @@
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+
 namespace EventManager.Models;
 
 public enum BookingStatus
@@ -6,7 +9,7 @@ public enum BookingStatus
 
     Confirmed,
 
-    Rekected,
+    Rejected,
 }
 
 /// <summary>
@@ -27,12 +30,12 @@ public class Booking
     /// <summary>
     /// Статус бронирования.
     /// </summary>
-    public required BookingStatus Status { get; set; } = BookingStatus.Pending;
+    public required BookingStatus Status { get; set; }
 
     /// <summary>
     /// Момент создания брони.
     /// </summary>
-    public required DateTime CreatedAt { get; set; } = DateTime.Now;
+    public required DateTime CreatedAt { get; set; }
 
     /// <summary>
     /// Момент обработки брони сервисом.
