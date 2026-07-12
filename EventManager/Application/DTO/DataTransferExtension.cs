@@ -48,7 +48,7 @@ public static class DataTransferExtension
     }
 
     public static BookingInfo ToInfo(this Booking booking)
-        => new BookingInfo()
+        => new()
         {
             Id = booking.Id,
             EventId = booking. EventId,
