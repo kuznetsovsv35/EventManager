@@ -1,7 +1,6 @@
 using EventManager.Application.DataTransfer;
 using EventManager.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using CustomProblemDetailsFactory = EventManager.Infrastructure.ProblemDetailsFactory;
 
 namespace EventManager.Presentation.Controllers;
 

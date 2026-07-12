@@ -1,3 +1,4 @@
+using EventManager.Application.DataTransfer;
 using EventManager.Application.Interfaces;
 using EventManager.Infrastructure;
 using EventManager.Models;
@@ -7,10 +8,11 @@ namespace EventManager.Application.Services;
 
 public class BookingService(IAppDbContext dbContext) : IBookingService
 {
-    public async Task<Booking> CreateBookingAsync(Guid eventId)
+    public async Task<BookingInfo> CreateBookingAsync(Guid eventId, CancellationToken cancellation)
     {
-        if (await dbContext.Events.SingleOrDefaultAsync(x => x.Id == eventId) is Event @event)
+        if (await dbContext.Events.SingleOrDefaultAsync(x => x.Id == eventId, cancellation) is Event @event)
         {
+            cancellation.ThrowIfCancellationRequested();
             var booking = new Booking()
             {
                 Id = Guid.NewGuid(),
@@ -20,19 +22,16 @@ public class BookingService(IAppDbContext dbContext) : IBookingService
             };
 
             await dbContext.AddBookingAsync(booking);
-
-            return booking;
+            return booking.ToInfo();
         }
 
         throw new EventNotFoundException(nameof(eventId), eventId);
     }
 
-    public async Task<Booking> GetBookingByIdAsync(Guid bookingId)
+    public async Task<BookingInfo> GetBookingByIdAsync(Guid bookingId, CancellationToken cancellation)
     {
-        if (await dbContext.Bookings.SingleOrDefaultAsync(x => x.Id == bookingId) is Booking booking)
-        {
-            return booking;    
-        }
+        if (await dbContext.Bookings.SingleOrDefaultAsync(x => x.Id == bookingId, cancellation) is Booking booking)
+            return booking.ToInfo();    
         
         throw new BookingNotFoundException(nameof(bookingId), bookingId);
     }

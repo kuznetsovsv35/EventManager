@@ -1,4 +1,4 @@
-using EventManager.Models;
+using EventManager.Application.DataTransfer;
 
 namespace EventManager.Application.Interfaces;
 
@@ -10,14 +10,14 @@ public interface IBookingService
     /// <summary>
     /// Создать бронь для события.
     /// </summary>
-    /// <param name="eventId">Идентиикатор бронирования.</param>
+    /// <param name="eventId">Идентификатор бронирования.</param>
     /// <returns></returns>
-    Task<Booking> CreateBookingAsync(Guid eventId);
+    Task<BookingInfo> CreateBookingAsync(Guid eventId, CancellationToken cancellation);
 
     /// <summary>
-    /// Получить бронь по идентиикатору.
+    /// Получить бронь по идентификатору.
     /// </summary>
     /// <param name="bookingId"></param>
     /// <returns></returns>
-    Task<Booking> GetBookingByIdAsync(Guid bookingId);
+    Task<BookingInfo> GetBookingByIdAsync(Guid bookingId, CancellationToken cancellation);
 }
