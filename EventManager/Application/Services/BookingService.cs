@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EventManager.Application.Services;
 
-public class BookingService(IAppDbContext dbContext) : IBookingService
+public class BookingService(IAppDbContext dbContext, IBookingQueue bookingQueue) : IBookingService
 {
     public async Task<BookingInfo> CreateBookingAsync(Guid eventId, CancellationToken cancellation)
     {
@@ -21,7 +21,8 @@ public class BookingService(IAppDbContext dbContext) : IBookingService
                 Status = BookingStatus.Pending
             };
 
-            await dbContext.AddBookingAsync(booking);
+            await dbContext.AddBookingAsync(booking, cancellation);
+            bookingQueue.EnqueueBooking(booking);
             return booking.ToInfo();
         }
 
