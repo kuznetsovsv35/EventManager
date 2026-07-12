@@ -20,7 +20,7 @@ public class EventService(
             throw new ArgumentNullException(nameof(data));
 
         var e = data.ToEvent();
-        dbContext.Add(e);
+        dbContext.AddEvent(e);
         return e.ToOutputData();
     }
 
@@ -28,7 +28,7 @@ public class EventService(
     {
         if (dbContext.Events.FirstOrDefault(e => e.Id == id) is Event e)
         {
-            dbContext.Delete(e);
+            dbContext.DeleteEvent(e);
             return e.ToOutputData();
         }
 
@@ -87,7 +87,7 @@ public class EventService(
         if (dbContext.Events.FirstOrDefault(e => e.Id == id) is Event e)
         {
             data.Update(e);
-            dbContext.Update(e);
+            dbContext.UpdateEvent(e);
             return e.ToOutputData();
         }
         throw new EventNotFoundException(nameof(id), id);

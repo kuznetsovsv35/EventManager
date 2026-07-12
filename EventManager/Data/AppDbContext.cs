@@ -18,39 +18,39 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
     IQueryable<Booking> IAppDbContext.Bookings => Bookings;
 
-    public void Add(Event @event)
+    public void AddEvent(Event @event)
     {
         Events.Add(@event);
         SaveChanges();
     }
 
-    public async Task AddBookingAsync(Booking booking)
+    public async Task AddBookingAsync(Booking booking, CancellationToken cancellation)
     {
-        await Bookings.AddAsync(booking);
-        await SaveChangesAsync();
+        await Bookings.AddAsync(booking, cancellation);
+        await SaveChangesAsync(cancellation);
     }
 
-    public void Delete(Event @event)
+    public void DeleteEvent(Event @event)
     {
         Events.Remove(@event);
         SaveChanges();
     }
 
-    public async Task DeleteBookingAsync(Booking booking)
+    public async Task DeleteBookingAsync(Booking booking, CancellationToken cancellation)
     {
         Bookings.Remove(booking);
-        await SaveChangesAsync();
+        await SaveChangesAsync(cancellation);
     }
 
-    public void Update(Event @event)
+    public void UpdateEvent(Event @event)
     {
         Events.Update(@event);
         SaveChanges();
     }
 
-    public async Task UpdateBookingAsync(Booking booking)
+    public async Task UpdateBookingAsync(Booking booking, CancellationToken cancellation)
     {
         Bookings.Remove(booking);
-        await SaveChangesAsync();
+        await SaveChangesAsync(cancellation);
     }
 }

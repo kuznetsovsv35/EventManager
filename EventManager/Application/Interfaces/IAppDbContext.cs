@@ -18,38 +18,41 @@ public interface IAppDbContext
     /// Добавляет событие в набор данных.
     /// </summary>
     /// <param name="event"></param>
-    void Add(Event @event);
+    void AddEvent(Event @event);
     
     /// <summary>
     /// Обновляет событие.
     /// </summary>
     /// <param name="event"></param>
-    void Update(Event @event);
+    void UpdateEvent(Event @event);
     
     /// <summary>
     /// Удаляет событие из набора данных.
     /// </summary>
     /// <param name="event"></param>
-    void Delete(Event @event);
+    void DeleteEvent(Event @event);
 
     /// <summary>
     /// Добавляет бронирование в хранилище.
     /// </summary>
     /// <param name="booking"></param>
+    /// <param name="cancellation"></param>
     /// <returns></returns>
-    Task AddBookingAsync(Booking booking);
+    Task AddBookingAsync(Booking booking, CancellationToken cancellation);
 
     /// <summary>
     /// Обновляет бронирование.
     /// </summary>
     /// <param name="booking"></param>
+    /// <param name="cancellation"></param>
     /// <returns></returns>
-    Task UpdateBookingAsync(Booking booking);
+    Task UpdateBookingAsync(Booking booking, CancellationToken cancellation);
 
     /// <summary>
     /// Удаляет бронь.
     /// </summary>
     /// <param name="booking"></param>
+    /// <param name="cancellation"></param>
     /// <returns></returns>
-    Task DeleteBookingAsync(Booking booking);
+    Task DeleteBookingAsync(Booking booking, CancellationToken cancellation);
 }
