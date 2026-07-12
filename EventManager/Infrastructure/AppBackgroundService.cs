@@ -1,24 +1,71 @@
+using System.Runtime.CompilerServices;
 using EventManager.Application.Interfaces;
+using EventManager.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace EventManager.Infrastructure;
 
-public class AppBackgroundService(IServiceProvider provider) : BackgroundService
+public class AppBackgroundService(
+    IServiceScopeFactory scopeFactory, 
+    IBookingQueue bookingQueue,
+    ILogger<AppBackgroundService> logger) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var scope = provider.CreateAsyncScope();
+        logger.LogInformation("Старт фонового процесса обработки ...");
         try
         {
-            var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
             while(!stoppingToken.IsCancellationRequested)
             {
-
-                await Task.Delay(2000);
+                try
+                {
+                    await ProcessBooking(await bookingQueue.DequeueBooking(stoppingToken), stoppingToken);
+                }
+                catch (OperationCanceledException canceled ) when(canceled.CancellationToken.IsCancellationRequested)
+                {
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Ошибка обработки.");
+                    if (!stoppingToken.IsCancellationRequested)
+                        await Task.Delay(TimeSpan.FromSeconds(1), stoppingToken);
+                }
             }
         }
         finally
         {
-            await scope.DisposeAsync();
+            logger.LogInformation("Завершение фонового процесса обработки...");
+        }
+    }
+
+    async Task ProcessBooking(Booking booking, CancellationToken cancellation)
+    {
+        using var scope = scopeFactory.CreateAsyncScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+
+        var temp = await dbContext.Bookings
+            .Where(x => x.Id == booking.Id && x.Status == BookingStatus.Pending)
+            .GroupJoin(dbContext.Events, b => b.EventId, e => e.Id, (
+                booking, events) => new 
+                { 
+                    Booking = booking, 
+                    Event = events.SingleOrDefault() 
+                })
+            .SingleOrDefaultAsync(cancellation);
+
+        if (temp is { Booking: Booking destBooking })
+        {
+            await Task.Delay(TimeSpan.FromSeconds(2), cancellation);
+
+            destBooking.Status = temp is { Event: Event @event }
+                ? BookingStatus.Confirmed
+                : BookingStatus.Rejected;
+            destBooking.ProcessedAt = DateTime.Now;
+
+            await dbContext.UpdateBookingAsync(destBooking, cancellation);
+
+            logger.LogInformation("Бронь {Booking} для события {Event} обработана.", destBooking.Id, destBooking.EventId);
         }
     }
 }
