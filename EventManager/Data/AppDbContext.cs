@@ -26,7 +26,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
     public async Task AddBookingAsync(Booking booking, CancellationToken cancellation)
     {
-        await Bookings.AddAsync(booking, cancellation);
+        Bookings.Add(booking);
         await SaveChangesAsync(cancellation);
     }
 
@@ -50,7 +50,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
     public async Task UpdateBookingAsync(Booking booking, CancellationToken cancellation)
     {
-        Bookings.Remove(booking);
+        Bookings.Update(booking);
         await SaveChangesAsync(cancellation);
     }
 }

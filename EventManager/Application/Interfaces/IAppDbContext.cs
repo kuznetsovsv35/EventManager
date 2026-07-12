@@ -8,7 +8,7 @@ namespace EventManager.Application.Interfaces;
 public interface IAppDbContext
 {
     /// <summary>
-    /// Вовзращает queryable объект набора данных.
+    /// Возвращает queryable объект набора данных.
     /// </summary>
     IQueryable<Event> Events { get; }
 
