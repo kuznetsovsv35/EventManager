@@ -14,7 +14,7 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
     public async Task<ActionResult<BookingInfo>> CreateBookingAsync([FromRoute] Guid eventId, CancellationToken cancellation)
     {
         BookingInfo booking = await bookingService.CreateBookingAsync(eventId, cancellation); 
-        return Accepted(new Uri($"/bookings/{booking.Id}"), booking);
+        return Accepted(new Uri($"/bookings/{booking.Id}", UriKind.Relative), booking);
     }
 
     [HttpGet("{id:guid}")]
