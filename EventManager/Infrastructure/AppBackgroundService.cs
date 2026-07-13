@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using EventManager.Application.Interfaces;
 using EventManager.Models;
 using Microsoft.EntityFrameworkCore;
@@ -7,7 +6,7 @@ namespace EventManager.Infrastructure;
 
 public class AppBackgroundService(
     IServiceScopeFactory scopeFactory, 
-    IBookingQueue bookingQueue,
+    IAsyncQueue<Booking> bookingQueue,
     ILogger<AppBackgroundService> logger) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -19,7 +18,7 @@ public class AppBackgroundService(
             {
                 try
                 {
-                    await ProcessBooking(await bookingQueue.DequeueBooking(stoppingToken), stoppingToken);
+                    await ProcessBooking(await bookingQueue.Dequeue(stoppingToken), stoppingToken);
                 }
                 catch (OperationCanceledException canceled ) when(canceled.CancellationToken.IsCancellationRequested)
                 {
