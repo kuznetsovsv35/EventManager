@@ -16,7 +16,7 @@ public static class DependencyInjection
         services.AddScoped<IPaginator<Event>, PaginateService<Event>>();
         services.AddScoped<IEventService, EventService>();
         services.AddScoped<IBookingService, BookingService>();
-        services.AddSingleton<IBookingQueue, BookingQueue>();
+        services.AddSingleton<IAsyncQueue<Booking>, AsyncQueue<Booking>>();
         services.AddHostedService<AppBackgroundService>();
         return services;
     }
