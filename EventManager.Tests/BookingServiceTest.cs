@@ -1,6 +1,7 @@
 using EventManager.Application.DataTransfer;
 using EventManager.Models;
 using Microsoft.EntityFrameworkCore;
+using Moq;
 
 namespace EventManager.Tests;
 
@@ -69,5 +70,21 @@ public class BookingServiceTest(BookingServiceFixture fixture) : TraitAttributes
         Assert.Equal(bookingCreated.Status, bookingFound.Status);
         Assert.Null(bookingCreated.ProcessedAt);
         Assert.Null(bookingFound.ProcessedAt);
+    }
+
+    [Trait(Category, Category_Booking)]
+    [Fact]
+    public async Task TestRunStopBackgroudService_Success()
+    {
+        // Given
+        var cts = new CancellationTokenSource();
+        await fixture.BookingQueue.Clear();
+     
+        // When
+        await fixture.BackgroudService.StartAsync(cts.Token);
+        await Task.Delay(TimeSpan.FromSeconds(5));
+        await fixture.BackgroudService.StopAsync(cts.Token);
+    
+        // Then
     }
 }
