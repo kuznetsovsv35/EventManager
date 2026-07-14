@@ -40,7 +40,7 @@ public class AppBackgroundService(
 
     async Task ProcessBooking(Booking booking, CancellationToken cancellation)
     {
-        using var scope = scopeFactory.CreateAsyncScope();
+        var scope = scopeFactory.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
 
         var temp = await dbContext.Bookings
