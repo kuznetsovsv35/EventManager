@@ -4,7 +4,7 @@ using EventManager.Models;
 
 namespace EventManager.Tests;
 
-public class PaginatorFixture : TestAppDbContext
+public class PaginatorFixture() : TestAppDbContext(true)
 {
     public IPaginator<Event> Paginator { get; } = new PaginateService<Event>();
 }

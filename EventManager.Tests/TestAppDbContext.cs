@@ -15,10 +15,14 @@ public class TestAppDbContext : AppDbContext
 
     public static readonly DateTime EndAt = StartAt.AddDays(EventCount);
 
-    public TestAppDbContext() : base(
+    public TestAppDbContext(bool ensureCreated) : base(
         new DbContextOptionsBuilder<AppDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-            .Options) => Database.EnsureCreated();
+            .UseInMemoryDatabase(databaseName: nameof(TestAppDbContext))
+            .Options)
+    {
+        if (ensureCreated)
+            Database.EnsureCreated();
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
