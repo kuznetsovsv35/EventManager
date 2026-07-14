@@ -8,7 +8,7 @@ public class EventServiceFixture : TestAppDbContext
 {
     public IEventService EventService { get; }
 
-    public EventServiceFixture() : base(true)
+    public EventServiceFixture() : base(nameof(EventServiceFixture))
         => EventService = new EventService(
             this,
             new FilterService<Event>(),

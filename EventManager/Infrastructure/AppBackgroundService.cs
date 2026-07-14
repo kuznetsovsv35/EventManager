@@ -9,11 +9,14 @@ public class AppBackgroundService(
     IAsyncQueue<Booking> bookingQueue,
     ILogger<AppBackgroundService> logger) : BackgroundService
 {
+    IAppDbContext? _dbContext;
+    
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         logger.LogInformation("Старт фонового процесса обработки ...");
         try
         {
+            _dbContext = scopeFactory.CreateScope().ServiceProvider.GetRequiredService<IAppDbContext>();
             while(!stoppingToken.IsCancellationRequested)
             {
                 try
@@ -40,12 +43,12 @@ public class AppBackgroundService(
 
     async Task ProcessBooking(Booking booking, CancellationToken cancellation)
     {
-        var scope = scopeFactory.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        if (_dbContext == null)
+            return;
 
-        var temp = await dbContext.Bookings
+        var temp =  await _dbContext.Bookings
             .Where(x => x.Id == booking.Id && x.Status == BookingStatus.Pending)
-            .GroupJoin(dbContext.Events, b => b.EventId, e => e.Id, (
+            .GroupJoin(_dbContext.Events, b => b.EventId, e => e.Id, (
                 booking, events) => new 
                 { 
                     Booking = booking, 
@@ -57,12 +60,12 @@ public class AppBackgroundService(
         {
             await Task.Delay(TimeSpan.FromSeconds(2), cancellation);
 
-            destBooking.Status = temp is { Event: Event @event }
+            destBooking.Status = temp is { Event: Event }
                 ? BookingStatus.Confirmed
                 : BookingStatus.Rejected;
             destBooking.ProcessedAt = DateTime.Now;
 
-            await dbContext.UpdateBookingAsync(destBooking, cancellation);
+            await _dbContext.UpdateBookingAsync(destBooking, cancellation);
 
             logger.LogInformation("Бронь {Booking} для события {Event} обработана.", destBooking.Id, destBooking.EventId);
         }

@@ -3,19 +3,19 @@ using EventManager.Models;
 
 namespace EventManager.Tests;
 
-public class BookingServiceTest(BookingServiceFixture fixture) : TraitAttributes, IClassFixture<BookingServiceFixture>
+public class BookingServiceTest : TraitAttributes
 {
     [Trait(Category, Category_Booking)]
     [Fact]
     public async Task CreateBookingExistingEvent_Success()
     {
         // Given
+        var ctx = new BookingServiceTestContext();
         using var cts = new CancellationTokenSource();
-        var eventId = await fixture.GetRandomEventId(cts.Token);
+        var eventId = await ctx.GetRandomEventId(cts.Token);
     
         // When
-        var bookingInfo = await fixture.BookingService.CreateBookingAsync(eventId, cts.Token);
-        await fixture.BookingQueue.Clear();
+        var bookingInfo = await ctx.BookingService.CreateBookingAsync(eventId, cts.Token);
     
         // Then
         Assert.Equal(eventId, bookingInfo.EventId);
@@ -31,19 +31,20 @@ public class BookingServiceTest(BookingServiceFixture fixture) : TraitAttributes
     public async Task CreateMultiBookingsForEvent_Success(int bookingCount)
     {
         // Given
+        var ctx = new BookingServiceTestContext();
         using var cts = new CancellationTokenSource();
-        var eventId = await fixture.GetRandomEventId(cts.Token);
+        var eventId = await ctx.GetRandomEventId(cts.Token);
+        var bookingService = ctx.BookingService;
     
         // When
         var bookingIds = Enumerable
             .Range(0, bookingCount)
-            .Select(async _ => await fixture.BookingService.CreateBookingAsync(eventId, cts.Token))
-            .ToHashSet();
+            .Select(async _ => await bookingService.CreateBookingAsync(eventId, cts.Token))
+            .ToList();
         
-        await fixture.BookingQueue.Clear();
-    
         // Then
         Assert.Equal(bookingCount, bookingIds.Count);
+        Assert.Distinct(bookingIds);
     }
 
     [Trait(Category, Category_Booking)]
@@ -51,8 +52,9 @@ public class BookingServiceTest(BookingServiceFixture fixture) : TraitAttributes
     public async Task GetBookingById_Success()
     {
         // Given
+        var ctx = new BookingServiceTestContext();
         using var cts = new CancellationTokenSource();
-        var eventId = await fixture.GetRandomEventId(cts.Token);
+        var eventId = await ctx.GetRandomEventId(cts.Token);
         var booking = new Booking()
         {
             Id = Guid.NewGuid(),
@@ -63,8 +65,8 @@ public class BookingServiceTest(BookingServiceFixture fixture) : TraitAttributes
 
         // When
         var bookingCreated = booking.ToInfo();
-        await fixture.AddBookingAsync(booking, cts.Token);
-        var bookingFound = await fixture.BookingService.GetBookingByIdAsync(booking.Id, cts.Token);
+        await ctx.DbContext.AddBookingAsync(booking, cts.Token);
+        var bookingFound = await ctx.BookingService.GetBookingByIdAsync(booking.Id, cts.Token);
     
         // Then
         Assert.Equal(bookingCreated.Id, bookingFound.Id);
@@ -78,16 +80,16 @@ public class BookingServiceTest(BookingServiceFixture fixture) : TraitAttributes
 
     [Trait(Category, Category_Booking)]
     [Fact]
-    public async Task TestRunStopBackgroudService_Success()
+    public async Task TestRunStopBackgroundService_Success()
     {
         // Given
-        var cts = new CancellationTokenSource();
-        await fixture.BookingQueue.Clear();
+        var ctx = new BookingServiceTestContext();
+        using var cts = new CancellationTokenSource();
      
         // When
-        await fixture.BackgroudService.StartAsync(cts.Token);
-        await Task.Delay(TimeSpan.FromSeconds(5));
-        await fixture.BackgroudService.StopAsync(cts.Token);
+        await ctx.BackgroundService.StartAsync(cts.Token);
+        await Task.Delay(TimeSpan.FromSeconds(2));
+        await ctx.BackgroundService.StopAsync(cts.Token);
     
         // Then
     }
@@ -97,21 +99,21 @@ public class BookingServiceTest(BookingServiceFixture fixture) : TraitAttributes
     public async Task TestChangeStatusOneEvent()
     {
         // Given        
-        var cts = new CancellationTokenSource();
-        var eventId = await fixture.GetRandomEventId(cts.Token);
-        await fixture.BookingQueue.Clear();
+        var ctx = new BookingServiceTestContext();
+        using var cts = new CancellationTokenSource();
+        var eventId = await ctx.GetRandomEventId(cts.Token);
     
         // When
-        var bookingCreated = await fixture.BookingService.CreateBookingAsync(eventId, cts.Token);
-        var bookingBeforeChange = await fixture.BookingService.GetBookingByIdAsync(bookingCreated.Id, cts.Token);
+        var bookingCreated = await ctx.BookingService.CreateBookingAsync(eventId, cts.Token);
+        var bookingBeforeChange = await ctx.BookingService.GetBookingByIdAsync(bookingCreated.Id, cts.Token);
         
-        await fixture.BackgroudService.StartAsync(cts.Token);
+        await ctx.BackgroundService.StartAsync(cts.Token);
         
-        var bookingBeforeChange2 = await fixture.BookingService.GetBookingByIdAsync(bookingCreated.Id, cts.Token);
-        await Task.Delay(TimeSpan.FromSeconds(5), cts.Token);
-        var bookingAfterChange = await fixture.BookingService.GetBookingByIdAsync(bookingCreated.Id, cts.Token);
+        var bookingBeforeChange2 = await ctx.BookingService.GetBookingByIdAsync(bookingCreated.Id, cts.Token);
+        await Task.Delay(TimeSpan.FromSeconds(3), cts.Token);
+        var bookingAfterChange = await ctx.BookingService.GetBookingByIdAsync(bookingCreated.Id, cts.Token);
         
-        await fixture.BackgroudService.StopAsync(cts.Token);
+        await ctx.BackgroundService.StopAsync(cts.Token);
     
         // Then
         Assert.Equal(eventId, bookingCreated.EventId);

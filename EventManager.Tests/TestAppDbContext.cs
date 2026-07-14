@@ -1,4 +1,5 @@
 using System.Data;
+using EventManager.Application.Interfaces;
 using EventManager.Data;
 using EventManager.Models;
 using Microsoft.EntityFrameworkCore;
@@ -15,14 +16,22 @@ public class TestAppDbContext : AppDbContext
 
     public static readonly DateTime EndAt = StartAt.AddDays(EventCount);
 
-    public TestAppDbContext(bool ensureCreated) : base(
+    public string DatabaseName { get; }
+
+    public TestAppDbContext(string databaseName) : base(
         new DbContextOptionsBuilder<AppDbContext>()
-            .UseInMemoryDatabase(databaseName: nameof(TestAppDbContext))
+            .UseInMemoryDatabase(databaseName)
             .Options)
     {
-        if (ensureCreated)
-            Database.EnsureCreated();
+        DatabaseName = databaseName;
+        Database.EnsureCreated();
     }
+
+    public IAppDbContext CreateNewInstance()
+        => new AppDbContext(
+            new DbContextOptionsBuilder<AppDbContext>()
+            .UseInMemoryDatabase(DatabaseName)
+            .Options);
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -10,26 +10,30 @@ using Moq;
 
 namespace EventManager.Tests;
 
-public class BookingServiceFixture  : TestAppDbContext
+class BookingServiceTestContext
 {
-    public IBookingService BookingService { get; }
+    public IAppDbContext DbContext => _dbContext;
+
     public IAsyncQueue<Booking> BookingQueue { get; }
-    public IHostedService BackgroudService { get; }
+    
+    public IBookingService BookingService => new BookingService(_dbContext.CreateNewInstance(), BookingQueue);
+
+    public IHostedService BackgroundService { get; }
 
     public async Task<Guid> GetRandomEventId(CancellationToken cancellation)
     {
-        int eventCount = await Events.CountAsync<Event>(cancellation);
+        int eventCount = await DbContext.Events.CountAsync<Event>(cancellation);
         var eventIndex = Random.Shared.Next(eventCount);
-        return (await Events.Skip(eventIndex).FirstAsync(cancellation)).Id;        
+        return (await DbContext.Events.Skip(eventIndex).FirstAsync(cancellation)).Id;        
     }
+    readonly TestAppDbContext _dbContext =  new($"Test_{Guid.NewGuid()}");
 
-    public BookingServiceFixture() : base(true)
+    internal BookingServiceTestContext()
     {
-        BookingQueue = new AsyncQueue<Booking>();
-        BookingService = new BookingService(this, BookingQueue);
+        BookingQueue = new AsyncQueue<Booking>();        
 
         var mockServiceProvider = new Mock<IServiceProvider>();
-        mockServiceProvider.Setup(x => x.GetService(typeof(IAppDbContext))!).Returns(new TestAppDbContext(false));
+        mockServiceProvider.Setup(x => x.GetService(typeof(IAppDbContext))!).Returns(_dbContext.CreateNewInstance());
 
         var mockServiceScope = new Mock<IServiceScope>();
         mockServiceScope.Setup(x => x.ServiceProvider).Returns(mockServiceProvider.Object);
@@ -39,6 +43,6 @@ public class BookingServiceFixture  : TestAppDbContext
 
         var logFactory = LoggerFactory.Create(builder => builder.AddConsole());
 
-        BackgroudService = new AppBackgroundService(mockScopeFactory.Object, BookingQueue, logFactory.CreateLogger<AppBackgroundService>());
+        BackgroundService = new AppBackgroundService(mockScopeFactory.Object, BookingQueue, logFactory.CreateLogger<AppBackgroundService>());
     }
 }
