@@ -28,7 +28,7 @@ public class AppBackgroundService(
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        Interlocked.Exchange(ref _status, BackgroundServiceStatus.Runing);
+        Interlocked.Exchange(ref _status, BackgroundServiceStatus.Running);
         logger.LogInformation("Старт фонового процесса обработки ...");
         try
         {
