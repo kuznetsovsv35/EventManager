@@ -13,6 +13,8 @@ public interface IAppDbContext
     IQueryable<Event> Events { get; }
 
     IQueryable<Booking> Bookings { get; }
+
+    Task<int> SaveChangesAsync(CancellationToken cancellation);
     
     /// <summary>
     /// Добавляет событие в набор данных.

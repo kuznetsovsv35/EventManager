@@ -1,5 +1,7 @@
 using EventManager.Application.DataTransfer;
+using EventManager.Application.Interfaces;
 using EventManager.Models;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EventManager.Tests;
 
@@ -11,11 +13,11 @@ public class BookingServiceTest : TraitAttributes
     {
         // Given
         var ctx = new BookingServiceTestContext();
-        using var cts = new CancellationTokenSource();
-        var eventId = await ctx.GetRandomEventId(cts.Token);
+        var eventId = await ctx.GetRandomEventId(CancellationToken.None);
+        var bookingService = ctx.GetService<IBookingService>();
     
         // When
-        var bookingInfo = await ctx.BookingService.CreateBookingAsync(eventId, cts.Token);
+        var bookingInfo = await bookingService.CreateBookingAsync(eventId, CancellationToken.None);
     
         // Then
         Assert.Equal(eventId, bookingInfo.EventId);
@@ -32,14 +34,13 @@ public class BookingServiceTest : TraitAttributes
     {
         // Given
         var ctx = new BookingServiceTestContext();
-        using var cts = new CancellationTokenSource();
-        var eventId = await ctx.GetRandomEventId(cts.Token);
-        var bookingService = ctx.BookingService;
+        var eventId = await ctx.GetRandomEventId(CancellationToken.None);
+        var bookingService = ctx.GetService<IBookingService>();
     
         // When
         var bookingIds = Enumerable
             .Range(0, bookingCount)
-            .Select(async _ => await bookingService.CreateBookingAsync(eventId, cts.Token))
+            .Select(async _ => await bookingService.CreateBookingAsync(eventId, CancellationToken.None))
             .ToList();
         
         // Then
@@ -53,8 +54,8 @@ public class BookingServiceTest : TraitAttributes
     {
         // Given
         var ctx = new BookingServiceTestContext();
-        using var cts = new CancellationTokenSource();
-        var eventId = await ctx.GetRandomEventId(cts.Token);
+        var bookingService = ctx.GetService<IBookingService>();
+        var eventId = await ctx.GetRandomEventId(CancellationToken.None);
         var booking = new Booking()
         {
             Id = Guid.NewGuid(),
@@ -65,8 +66,8 @@ public class BookingServiceTest : TraitAttributes
 
         // When
         var bookingCreated = booking.ToInfo();
-        await ctx.DbContext.AddBookingAsync(booking, cts.Token);
-        var bookingFound = await ctx.BookingService.GetBookingByIdAsync(booking.Id, cts.Token);
+        await ctx.DbContext.AddBookingAsync(booking, CancellationToken.None);
+        var bookingFound = await bookingService.GetBookingByIdAsync(booking.Id, CancellationToken.None);
     
         // Then
         Assert.Equal(bookingCreated.Id, bookingFound.Id);
@@ -84,36 +85,51 @@ public class BookingServiceTest : TraitAttributes
     {
         // Given
         var ctx = new BookingServiceTestContext();
-        using var cts = new CancellationTokenSource();
      
         // When
-        await ctx.BackgroundService.StartAsync(cts.Token);
+        var statusBeforeStart = ctx.BackgroundService.Status;
+        await ctx.BackgroundService.StartAsync(CancellationToken.None);
+        var statusAfterStart = ctx.BackgroundService.Status;
+        
         await Task.Delay(TimeSpan.FromSeconds(2));
-        await ctx.BackgroundService.StopAsync(cts.Token);
-    
+        var statusRunning = ctx.BackgroundService.Status;
+
+        await ctx.BackgroundService.StopAsync(CancellationToken.None);
+        var statusAfterStop = ctx.BackgroundService.Status;
+
+        await Task.Delay(TimeSpan.FromSeconds(2));
+        var statusStopped = ctx.BackgroundService.Status;
+
         // Then
+        Assert.Equal(BackgroundServiceStatus.Stopped, statusBeforeStart);
+        Assert.NotEqual(BackgroundServiceStatus.Stopped, statusAfterStart);
+        Assert.Equal(BackgroundServiceStatus.Runing, statusRunning);
+        Assert.NotEqual(BackgroundServiceStatus.Runing, statusAfterStop);
+        Assert.Equal(BackgroundServiceStatus.Stopped, statusStopped);
     }
 
     [Trait(Category, Category_Booking)]
     [Fact]
-    public async Task TestChangeStatusOneEvent()
+    public async Task TestChangeStatusOneEvent_Success()
     {
         // Given        
         var ctx = new BookingServiceTestContext();
-        using var cts = new CancellationTokenSource();
-        var eventId = await ctx.GetRandomEventId(cts.Token);
+        var bookingService = ctx.ServiceProvider.CreateScope().ServiceProvider.GetRequiredService<IBookingService>();
+        var eventId = await ctx.GetRandomEventId(CancellationToken.None);
     
         // When
-        var bookingCreated = await ctx.BookingService.CreateBookingAsync(eventId, cts.Token);
-        var bookingBeforeChange = await ctx.BookingService.GetBookingByIdAsync(bookingCreated.Id, cts.Token);
+        var bookingCreated = await bookingService.CreateBookingAsync(eventId, CancellationToken.None);
+        var bookingBeforeChange = await bookingService.GetBookingByIdAsync(bookingCreated.Id, CancellationToken.None);
         
-        await ctx.BackgroundService.StartAsync(cts.Token);
+        await ctx.BackgroundService.StartAsync(CancellationToken.None);
         
-        var bookingBeforeChange2 = await ctx.BookingService.GetBookingByIdAsync(bookingCreated.Id, cts.Token);
-        await Task.Delay(TimeSpan.FromSeconds(3), cts.Token);
-        var bookingAfterChange = await ctx.BookingService.GetBookingByIdAsync(bookingCreated.Id, cts.Token);
+        var bookingBeforeChange2 = await bookingService.GetBookingByIdAsync(bookingCreated.Id, CancellationToken.None);
+        await Task.Delay(TimeSpan.FromSeconds(3));
         
-        await ctx.BackgroundService.StopAsync(cts.Token);
+        bookingService = ctx.ServiceProvider.CreateScope().ServiceProvider.GetRequiredService<IBookingService>();
+        var bookingAfterChange = await bookingService.GetBookingByIdAsync(bookingCreated.Id, CancellationToken.None);
+        
+        await ctx.BackgroundService.StopAsync(CancellationToken.None);
     
         // Then
         Assert.Equal(eventId, bookingCreated.EventId);
