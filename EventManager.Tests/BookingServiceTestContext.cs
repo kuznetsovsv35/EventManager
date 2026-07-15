@@ -13,17 +13,14 @@ class BookingServiceTestContext
 {
     public IServiceProvider ServiceProvider { get; }
 
-    public IAppDbContext DbContext => _dbContext;
-
-    public T GetService<T>() where T: notnull => ServiceProvider.GetRequiredService<T>();
-
-    public IAppBackgroundService BackgroundService { get; }
-
+    public IServiceScope CreateScope() => ServiceProvider.CreateScope();
     public async Task<Guid> GetRandomEventId(CancellationToken cancellation)
     {
-        int eventCount = await DbContext.Events.CountAsync<Event>(cancellation);
+        using var scope = ServiceProvider.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        int eventCount = await dbContext.Events.CountAsync<Event>(cancellation);
         var eventIndex = Random.Shared.Next(eventCount);
-        return (await DbContext.Events.Skip(eventIndex).FirstAsync(cancellation)).Id;        
+        return (await dbContext.Events.Skip(eventIndex).FirstAsync(cancellation)).Id;        
     }
     readonly TestAppDbContext _dbContext =  new($"Test_{Guid.NewGuid()}");
 
@@ -32,28 +29,15 @@ class BookingServiceTestContext
         ServiceProvider = new ServiceCollection()
             .AddSingleton<IAsyncQueue<Booking>, AsyncQueue<Booking>>()
             .AddScoped(_ => _dbContext.CreateNewInstance())
-            .AddScoped<IBookingService>(provider =>
+            .AddScoped<IBookingService, BookingService>()
+            .AddSingleton(_ => LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<AppBackgroundService>())
+            .AddSingleton(provider => 
             {
-                return new BookingService(
-                    provider.GetRequiredService<IAppDbContext>(), 
-                    provider.GetRequiredService<IAsyncQueue<Booking>>());
+                var mock = new Mock<IServiceScopeFactory>();
+                mock.Setup(x => x.CreateScope()).Returns(provider.CreateScope());
+                return mock.Object;
             })
+            .AddSingleton<IAppBackgroundService, AppBackgroundService>()
             .BuildServiceProvider();
-
-        var mockServiceProvider = new Mock<IServiceProvider>();
-        mockServiceProvider.Setup(x => x.GetService(typeof(IAppDbContext))!).Returns(_dbContext.CreateNewInstance());
-
-        var mockServiceScope = new Mock<IServiceScope>();
-        mockServiceScope.Setup(x => x.ServiceProvider).Returns(mockServiceProvider.Object);
-
-        var mockScopeFactory = new Mock<IServiceScopeFactory>();
-        mockScopeFactory.Setup(x => x.CreateScope()).Returns(mockServiceScope.Object);
-
-        var logFactory = LoggerFactory.Create(builder => builder.AddConsole());
-
-        BackgroundService = new AppBackgroundService(
-            mockScopeFactory.Object, 
-            ServiceProvider.GetRequiredService<IAsyncQueue<Booking>>(), 
-            logFactory.CreateLogger<AppBackgroundService>());
     }
 }
