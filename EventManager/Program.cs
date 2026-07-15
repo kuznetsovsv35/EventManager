@@ -34,7 +34,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-// Мапируем контролеры.
+// Контролеры.
 app.MapControllers();
 
 // Запускаем приложение.

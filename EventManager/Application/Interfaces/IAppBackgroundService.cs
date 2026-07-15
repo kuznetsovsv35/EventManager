@@ -4,7 +4,7 @@ public enum BackgroundServiceStatus
 {
     Stopped,
     Starting,
-    Runing,
+    Running,
     Stopping,
 }
 

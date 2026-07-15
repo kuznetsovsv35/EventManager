@@ -23,7 +23,7 @@ public class BookingInfo
             return CreatedAt == info.CreatedAt
                 && EventId == info.EventId
                 && Id == info.Id
-                && ProcessedAt ==info.ProcessedAt
+                && ProcessedAt == info.ProcessedAt
                 && Status == info.Status;
 
         return base.Equals(obj);

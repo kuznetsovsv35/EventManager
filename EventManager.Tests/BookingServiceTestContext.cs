@@ -20,9 +20,9 @@ class BookingServiceTestContext
         var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
         int eventCount = await dbContext.Events.CountAsync<Event>(cancellation);
         var eventIndex = Random.Shared.Next(eventCount);
-        return (await dbContext.Events.Skip(eventIndex).FirstAsync(cancellation)).Id;        
+        return (await dbContext.Events.Skip(eventIndex).FirstAsync(cancellation)).Id;
     }
-    readonly TestAppDbContext _dbContext =  new($"Test_{Guid.NewGuid()}");
+    readonly TestAppDbContext _dbContext = new($"Test_{Guid.NewGuid()}");
 
     internal BookingServiceTestContext()
     {
@@ -31,7 +31,7 @@ class BookingServiceTestContext
             .AddScoped(_ => _dbContext.CreateNewInstance())
             .AddScoped<IBookingService, BookingService>()
             .AddSingleton(_ => LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<AppBackgroundService>())
-            .AddSingleton(provider => 
+            .AddSingleton(provider =>
             {
                 var mock = new Mock<IServiceScopeFactory>();
                 mock.Setup(x => x.CreateScope()).Returns(provider.CreateScope());

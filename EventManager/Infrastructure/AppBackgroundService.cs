@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 namespace EventManager.Infrastructure;
 
 public class AppBackgroundService(
-    IServiceScopeFactory scopeFactory, 
+    IServiceScopeFactory scopeFactory,
     IAsyncQueue<Booking> bookingQueue,
     ILogger<AppBackgroundService> logger) : BackgroundService, IAppBackgroundService
 {
@@ -22,7 +22,7 @@ public class AppBackgroundService(
 
     public override Task StopAsync(CancellationToken cancellation)
     {
-        Interlocked.CompareExchange(ref _status, BackgroundServiceStatus.Stopping, BackgroundServiceStatus.Runing);
+        Interlocked.CompareExchange(ref _status, BackgroundServiceStatus.Stopping, BackgroundServiceStatus.Running);
         return base.StopAsync(cancellation);
     }
 
@@ -32,13 +32,13 @@ public class AppBackgroundService(
         logger.LogInformation("Старт фонового процесса обработки ...");
         try
         {
-            while(!stoppingToken.IsCancellationRequested)
+            while (!stoppingToken.IsCancellationRequested)
             {
                 try
                 {
                     await ProcessBooking(await bookingQueue.Dequeue(stoppingToken), stoppingToken);
                 }
-                catch (OperationCanceledException canceled ) when(canceled.CancellationToken.IsCancellationRequested)
+                catch (OperationCanceledException canceled) when (canceled.CancellationToken.IsCancellationRequested)
                 {
                     break;
                 }
@@ -61,13 +61,13 @@ public class AppBackgroundService(
     {
         var dbContext = _serviceScope.ServiceProvider.GetRequiredService<IAppDbContext>();
 
-        var temp =  await dbContext.Bookings
+        var temp = await dbContext.Bookings
             .Where(x => x.Id == booking.Id && x.Status == BookingStatus.Pending)
             .GroupJoin(dbContext.Events, b => b.EventId, e => e.Id, (
-                booking, events) => new 
-                { 
-                    Booking = booking, 
-                    Event = events.SingleOrDefault() 
+                booking, events) => new
+                {
+                    Booking = booking,
+                    Event = events.SingleOrDefault()
                 })
             .SingleOrDefaultAsync(cancellation);
 

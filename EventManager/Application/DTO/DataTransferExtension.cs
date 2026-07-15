@@ -51,7 +51,7 @@ public static class DataTransferExtension
         => new()
         {
             Id = booking.Id,
-            EventId = booking. EventId,
+            EventId = booking.EventId,
             Status = booking.Status,
             CreatedAt = booking.CreatedAt,
             ProcessedAt = booking.ProcessedAt,

@@ -32,8 +32,8 @@ public class BookingService(IAppDbContext dbContext, IAsyncQueue<Booking> bookin
     public async Task<BookingInfo> GetBookingByIdAsync(Guid bookingId, CancellationToken cancellation)
     {
         if (await dbContext.Bookings.SingleOrDefaultAsync(x => x.Id == bookingId, cancellation) is Booking booking)
-            return booking.ToInfo();    
-        
+            return booking.ToInfo();
+
         throw new BookingNotFoundException(nameof(bookingId), bookingId);
     }
 }

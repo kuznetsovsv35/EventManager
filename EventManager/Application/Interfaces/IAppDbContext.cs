@@ -12,22 +12,30 @@ public interface IAppDbContext
     /// </summary>
     IQueryable<Event> Events { get; }
 
+    /// <summary>
+    /// Возвращает queryable набор данных бронирований.
+    /// </summary>
     IQueryable<Booking> Bookings { get; }
 
+    /// <summary>
+    /// Сохраняет отложенные операции с данными.
+    /// </summary>
+    /// <param name="cancellation"></param>
+    /// <returns></returns>
     Task<int> SaveChangesAsync(CancellationToken cancellation);
-    
+
     /// <summary>
     /// Добавляет событие в набор данных.
     /// </summary>
     /// <param name="event"></param>
     void AddEvent(Event @event);
-    
+
     /// <summary>
     /// Обновляет событие.
     /// </summary>
     /// <param name="event"></param>
     void UpdateEvent(Event @event);
-    
+
     /// <summary>
     /// Удаляет событие из набора данных.
     /// </summary>

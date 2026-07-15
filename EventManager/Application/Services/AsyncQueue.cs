@@ -7,7 +7,7 @@ public class AsyncQueue<T> : IAsyncQueue<T>
     readonly Queue<T> _queue = new();
     SemaphoreSlim _trigger = new(0);
     readonly SemaphoreSlim _lock = new(1, 1);
-    
+
     public async Task Clear()
     {
         await _lock.WaitAsync();
@@ -20,11 +20,11 @@ public class AsyncQueue<T> : IAsyncQueue<T>
         {
             _lock.Release();
         }
-    } 
-   
+    }
+
     public async Task<T> Dequeue(CancellationToken cancellation)
     {
-        while(true)
+        while (true)
         {
             await _lock.WaitAsync();
             try

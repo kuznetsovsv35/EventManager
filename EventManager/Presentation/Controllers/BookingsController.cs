@@ -8,12 +8,12 @@ namespace EventManager.Presentation.Controllers;
 [Route("[controller]")]
 public class BookingsController(IBookingService bookingService) : ControllerBase
 {
-    [HttpPost("/events/{eventId:guid}/book")]
+    [HttpPost("/Events/{eventId:guid}/book")]
     [ProducesResponseType<BookingInfo>(StatusCodes.Status202Accepted)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<BookingInfo>> CreateBookingAsync([FromRoute] Guid eventId, CancellationToken cancellation)
     {
-        BookingInfo booking = await bookingService.CreateBookingAsync(eventId, cancellation); 
+        BookingInfo booking = await bookingService.CreateBookingAsync(eventId, cancellation);
         return Accepted(new Uri($"/bookings/{booking.Id}", UriKind.Relative), booking);
     }
 

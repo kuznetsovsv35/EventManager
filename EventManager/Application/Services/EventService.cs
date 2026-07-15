@@ -55,7 +55,7 @@ public class EventService(
 
         if (filterParams is { Title: string title })
         {
-            string titleLowCase = title.ToLower();  
+            string titleLowCase = title.ToLower();
             f.AddCondition(e => e.Title.ToLower().Contains(titleLowCase));
         }
 

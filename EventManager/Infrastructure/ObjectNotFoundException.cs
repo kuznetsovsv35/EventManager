@@ -11,6 +11,6 @@ public abstract class ObjectNotFoundException<TKey> : ArgumentException where TK
     }
 
     protected ObjectNotFoundException(string message, string paramName, TKey key)
-        : this(message, paramName, key, null) {}
+        : this(message, paramName, key, null) { }
 
 }
