@@ -1,6 +1,6 @@
 namespace EventManager.Infrastructure;
 
-class BookingNotFoundException : ObjectNotFoundException<Guid>
+public class BookingNotFoundException : ObjectNotFoundException<Guid>
 {
     internal BookingNotFoundException(string paramName, Guid bookingId)
         : this(paramName, bookingId, null) {}
