@@ -19,11 +19,23 @@ public class Event
 
     public int AvailableSeats { get; private set; }
 
-     Event() {}
+    public bool TryReserveSeats(int count = 1)
+    {
+        if (AvailableSeats - count < 0)
+            return false;
+        
+        AvailableSeats -= count;
+        return true;
+    }
+
+    public void ReleaseSeats(int count = 1) => AvailableSeats = Math.Min(AvailableSeats, TotalSeats);
+
+    Event() {}
 
     public Event(int totalSeats) : this() 
     { 
         Id = Guid.NewGuid();
         TotalSeats = totalSeats; 
+        AvailableSeats = TotalSeats;
     }
 }

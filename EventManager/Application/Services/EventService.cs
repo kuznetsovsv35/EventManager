@@ -2,6 +2,7 @@ using EventManager.Application.DataTransfer;
 using EventManager.Application.Interfaces;
 using EventManager.Infrastructure;
 using EventManager.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace EventManager.Application.Services;
 
@@ -76,7 +77,7 @@ public class EventService(
 
     public EventOutputData GetEvent(Guid id)
     {
-        if (dbContext.Events.FirstOrDefault(e => e.Id == id) is Event e)
+        if (dbContext.Events.AsNoTracking().SingleOrDefault(e => e.Id == id) is Event e)
             return e.ToOutputData();
 
         throw new EventNotFoundException(nameof(id), id);
@@ -84,7 +85,7 @@ public class EventService(
 
     public EventOutputData UpdateEvent(Guid id, EventInputData data)
     {
-        if (dbContext.Events.FirstOrDefault(e => e.Id == id) is Event e)
+        if (dbContext.Events.SingleOrDefault(e => e.Id == id) is Event e)
         {
             data.Update(e);
             dbContext.UpdateEvent(e);

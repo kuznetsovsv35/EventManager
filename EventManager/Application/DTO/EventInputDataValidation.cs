@@ -33,7 +33,7 @@ public class EventInputDataValidationAttribute : ValidationAttribute
                         return CreateResult(context);
                     break;
                 case nameof(data.TotalSeats):
-                    if (value is int totalSeats && totalSeats < 0)
+                    if (value is int totalSeats && totalSeats <= 0)
                         return CreateResult(context);
                     break;
             }

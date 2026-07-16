@@ -38,6 +38,8 @@ public static class DataTransferExtension
             Description = e.Description,
             StartAt = e.StartAt,
             EndAt = e.EndAt,
+            TotalSeats = e.TotalSeats,
+            AvailableSeats = e.AvailableSeats,
         };
 
     public static void Check(this EventInputData data)
