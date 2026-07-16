@@ -11,7 +11,7 @@ public interface IAsyncQueue<T>
     /// </summary>
     /// <param name="obj"></param>
     /// <returns></returns>
-    Task Enqueue(T obj);
+    Task Enqueue(T obj, CancellationToken cancellation);
 
     /// <summary>
     /// Изъятие объекта из очереди, если пуста ждем. Возможная отменя ожидания.

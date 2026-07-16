@@ -22,7 +22,7 @@ public class BookingService(IAppDbContext dbContext, IAsyncQueue<Booking> bookin
             };
 
             await dbContext.AddBookingAsync(booking, cancellation);
-            await bookingQueue.Enqueue(booking);
+            await bookingQueue.Enqueue(booking, cancellation);
             return booking.ToInfo();
         }
 

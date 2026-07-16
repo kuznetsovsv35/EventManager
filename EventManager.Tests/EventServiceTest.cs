@@ -254,7 +254,6 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
         const string titleAll = "Event title";  // all event expected
         const string titleNone = "AbcDeF";      // No events
         var titleAllLowCase = titleAll.ToLower();
-        var titleNoneLowcase = titleNone.ToLower();
 
         var expectedAll = fixture.Events
             .Where(x => x.Title.ToLower().Contains(titleAllLowCase))

@@ -9,7 +9,6 @@ public class AppBackgroundService(
     IAsyncQueue<Booking> bookingQueue,
     ILogger<AppBackgroundService> logger) : BackgroundService, IAppBackgroundService
 {
-    readonly IServiceScope _serviceScope = scopeFactory.CreateScope();
     BackgroundServiceStatus _status = BackgroundServiceStatus.Stopped;
 
     public BackgroundServiceStatus Status => _status;
@@ -59,7 +58,8 @@ public class AppBackgroundService(
 
     async Task ProcessBooking(Booking booking, CancellationToken cancellation)
     {
-        var dbContext = _serviceScope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        await using var scope = scopeFactory.CreateAsyncScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
 
         var temp = await dbContext.Bookings
             .Where(x => x.Id == booking.Id && x.Status == BookingStatus.Pending)

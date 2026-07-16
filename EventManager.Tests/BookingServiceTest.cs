@@ -7,15 +7,22 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace EventManager.Tests;
 
+/// <summary>
+/// Тесты сервиса бронирования.
+/// </summary>
 public class BookingServiceTest : TraitAttributes
 {
+    /// <summary>
+    /// Создание брони для существующего события.
+    /// </summary>
+    /// <returns></returns>
     [Trait(Category, Category_Booking)]
     [Fact]
     public async Task CreateBookingExistingEvent_Success()
     {
         // Given
         var ctx = new BookingServiceTestContext();
-        using var scope = ctx.CreateScope();
+        await using var scope = ctx.CreateScope();
         var eventId = await ctx.GetRandomEventId(CancellationToken.None);
         var bookingService = scope.ServiceProvider.GetRequiredService<IBookingService>();
         var db = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
@@ -35,6 +42,11 @@ public class BookingServiceTest : TraitAttributes
         Assert.Null(booking.ProcessedAt);
     }
 
+    /// <summary>
+    /// Создание несколько броней для одного события.
+    /// </summary>
+    /// <param name="bookingCount"></param>
+    /// <returns></returns>
     [Trait(Category, Category_Booking)]
     [Theory]
     [InlineData([10])]
@@ -44,7 +56,7 @@ public class BookingServiceTest : TraitAttributes
     {
         // Given
         var ctx = new BookingServiceTestContext();
-        using var scope = ctx.CreateScope();
+        await using var scope = ctx.CreateScope();
         var eventId = await ctx.GetRandomEventId(CancellationToken.None);
         var bookingService = scope.ServiceProvider.GetRequiredService<IBookingService>();
 
@@ -60,13 +72,17 @@ public class BookingServiceTest : TraitAttributes
         Assert.Distinct(bookingIds);
     }
 
+    /// <summary>
+    /// Получение информации о брони по идентификатору.
+    /// </summary>
+    /// <returns></returns>
     [Trait(Category, Category_Booking)]
     [Fact]
     public async Task GetBookingById_Success()
     {
         // Given
         var ctx = new BookingServiceTestContext();
-        using var scope = ctx.CreateScope();
+        await using var scope = ctx.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
         var bookingService = scope.ServiceProvider.GetRequiredService<IBookingService>();
         var eventId = await ctx.GetRandomEventId(CancellationToken.None);
@@ -93,6 +109,10 @@ public class BookingServiceTest : TraitAttributes
         Assert.Null(bookingFound.ProcessedAt);
     }
 
+    /// <summary>
+    /// Тест асинхронной очереди.
+    /// </summary>
+    /// <returns></returns>
     [Fact]
     public async Task TestBookingQueue_Success()
     {
@@ -109,7 +129,7 @@ public class BookingServiceTest : TraitAttributes
 
         // When
         var queueTask = queue.Dequeue(CancellationToken.None);
-        await queue.Enqueue(queuedBooking);
+        await queue.Enqueue(queuedBooking, CancellationToken.None);
         var dequeuedBooking = await queueTask;
 
         // Then
@@ -117,6 +137,10 @@ public class BookingServiceTest : TraitAttributes
         Assert.Equal(queuedBooking, dequeuedBooking);
     }
 
+    /// <summary>
+    /// Тест запуска/останова фоновой службы.
+    /// </summary>
+    /// <returns></returns>
     [Trait(Category, Category_Booking)]
     [Fact]
     public async Task TestRunStopBackgroundService_Success()
@@ -147,13 +171,17 @@ public class BookingServiceTest : TraitAttributes
         Assert.Equal(BackgroundServiceStatus.Stopped, statusStopped);
     }
 
+    /// <summary>
+    /// Тест изменения статуса брони при обработке фоновой службой.
+    /// </summary>
+    /// <returns></returns>
     [Trait(Category, Category_Booking)]
     [Fact]
     public async Task TestChangeStatusOneEvent_Success()
     {
         // Given        
         var ctx = new BookingServiceTestContext();
-        using var scope = ctx.CreateScope();
+        await using var scope = ctx.CreateScope();
         var bookingService = scope.ServiceProvider.GetRequiredService<IBookingService>();
         var backService = ctx.ServiceProvider.GetRequiredService<IAppBackgroundService>();
         var eventId = await ctx.GetRandomEventId(CancellationToken.None);
@@ -169,7 +197,7 @@ public class BookingServiceTest : TraitAttributes
         await Task.Delay(TimeSpan.FromSeconds(3));
 
         BookingInfo? bookingAfterChange;
-        using (IServiceScope scope2 = ctx.CreateScope())
+        await using (var scope2 = ctx.CreateScope())
         {
             bookingAfterChange = await scope2.ServiceProvider
                 .GetRequiredService<IBookingService>()
@@ -195,13 +223,17 @@ public class BookingServiceTest : TraitAttributes
         Assert.NotNull(bookingAfterChange.ProcessedAt);
     }
 
+    /// <summary>
+    /// Тест неудачной попытки создать бронь для несуществующего события.
+    /// </summary>
+    /// <returns></returns>
     [Trait(Category, Category_Booking)]
     [Fact]
     public async Task CreateBookingNotExistEvent_Fail()
     {
         // Given
         var ctx = new BookingServiceTestContext();
-        using var scope = ctx.CreateScope();
+        await using var scope = ctx.CreateScope();
         var bookingService = scope.ServiceProvider.GetRequiredService<IBookingService>();
         var eventId = Guid.NewGuid();
 
@@ -209,13 +241,17 @@ public class BookingServiceTest : TraitAttributes
         await Assert.ThrowsAsync<EventNotFoundException>(() => bookingService.CreateBookingAsync(eventId, CancellationToken.None));
     }
 
+    /// <summary>
+    /// Тест неудачной попытки создать бронь для удаленного события.
+    /// </summary>
+    /// <returns></returns>
     [Trait(Category, Category_Booking)]
     [Fact]
     public async Task CreateBookingForDeletedEvent_Fail()
     {
         // Given
         var ctx = new BookingServiceTestContext();
-        using var scope = ctx.CreateScope();
+        await using var scope = ctx.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
         var bookingService = scope.ServiceProvider.GetRequiredService<IBookingService>();
         var eventId = await ctx.GetRandomEventId(CancellationToken.None);
@@ -231,13 +267,17 @@ public class BookingServiceTest : TraitAttributes
         await Assert.ThrowsAsync<EventNotFoundException>(() => bookingService.CreateBookingAsync(eventId, CancellationToken.None));
     }
 
+    /// <summary>
+    /// Тест неудачной попытки получить инфо о несуществующей брони.
+    /// </summary>
+    /// <returns></returns>
     [Trait(Category, Category_Booking)]
     [Fact]
     public async Task GetBookingById_Fail()
     {
         // Given
         var ctx = new BookingServiceTestContext();
-        using var scope = ctx.CreateScope();
+        await using var scope = ctx.CreateScope();
         var bookingService = scope.ServiceProvider.GetRequiredService<IBookingService>();
         var bookingId = Guid.NewGuid();
 

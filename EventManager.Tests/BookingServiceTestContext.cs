@@ -9,14 +9,17 @@ using Moq;
 
 namespace EventManager.Tests;
 
+/// <summary>
+/// Контекст метода теста.
+/// </summary>
 class BookingServiceTestContext
 {
     public IServiceProvider ServiceProvider { get; }
 
-    public IServiceScope CreateScope() => ServiceProvider.CreateScope();
+    public AsyncServiceScope CreateScope() => ServiceProvider.CreateAsyncScope();
     public async Task<Guid> GetRandomEventId(CancellationToken cancellation)
     {
-        using var scope = ServiceProvider.CreateScope();
+        await using var scope = ServiceProvider.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
         int eventCount = await dbContext.Events.CountAsync<Event>(cancellation);
         var eventIndex = Random.Shared.Next(eventCount);

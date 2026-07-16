@@ -26,7 +26,7 @@ public class AsyncQueue<T> : IAsyncQueue<T>
     {
         while (true)
         {
-            await _lock.WaitAsync();
+            await _lock.WaitAsync(cancellation);
             try
             {
                 if (_queue.TryDequeue(out T? obj) && obj != null)
@@ -41,9 +41,9 @@ public class AsyncQueue<T> : IAsyncQueue<T>
         }
     }
 
-    public async Task Enqueue(T obj)
+    public async Task Enqueue(T obj, CancellationToken cancellation)
     {
-        await _lock.WaitAsync();
+        await _lock.WaitAsync(cancellation);
         try
         {
             _queue.Enqueue(obj);

@@ -10,7 +10,7 @@ public interface IBookingService
     /// <summary>
     /// Создать бронь для события.
     /// </summary>
-    /// <param name="eventId">Идентификатор бронирования.</param>
+    /// <param name="eventId">Идентификатор события.</param>
     /// <returns></returns>
     Task<BookingInfo> CreateBookingAsync(Guid eventId, CancellationToken cancellation);
 
