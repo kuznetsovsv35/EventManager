@@ -26,18 +26,17 @@ public class AsyncQueue<T> : IAsyncQueue<T>
     {
         while (true)
         {
+            await _trigger.WaitAsync(cancellation);
             await _lock.WaitAsync(cancellation);
             try
             {
-                if (_queue.TryDequeue(out T? obj) && obj != null)
+                if (_queue.TryDequeue(out T? obj) && obj is not null)
                     return obj;
             }
             finally
             {
                 _lock.Release();
             }
-
-            await _trigger.WaitAsync(cancellation);
         }
     }
 
@@ -47,11 +46,12 @@ public class AsyncQueue<T> : IAsyncQueue<T>
         try
         {
             _queue.Enqueue(obj);
-            _trigger.Release();
         }
         finally
         {
             _lock.Release();
         }
+        
+        _trigger.Release();
     }
 }
