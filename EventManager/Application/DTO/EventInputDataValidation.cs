@@ -32,6 +32,10 @@ public class EventInputDataValidationAttribute : ValidationAttribute
                     if (value is DateTime endAt && endAt <= data.StartAt)
                         return CreateResult(context);
                     break;
+                case nameof(data.TotalSeats):
+                    if (value is int totalSeats && totalSeats < 0)
+                        return CreateResult(context);
+                    break;
             }
 
             return ValidationResult.Success;

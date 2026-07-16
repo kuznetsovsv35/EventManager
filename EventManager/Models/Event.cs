@@ -5,7 +5,7 @@ namespace EventManager.Models;
 /// </summary>
 public class Event
 {
-    public required Guid Id { get; set; }
+    public Guid Id { get; private set; }
 
     public required string Title { get; set; }
 
@@ -14,4 +14,16 @@ public class Event
     public required DateTime StartAt { get; set; }
 
     public required DateTime EndAt { get; set; }
+
+    public int TotalSeats { get; private set; }
+
+    public int AvailableSeats { get; private set; }
+
+     Event() {}
+
+    public Event(int totalSeats) : this() 
+    { 
+        Id = Guid.NewGuid();
+        TotalSeats = totalSeats; 
+    }
 }

@@ -17,6 +17,9 @@ public class EventInputData
     [EventInputDataValidation("Момент окончания события не может быть раньше момента начала.")]
     public DateTime EndAt { get; set; }
 
+    [EventInputDataValidation("Общее число мест должно быть неотрицательным числом")]
+    public int TotalSeats { get; set; }
+
     public override bool Equals(object? obj)
     {
         if (ReferenceEquals(this, obj))
@@ -26,7 +29,8 @@ public class EventInputData
             return Title == inputData.Title
                 && StartAt == inputData.StartAt
                 && EndAt == inputData.EndAt
-                && Description == inputData.Description;
+                && Description == inputData.Description
+                && TotalSeats == inputData.TotalSeats;
 
         return base.Equals(obj);
     }

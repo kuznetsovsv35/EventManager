@@ -38,9 +38,8 @@ public class TestAppDbContext : AppDbContext
         base.OnModelCreating(modelBuilder);
         modelBuilder.Entity<Event>().HasData(
             [.. Enumerable.Range(1, EventCount)
-            .Select(i => new Event()
+            .Select(i => new Event(0)
             {
-                Id = Guid.NewGuid(),
                 Title = $"Event Title {i}",
                 StartAt = StartAt.AddDays(i - 1),
                 EndAt = StartAt.AddDays(i - 1).AddMinutes(EventDuration),
