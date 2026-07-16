@@ -1,15 +1,12 @@
+using EventManager.Models;
+
 namespace EventManager.Infrastructure;
 
-public class EventNotFoundException : ArgumentException
+public class EventNotFoundException : ObjectNotFoundException<Guid>
 {
-    public Guid EventId { get; }
-    
-    public EventNotFoundException(string paramName, Guid eventId)
-        : this(paramName, eventId, null) {}
+    internal EventNotFoundException(string paramName, Guid eventId)
+        : this(paramName, eventId, null) { }
 
-    public EventNotFoundException(string paramName, Guid eventId, Exception? innerException)
-        : base("Событие не найден", paramName, innerException)
-    {
-        EventId = eventId;
-    }
+    internal EventNotFoundException(string paramName, Guid eventId, Exception? innerException)
+        : base("Событие не найдено", paramName, eventId, innerException) { }
 }

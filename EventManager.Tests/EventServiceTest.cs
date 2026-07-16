@@ -42,7 +42,7 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
     }
 
     /// <summary>
-    /// Попытка создать событие по нулвой ссцлке на входне данные.
+    /// Попытка создать событие по нулевой ссылке на входные данные.
     /// </summary>
     [Trait(Category, Category_Service)]
     [Fact]
@@ -52,7 +52,7 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
     }
 
     /// <summary>
-    /// Набор некоррктных данных для теста попытки создать/обновить.
+    /// Набор некорректных данных для теста попытки создать/обновить.
     /// </summary>
     public static readonly IEnumerable<object?[]> InvalidEventInputData = [
         [new EventInputData()], // Пустой заголовок, равные моменты начала и окончания события.
@@ -60,7 +60,7 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
         [new EventInputData(){Title = "Title", EndAt = new DateTime(2026, 1, 14), StartAt = new DateTime(2026, 1, 15)}]
     ];
     /// <summary>
-    /// Тест неудачных попыток создать/обновить некоректными данными.
+    /// Тест неудачных попыток создать/обновить некорректными данными.
     /// </summary>
     /// <param name="inputData"></param>
     [Trait(Category, Category_Service)]
@@ -91,7 +91,7 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
     }
 
     /// <summary>
-    /// Получть событие с существующим ID.
+    /// Получить событие с существующим ID.
     /// </summary>
     [Trait(Category, Category_Service)]
     [Fact]
@@ -110,7 +110,7 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
     }
 
     /// <summary>
-    /// Тест неудачнай попытки получить событие по несуществуюшему ID.
+    /// Тест неудачной попытки получить событие по несуществующему ID.
     /// </summary>
     [Trait(Category, Category_Service)]
     [Fact]
@@ -123,11 +123,11 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
 
         // Then
         var ex = Assert.Throws<EventNotFoundException>(() => fixture.EventService.GetEvent(requestedId));
-        Assert.Equal(requestedId, ex.EventId);
+        Assert.Equal(requestedId, ex.ObjectKey);
     }
 
     /// <summary>
-    /// Тест успошнго обновление события.
+    /// Тест успешного обновление события.
     /// </summary>
     [Trait(Category, Category_Service)]
     [Fact]
@@ -154,7 +154,7 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
     }
 
     /// <summary>
-    /// Тест неудачноо обновление обытия по несуществующему ID.
+    /// Тест неудачного обновление события по несуществующему ID.
     /// </summary>
     [Trait(Category, Category_Service)]
     [Fact]
@@ -175,11 +175,11 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
 
         // Then
         var ex = Assert.Throws<EventNotFoundException>(() => fixture.EventService.UpdateEvent(requestedId, inputData));
-        Assert.Equal(requestedId, ex.EventId);
+        Assert.Equal(requestedId, ex.ObjectKey);
     }
 
     /// <summary>
-    /// Тест неудачного обновления с некоректными входными данными.
+    /// Тест неудачного обновления с некорректными входными данными.
     /// </summary>
     [Trait(Category, Category_Service)]
     [Theory]
@@ -236,7 +236,7 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
         var ex = Assert.Throws<EventNotFoundException>(() => fixture.EventService.DeleteEvent(requestedId));
         var actualCount = fixture.Events.Count();
         Assert.Equal(expectedCount, actualCount);
-        Assert.Equal(requestedId, ex.EventId);
+        Assert.Equal(requestedId, ex.ObjectKey);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////
@@ -254,7 +254,6 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
         const string titleAll = "Event title";  // all event expected
         const string titleNone = "AbcDeF";      // No events
         var titleAllLowCase = titleAll.ToLower();
-        var titleNoneLowcase = titleNone.ToLower();
 
         var expectedAll = fixture.Events
             .Where(x => x.Title.ToLower().Contains(titleAllLowCase))
@@ -312,7 +311,7 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
         ];
 
     /// <summary>
-    /// Тест фильтрации по нвчалу события.
+    /// Тест фильтрации по началу события.
     /// </summary>
     /// <param name="startAt"></param>
     [Trait(Category, Category_Filters)]
@@ -335,7 +334,7 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
     }
 
     /// <summary>
-    /// Тестовы набор дат для фильтров окончания.
+    /// Тестовый набор дат для фильтров окончания.
     /// </summary>
     public static readonly IEnumerable<object[]> EndDates =
         [
@@ -370,7 +369,7 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
     }
 
     /// <summary>
-    /// Тестовый набор данных для тетовв комбинированных фильтров.
+    /// Тестовый набор данных для тестов комбинированных фильтров.
     /// </summary>
     public static readonly IEnumerable<object[]> Combined =
         [

@@ -107,7 +107,7 @@ public class FilterEventTest(FilterEventFixture fixture) : TraitAttributes, ICla
     [MemberData(nameof(Titles))]
     public void IterationFilterByTitle_Success(string title)
     {
-        // Givent
+        // Given
         var titleLowCase = title.ToLower();
         Expression<Func<Event, bool>> expression = x => x.Title.ToLower().Contains(titleLowCase);
         var expected = fixture.Events.Where(expression).ToList();

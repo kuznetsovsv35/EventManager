@@ -4,7 +4,7 @@ using EventManager.Models;
 
 namespace EventManager.Tests;
 
-public class FilterEventFixture : TestAppDbContext
+public class FilterEventFixture() : TestAppDbContext(nameof(FilterEventFixture))
 {
     public IFilter<Event> FilterService { get; } = new FilterService<Event>();
 }

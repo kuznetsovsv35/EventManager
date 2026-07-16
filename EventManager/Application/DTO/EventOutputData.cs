@@ -19,5 +19,5 @@ public class EventOutputData : EventInputData
         return base.Equals(obj);
     }
 
-    public override int GetHashCode() => HashCode.Combine(Id);
+    public override int GetHashCode() => Id.GetHashCode();
 }

@@ -19,7 +19,7 @@ public static class DependencyInjection
     {
         services.AddDbContext<AppDbContext>(options =>
         {
-            options.UseInMemoryDatabase("EventDb");
+            options.UseInMemoryDatabase($"{nameof(EventManager)}.db");
         });
 
         services.AddScoped<IAppDbContext>(provider => provider.GetRequiredService<AppDbContext>());
