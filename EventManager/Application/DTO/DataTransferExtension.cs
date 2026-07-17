@@ -26,6 +26,7 @@ public static class DataTransferExtension
         e.Description = data.Description;
         e.StartAt = data.StartAt;
         e.EndAt = data.EndAt;
+        e.TotalSeats = Math.Min(e.AvailableSeats, data.TotalSeats);
 
         return e;
     }

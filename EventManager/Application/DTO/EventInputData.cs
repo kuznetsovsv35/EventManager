@@ -17,7 +17,7 @@ public class EventInputData
     [EventInputDataValidation("Момент окончания события не может быть раньше момента начала.")]
     public DateTime EndAt { get; set; }
 
-    [EventInputDataValidation("Общее число мест должно быть неотрицательным числом")]
+    [EventInputDataValidation("Общее число мест должно быть положительным числом")]
     public int TotalSeats { get; set; }
 
     public override bool Equals(object? obj)

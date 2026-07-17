@@ -27,30 +27,27 @@ public class EventService(
 
     public EventOutputData DeleteEvent(Guid id)
     {
-        if (dbContext.Events.FirstOrDefault(e => e.Id == id) is Event e)
-        {
-            dbContext.DeleteEvent(e);
+        if (dbContext.DeleteEvent(id) is Event e)
             return e.ToOutputData();
-        }
 
         throw new EventNotFoundException(nameof(id), id);
     }
 
     public IEnumerable<EventOutputData> GetAllEvents()
-        => dbContext.Events.AsEnumerable().Select(x => x.ToOutputData());
+        => dbContext.GetAllEvents().Select(x => x.ToOutputData());
 
     public PaginateResult<EventOutputData> GetEvents(FilterParams? filterParams, PageParams pageParams)
         => paginator.Paginate(
-            FilterEvents(dbContext.Events, filterParams),
+            FilterEvents(filterParams),
             pageParams.CurrentPage, pageParams.PageSize,
             e => e.ToOutputData());
 
     public IEnumerable<EventOutputData> GetEvents(FilterParams? filterParams)
-        => FilterEvents(dbContext.Events, filterParams)
+        => FilterEvents(filterParams)
             .AsEnumerable()
             .Select(e => e.ToOutputData());
 
-    IQueryable<Event> FilterEvents(IQueryable<Event> events, FilterParams? filterParams)
+    IQueryable<Event> FilterEvents(FilterParams? filterParams)
     {
         var f = filter.Reset();
 
@@ -72,12 +69,12 @@ public class EventService(
             f.AddCondition(e => e.EndAt < toDate);
         }
 
-        return f.ApplyFilter(events);
+        return dbContext.GetEvents(f.Expression);
     }
 
     public EventOutputData GetEvent(Guid id)
     {
-        if (dbContext.Events.AsNoTracking().SingleOrDefault(e => e.Id == id) is Event e)
+        if (dbContext.GetEvent(id) is Event e)
             return e.ToOutputData();
 
         throw new EventNotFoundException(nameof(id), id);
@@ -85,7 +82,7 @@ public class EventService(
 
     public EventOutputData UpdateEvent(Guid id, EventInputData data)
     {
-        if (dbContext.Events.SingleOrDefault(e => e.Id == id) is Event e)
+        if (dbContext.GetEvents(e => e.Id == id).FirstOrDefault() is Event e)
         {
             data.Update(e);
             dbContext.UpdateEvent(e);

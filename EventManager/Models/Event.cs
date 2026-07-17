@@ -15,7 +15,7 @@ public class Event
 
     public required DateTime EndAt { get; set; }
 
-    public int TotalSeats { get; private set; }
+    public int TotalSeats { get; internal set; }
 
     public int AvailableSeats { get; private set; }
 

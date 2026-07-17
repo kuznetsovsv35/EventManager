@@ -10,7 +10,7 @@ public class BookingService(IAppDbContext dbContext, IAsyncQueue<Booking> bookin
 {
     public async Task<BookingInfo> CreateBookingAsync(Guid eventId, CancellationToken cancellation)
     {
-        if (await dbContext.Events.SingleOrDefaultAsync(x => x.Id == eventId, cancellation) is Event @event)
+        if (await dbContext.GetEventAsync(eventId, cancellation) is Event @event)
         {
             cancellation.ThrowIfCancellationRequested();
             var booking = new Booking()
@@ -31,7 +31,7 @@ public class BookingService(IAppDbContext dbContext, IAsyncQueue<Booking> bookin
 
     public async Task<BookingInfo> GetBookingByIdAsync(Guid bookingId, CancellationToken cancellation)
     {
-        if (await dbContext.Bookings.SingleOrDefaultAsync(x => x.Id == bookingId, cancellation) is Booking booking)
+        if (await dbContext.GetBookingAsync(bookingId, cancellation) is Booking booking)
             return booking.ToInfo();
 
         throw new BookingNotFoundException(nameof(bookingId), bookingId);

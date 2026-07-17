@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using EventManager.Models;
 
 namespace EventManager.Application.Interfaces;
@@ -8,39 +9,56 @@ namespace EventManager.Application.Interfaces;
 public interface IAppDbContext
 {
     /// <summary>
-    /// Возвращает queryable объект набора данных.
+    /// Возвращает довальную копию всех событий.
     /// </summary>
-    IQueryable<Event> Events { get; }
-
-    /// <summary>
-    /// Возвращает queryable набор данных бронирований.
-    /// </summary>
-    IQueryable<Booking> Bookings { get; }
-
-    /// <summary>
-    /// Сохраняет отложенные операции с данными.
-    /// </summary>
-    /// <param name="cancellation"></param>
     /// <returns></returns>
-    Task<int> SaveChangesAsync(CancellationToken cancellation);
+    IEnumerable<Event> GetAllEvents();
+
+    /// <summary>
+    /// Возвращает запрос отфильтрованного набора.
+    /// </summary>
+    /// <param name="filter"></param>
+    /// <returns></returns>
+    IQueryable<Event> GetEvents(Expression<Func<Event, bool>>? filter = null);
+
+    Event? GetEvent(Guid id);
+    Task<Event?> GetEventAsync(Guid id, CancellationToken cancellation);
 
     /// <summary>
     /// Добавляет событие в набор данных.
     /// </summary>
     /// <param name="event"></param>
     void AddEvent(Event @event);
+    Task AddEventAsync(Event @event, CancellationToken cancellation);
 
     /// <summary>
     /// Обновляет событие.
     /// </summary>
     /// <param name="event"></param>
-    void UpdateEvent(Event @event);
+    bool UpdateEvent(Event @event);
+    Task<bool> UpdateEventAsync(Event @event, CancellationToken cancellation);
 
     /// <summary>
     /// Удаляет событие из набора данных.
     /// </summary>
-    /// <param name="event"></param>
-    void DeleteEvent(Event @event);
+    /// <param name="id"></param>
+    Event? DeleteEvent(Guid id);
+    Task<Event?> DeleteEventAsync(Guid id, CancellationToken cancellation);
+
+    /// <summary>
+    /// Возвращает объект запроса отфильтрованного набора броней.
+    /// </summary>
+    /// <param name="filter"></param>
+    /// <returns></returns>
+    IQueryable<Booking> GetBookings(Expression<Func<Booking, bool>>? filter = null);
+
+    /// <summary>
+    /// Возвращает бронь по идентификатору.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="cancellation"></param>
+    /// <returns></returns>
+    Task<Booking?> GetBookingAsync(Guid id, CancellationToken cancellation);
 
     /// <summary>
     /// Добавляет бронирование в хранилище.
@@ -56,7 +74,7 @@ public interface IAppDbContext
     /// <param name="booking"></param>
     /// <param name="cancellation"></param>
     /// <returns></returns>
-    Task UpdateBookingAsync(Booking booking, CancellationToken cancellation);
+    Task<bool> UpdateBookingAsync(Booking booking, CancellationToken cancellation);
 
     /// <summary>
     /// Удаляет бронь.
@@ -64,5 +82,5 @@ public interface IAppDbContext
     /// <param name="booking"></param>
     /// <param name="cancellation"></param>
     /// <returns></returns>
-    Task DeleteBookingAsync(Booking booking, CancellationToken cancellation);
+    Task<Booking?> DeleteBookingAsync(Guid id, CancellationToken cancellation);
 }

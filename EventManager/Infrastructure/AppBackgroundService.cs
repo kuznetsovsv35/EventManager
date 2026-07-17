@@ -61,15 +61,14 @@ public class AppBackgroundService(
         await using var scope = scopeFactory.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
 
-        var temp = await dbContext.Bookings
-            .Where(x => x.Id == booking.Id && x.Status == BookingStatus.Pending)
-            .GroupJoin(dbContext.Events, b => b.EventId, e => e.Id, (
+        var temp = await dbContext.GetBookings(x => x.Id == booking.Id && x.Status == BookingStatus.Pending)
+            .GroupJoin(dbContext.GetEvents(), b => b.EventId, e => e.Id, (
                 booking, events) => new
                 {
                     Booking = booking,
-                    Event = events.SingleOrDefault()
+                    Event = events.FirstOrDefault()
                 })
-            .SingleOrDefaultAsync(cancellation);
+            .FirstOrDefaultAsync(cancellation);
 
         if (temp is { Booking: Booking destBooking })
         {
@@ -80,7 +79,7 @@ public class AppBackgroundService(
                 : BookingStatus.Rejected;
             destBooking.ProcessedAt = DateTime.Now;
 
-            await dbContext.SaveChangesAsync(cancellation);
+            await dbContext.UpdateBookingAsync(destBooking, cancellation);
 
             logger.LogInformation("Бронь {Booking} для события {Event} обработана.", destBooking.Id, destBooking.EventId);
         }
