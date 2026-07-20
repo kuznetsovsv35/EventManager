@@ -9,12 +9,6 @@ namespace EventManager.Application.Interfaces;
 public interface IAppDbContext
 {
     /// <summary>
-    /// Возвращает довальную копию всех событий.
-    /// </summary>
-    /// <returns></returns>
-    IEnumerable<Event> GetAllEvents();
-
-    /// <summary>
     /// Возвращает запрос отфильтрованного набора.
     /// </summary>
     /// <param name="filter"></param>

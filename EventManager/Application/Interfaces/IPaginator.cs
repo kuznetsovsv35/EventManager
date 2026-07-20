@@ -13,4 +13,9 @@ public interface IPaginator<T>
     /// <param name="viewFactory">Фабрика отображения.</param>
     /// <returns></returns>
     PaginateResult<TView> Paginate<TView>(IQueryable<T> values, int page, int pageSize, Func<T, TView> viewFactory);
+    Task<PaginateResult<TView>> PaginateAsync<TView>(
+        IQueryable<T> values, 
+        int page, int pageSize, 
+        Func<T, TView> viewFactory,
+        CancellationToken cancellation);
 }

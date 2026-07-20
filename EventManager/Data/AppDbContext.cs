@@ -14,9 +14,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     #region  Events
     protected DbSet<Event> Events { get; set; }
 
-    IEnumerable<Event> IAppDbContext.GetAllEvents()
-        => Events.AsNoTracking().AsEnumerable();
-
     IQueryable<Event> IAppDbContext.GetEvents(Expression<Func<Event, bool>>? filter)
     {
         if (filter == null)

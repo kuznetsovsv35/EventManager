@@ -1,3 +1,5 @@
+using System.Security.Cryptography;
+
 namespace EventManager.Models;
 
 /// <summary>
@@ -15,7 +17,7 @@ public class Event
 
     public required DateTime EndAt { get; set; }
 
-    public int TotalSeats { get; internal set; }
+    public int TotalSeats { get; private set; }
 
     public int AvailableSeats { get; private set; }
 
@@ -28,7 +30,14 @@ public class Event
         return true;
     }
 
-    public void ReleaseSeats(int count = 1) => AvailableSeats = Math.Min(AvailableSeats, TotalSeats);
+    public void ReleaseSeats(int count = 1) => AvailableSeats = Math.Min(AvailableSeats + count, TotalSeats);
+
+    internal void UpdateTotalSeats(int totalSeats)
+    {
+        var delta = totalSeats - TotalSeats;
+        AvailableSeats += delta;
+        TotalSeats = totalSeats;
+    }
 
     Event() {}
 

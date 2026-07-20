@@ -33,8 +33,11 @@ public class EventService(
         throw new EventNotFoundException(nameof(id), id);
     }
 
-    public IEnumerable<EventOutputData> GetAllEvents()
-        => dbContext.GetAllEvents().Select(x => x.ToOutputData());
+    public IAsyncEnumerable<EventOutputData> GetAllEvents()
+        => dbContext
+            .GetEvents()
+            .Select(x => x.ToOutputData())
+            .AsAsyncEnumerable();
 
     public PaginateResult<EventOutputData> GetEvents(FilterParams? filterParams, PageParams pageParams)
         => paginator.Paginate(
@@ -42,20 +45,17 @@ public class EventService(
             pageParams.CurrentPage, pageParams.PageSize,
             e => e.ToOutputData());
 
-    public IEnumerable<EventOutputData> GetEvents(FilterParams? filterParams)
+    public IAsyncEnumerable<EventOutputData> GetEvents(FilterParams? filterParams)
         => FilterEvents(filterParams)
-            .AsEnumerable()
-            .Select(e => e.ToOutputData());
+            .Select(e => e.ToOutputData())
+            .AsAsyncEnumerable();
 
     IQueryable<Event> FilterEvents(FilterParams? filterParams)
     {
         var f = filter.Reset();
 
         if (filterParams is { Title: string title })
-        {
-            string titleLowCase = title.ToLower();
-            f.AddCondition(e => e.Title.ToLower().Contains(titleLowCase));
-        }
+            f.AddCondition(e => e.Title.Contains(title, StringComparison.OrdinalIgnoreCase));
 
         if (filterParams is { From: DateTime from })
         {

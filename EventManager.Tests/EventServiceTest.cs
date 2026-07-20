@@ -1,10 +1,13 @@
 using System.ComponentModel.DataAnnotations;
 using EventManager.Application.DataTransfer;
+using EventManager.Application.Interfaces;
 using EventManager.Infrastructure;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EventManager.Tests;
 
-public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IClassFixture<EventServiceFixture>
+public class EventServiceTest(EventManagerTestContext context) : TraitAttributes, IClassFixture<EventManagerTestContext>
 {
     ////////////////////////////////////////////////////////////////////////////////////////////
     /// Тесты управления событиями.
@@ -15,28 +18,33 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
     /// </summary>
     [Trait(Category, Category_Service)]
     [Fact]
-    public void CreateEvent_Success()
+    public async Task CreateEvent_Success()
     {
         // Given
+        using var scope = context.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
+        
         var title = "Simple event";
         var startAt = new DateTime(2026, 6, 28, 10, 0, 00);
         var endAt = new DateTime(2026, 6, 28, 10, 30, 00);
         var description = "Some event";
-        var expectedCount = fixture.Events.Count() + 1;
+        var expectedCount = await dbContext.GetEvents().CountAsync() + 1;
 
         EventInputData inData = new()
         {
             Title = title,
             StartAt = startAt,
             EndAt = endAt,
-            Description = description
+            Description = description,
+            TotalSeats = 15,
         };
 
         // When
-        var outData = fixture.EventService.CreateEvent(inData);
+        var outData = eventService.CreateEvent(inData);
 
         // Then
-        var actualCount = fixture.Events.Count();
+        var actualCount = await dbContext.GetEvents().CountAsync();
         Assert.Equal(expectedCount, actualCount);
         Assert.Equal(inData, outData);
     }
@@ -46,9 +54,16 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
     /// </summary>
     [Trait(Category, Category_Service)]
     [Fact]
-    public void CreateEvent_Null()
+    public async Task CreateEvent_Null()
     {
-        var ex = Assert.Throws<ArgumentNullException>(() => fixture.EventService.CreateEvent(null!));
+        // Given 
+        using var scope = context.CreateScope();
+        var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
+
+        // When
+
+        // Then
+        Assert.Throws<ArgumentNullException>(() => eventService.CreateEvent(null!));
     }
 
     /// <summary>
@@ -66,9 +81,17 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
     [Trait(Category, Category_Service)]
     [Theory]
     [MemberData(nameof(InvalidEventInputData))]
-    void CreateEvent_Fail(EventInputData inputData)
+    public async Task CreateEvent_Fail(EventInputData inputData)
     {
-        var ex = Assert.Throws<ValidationException>(() => fixture.EventService.CreateEvent(inputData));
+        // Given
+        using var scope = context.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
+
+        // When
+
+        // Then
+        var ex = Assert.Throws<ValidationException>(() => eventService.CreateEvent(inputData));
         Assert.NotNull(ex?.ValidationResult?.MemberNames);
         Assert.NotEmpty(ex.ValidationResult.MemberNames);
     }
@@ -78,13 +101,17 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
     /// </summary>
     [Trait(Category, Category_Service)]
     [Fact]
-    public void GetAllEvents_Success()
+    public async Task GetAllEvents_Success()
     {
         // Given
-        var expected = fixture.Events.Select(x => x.ToOutputData());
+        using var scope = context.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
+        
+        var expected = await dbContext.GetEvents().Select(x => x.ToOutputData()).ToListAsync();
 
         // When
-        var actual = fixture.EventService.GetAllEvents();
+        var actual = await eventService.GetAllEvents().ToListAsync();
 
         // Then
         Assert.Equal(expected, actual);
@@ -95,14 +122,20 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
     /// </summary>
     [Trait(Category, Category_Service)]
     [Fact]
-    public void GetEventByID_Success()
+    public async Task GetEventByID_Success()
     {
         // Given
-        var firstEvent = fixture.Events.First();
-        var requestedId = firstEvent.Id;
+        using var scope = context.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
+
+        var requestedId = await context.GetRandomEventId(CancellationToken.None);
+        var @event = (await dbContext
+            .GetEvents(x => x.Id == requestedId)
+            .SingleAsync(CancellationToken.None)).ToOutputData();
 
         // When
-        var foundEvent = fixture.EventService.GetEvent(requestedId);
+        var foundEvent = eventService.GetEvent(requestedId);
 
         // Then
         Assert.NotNull(foundEvent);
@@ -114,15 +147,18 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
     /// </summary>
     [Trait(Category, Category_Service)]
     [Fact]
-    public void GetEventByID_Fail()
+    public async Task GetEventByID_Fail()
     {
         // Given
-        var requestedId = Guid.Empty;
+        using var scope = context.CreateScope();
+        var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
+
+        var requestedId = Guid.NewGuid();
 
         // When
 
         // Then
-        var ex = Assert.Throws<EventNotFoundException>(() => fixture.EventService.GetEvent(requestedId));
+        var ex = Assert.Throws<EventNotFoundException>(() => eventService.GetEvent(requestedId));
         Assert.Equal(requestedId, ex.ObjectKey);
     }
 
@@ -131,21 +167,26 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
     /// </summary>
     [Trait(Category, Category_Service)]
     [Fact]
-    public void UpdateEvent_Success()
+    public async Task UpdateEvent_Success()
     {
         // Given
+        using var scope = context.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
+
+        var requestedId = await context.GetRandomEventId(CancellationToken.None);
+
         EventInputData inputData = new()
         {
             Title = "Title updated",
             StartAt = new DateTime(1976, 1, 15, 15, 34, 0),
             EndAt = new DateTime(1976, 1, 15, 16, 34, 0),
-            Description = "Description updated"
+            Description = "Description updated",
+            TotalSeats = 100,
         };
 
-        var requestedId = fixture.Events.Last().Id;
-
         // When
-        var outData = fixture.EventService.UpdateEvent(requestedId, inputData);
+        var outData = eventService.UpdateEvent(requestedId, inputData);
 
         // Then
         Assert.NotNull(outData);
@@ -161,6 +202,9 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
     public void UpdateEventByID_Fail()
     {
         // Given
+        using var scope = context.CreateScope();
+        var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
+
         EventInputData inputData = new()
         {
             Title = "Title updated",
@@ -169,12 +213,12 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
             Description = "Description updated"
         };
 
-        var requestedId = Guid.Empty;
+        var requestedId = Guid.NewGuid();
 
         // When
 
         // Then
-        var ex = Assert.Throws<EventNotFoundException>(() => fixture.EventService.UpdateEvent(requestedId, inputData));
+        var ex = Assert.Throws<EventNotFoundException>(() => eventService.UpdateEvent(requestedId, inputData));
         Assert.Equal(requestedId, ex.ObjectKey);
     }
 
@@ -184,15 +228,19 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
     [Trait(Category, Category_Service)]
     [Theory]
     [MemberData(nameof(InvalidEventInputData))]
-    public void UpdateEven_Fail(EventInputData inputData)
+    public async Task UpdateEven_Fail(EventInputData inputData)
     {
         // Given
-        var requestedId = fixture.Events.Last().Id;
+        using var scope = context.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
+
+        var requestedId = await context.GetRandomEventId(CancellationToken.None);
 
         // When
 
         // Then
-        Assert.Throws<ValidationException>(() => fixture.EventService.UpdateEvent(requestedId, inputData));
+        Assert.Throws<ValidationException>(() => eventService.UpdateEvent(requestedId, inputData));
     }
 
     /// <summary>
@@ -200,21 +248,22 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
     /// </summary>
     [Trait(Category, Category_Service)]
     [Fact]
-    public void DeleteEvent_Success()
+    public async Task DeleteEvent_Success()
     {
         // Given
-        var requestedEvent = fixture.Events.First();
-        var requestedId = requestedEvent.Id;
+        using var scope = context.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
+
+        var requestedId = await context.GetRandomEventId(CancellationToken.None);
+        var requestedEvent = await dbContext.GetEvents(x => x.Id == requestedId).SingleAsync(CancellationToken.None);
         var expectedEvent = requestedEvent.ToOutputData();
-        var expectedCount = fixture.Events.Count() - 1;
 
         // When
-        var deletedEvent = fixture.EventService.DeleteEvent(requestedId);
+        var deletedEvent = eventService.DeleteEvent(requestedId);
 
         // Then
-        var actualCount = fixture.Events.Count();
-        var foundEvent = fixture.Events.FirstOrDefault(e => e.Id == requestedId);
-        Assert.Equal(expectedCount, actualCount);
+        var foundEvent = await dbContext.GetEvents(e => e.Id == requestedId).SingleOrDefaultAsync(CancellationToken.None);
         Assert.Equal(expectedEvent, deletedEvent);
         Assert.Null(foundEvent);
     }
@@ -227,15 +276,16 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
     public void DeleteEventByID_Fail()
     {
         // Given
-        var requestedId = Guid.Empty;
-        var expectedCount = fixture.Events.Count();
+        using var scope = context.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
+
+        var requestedId = Guid.NewGuid();
 
         // When
 
         // Then
-        var ex = Assert.Throws<EventNotFoundException>(() => fixture.EventService.DeleteEvent(requestedId));
-        var actualCount = fixture.Events.Count();
-        Assert.Equal(expectedCount, actualCount);
+        var ex = Assert.Throws<EventNotFoundException>(() => eventService.DeleteEvent(requestedId));
         Assert.Equal(requestedId, ex.ObjectKey);
     }
 
@@ -248,21 +298,28 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
     /// </summary>
     [Trait(Category, Category_Filters)]
     [Fact]
-    public void SimpleFilterByTitle_Success()
+    public async Task SimpleFilterByTitle_Success()
     {
         // Given
+        using var scope = context.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
+
         const string titleAll = "Event title";  // all event expected
         const string titleNone = "AbcDeF";      // No events
-        var titleAllLowCase = titleAll.ToLower();
 
-        var expectedAll = fixture.Events
-            .Where(x => x.Title.ToLower().Contains(titleAllLowCase))
+        var expectedAll = await dbContext
+            .GetEvents(x => x.Title.Contains(titleAll, StringComparison.OrdinalIgnoreCase))
             .Select(x => x.ToOutputData())
-            .ToList();
+            .ToListAsync();
 
         // When
-        var actualAll = fixture.EventService.GetEvents(new() { Title = titleAll }).ToList();
-        var actualNone = fixture.EventService.GetEvents(new() { Title = titleNone }).ToList();
+        var actualAll = await eventService
+            .GetEvents(new() { Title = titleAll })
+            .ToListAsync();
+        var actualNone = await eventService
+            .GetEvents(new() { Title = titleNone })
+            .ToListAsync();
 
         // Then
         Assert.Equal(expectedAll, actualAll);
@@ -281,15 +338,21 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
     [Trait(Category, Category_Filters)]
     [Theory]
     [MemberData(nameof(Titles))]
-    public void IterationFilterByTitle_Success(string title)
+    public async Task IterationFilterByTitle_Success(string title)
     {
-        var titleLowCase = title.ToLower();
-        var expected = fixture.Events
-            .Where(x => x.Title.ToLower().Contains(titleLowCase))
-            .Select(x => x.ToOutputData())
-            .ToList();
+        // Given
+        using var scope = context.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
-        var actual = fixture.EventService.GetEvents(new() { Title = title }).ToList();
+        var expected = await dbContext
+            .GetEvents(x => x.Title.Contains(title, StringComparison.OrdinalIgnoreCase))
+            .Select(x => x.ToOutputData())
+            .ToListAsync();
+
+        var actual = await eventService
+            .GetEvents(new() { Title = title })
+            .ToListAsync();
 
         Assert.All(actual, item => Assert.Contains(title, item.Title, StringComparison.OrdinalIgnoreCase));
         Assert.Equal(expected, actual);
@@ -317,16 +380,22 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
     [Trait(Category, Category_Filters)]
     [Theory]
     [MemberData(nameof(StartDates))]
-    public void FilterByStartDate_Success(DateTime startAt)
+    public async Task FilterByStartDate_Success(DateTime startAt)
     {
         // Given
-        var expected = fixture.Events
-            .Where(x => x.StartAt >= startAt)
+        using var scope = context.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
+
+        var expected = await dbContext
+            .GetEvents(x => x.StartAt >= startAt)
             .Select(x => x.ToOutputData())
-            .ToList();
+            .ToListAsync();
 
         // When
-        var actual = fixture.EventService.GetEvents(new() { From = startAt }).ToList();
+        var actual = await eventService
+            .GetEvents(new() { From = startAt })
+            .ToListAsync();
 
         // Then
         Assert.Equal(expected, actual);
@@ -354,14 +423,23 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
     [Trait(Category, Category_Filters)]
     [Theory]
     [MemberData(nameof(EndDates))]
-    public void FilterByEndDate_Success(DateTime endAt)
+    public async Task FilterByEndDate_Success(DateTime endAt)
     {
+        // Given
+        using var scope = context.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
+        
         var endDate = endAt.AddDays(1).Date;
-        // Given        
-        var expected = fixture.Events.Where(x => x.EndAt < endDate).Select(x => x.ToOutputData()).ToList();
+        var expected = await dbContext
+            .GetEvents(x => x.EndAt < endDate)
+            .Select(x => x.ToOutputData())
+            .ToListAsync();
 
         // When
-        var actual = fixture.EventService.GetEvents(new() { To = endAt }).ToList();
+        var actual = await eventService
+            .GetEvents(new() { To = endAt })
+            .ToListAsync();
 
         // Then
         Assert.Equal(expected, actual);
@@ -391,21 +469,26 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
     [Trait(Category, Category_Filters)]
     [Theory]
     [MemberData(nameof(Combined))]
-    public void CombinedFilter_Success(string? title, DateTime? startAt, DateTime? endAt)
+    public async Task CombinedFilter_Success(string? title, DateTime? startAt, DateTime? endAt)
     {
         // Given
-        var endDate = endAt?.AddDays(1).Date;
-        var titleLowCase = title?.ToLower();
+        using var scope = context.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
-        var expected = fixture.Events
-            .Where(x => (string.IsNullOrEmpty(titleLowCase) || x.Title.ToLower().Contains(titleLowCase))
+        var endDate = endAt?.AddDays(1).Date;
+
+        var expected = await dbContext
+            .GetEvents(x => (string.IsNullOrEmpty(title) || x.Title.ToLower().Contains(title, StringComparison.OrdinalIgnoreCase))
                 && (startAt == null || x.StartAt >= startAt.Value)
                 && (endDate == null || x.EndAt < endDate.Value))
             .Select(x => x.ToOutputData())
-            .ToList();
+            .ToListAsync();
 
         // When
-        var actual = fixture.EventService.GetEvents(new() { Title = title, From = startAt, To = endAt }).ToList();
+        var actual = await eventService
+            .GetEvents(new() { Title = title, From = startAt, To = endAt })
+            .ToListAsync();
 
         // Then
         Assert.Equal(expected, actual);
@@ -442,10 +525,16 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
     [InlineData([2, 7, 5, 7])]
     [InlineData([5, 7, 5, 2])]
     [InlineData([1, 30, 1, 30])]
-    public void PaginateResult_Success(int page, int pageSize, int expectedPageCount, int expectedPageSize)
+    public async Task PaginateResult_Success(int page, int pageSize, int expectedPageCount, int expectedPageSize)
     {
         // Given
-        var allValues = fixture.EventService.GetAllEvents().ToList();
+        using var scope = context.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
+
+        var allValues = await eventService
+            .GetAllEvents()
+            .ToListAsync();
         var expectedTotalCount = allValues.Count;
 
         var expectedValues = allValues
@@ -454,7 +543,7 @@ public class EventServiceTest(EventServiceFixture fixture) : TraitAttributes, IC
             .ToList();
 
         // When
-        var pageResult = fixture.EventService.GetEvents(null, new() { CurrentPage = page, PageSize = pageSize });
+        var pageResult = eventService.GetEvents(null, new() { CurrentPage = page, PageSize = pageSize });
 
         // Then
         Assert.Equal(expectedPageCount, pageResult.PageCount);

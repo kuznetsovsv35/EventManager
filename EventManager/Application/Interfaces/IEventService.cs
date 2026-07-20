@@ -11,7 +11,7 @@ public interface IEventService
     /// Получить все события.
     /// </summary>
     /// <returns>Список событий.</returns>
-    IEnumerable<EventOutputData> GetAllEvents();
+    IAsyncEnumerable<EventOutputData> GetAllEvents();
 
     /// <summary>
     /// Возвращает отфильтрованный набор с разбивкой по страницам.
@@ -26,7 +26,7 @@ public interface IEventService
     /// </summary>
     /// <param name="filterParams">Параметры фильтра.</param>
     /// <returns></returns>
-    IEnumerable<EventOutputData> GetEvents(FilterParams? filterParams);
+    IAsyncEnumerable<EventOutputData> GetEvents(FilterParams? filterParams);
 
     /// <summary>
     /// Получить событие по идентификатору.
