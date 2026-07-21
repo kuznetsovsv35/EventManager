@@ -2,7 +2,6 @@ using EventManager.Application.DataTransfer;
 using EventManager.Application.Interfaces;
 using EventManager.Infrastructure;
 using EventManager.Models;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace EventManager.Tests;
@@ -10,7 +9,7 @@ namespace EventManager.Tests;
 /// <summary>
 /// Тесты сервиса бронирования.
 /// </summary>
-public class BookingServiceTest : TraitAttributes
+public class BookingServiceTest(EventManagerTestContext context) : TraitAttributes, IClassFixture<EventManagerTestContext>
 {
     /// <summary>
     /// Создание брони для существующего события.
@@ -21,11 +20,11 @@ public class BookingServiceTest : TraitAttributes
     public async Task CreateBookingExistingEvent_Success()
     {
         // Given
-        var ctx = new EventManagerTestContext();
-        await using var scope = ctx.CreateScope();
-        var eventId = await ctx.GetRandomEventId(CancellationToken.None);
+        await using var scope = context.CreateAsyncScope();
         var bookingService = scope.ServiceProvider.GetRequiredService<IBookingService>();
         var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+
+        var eventId = await context.GetRandomEventId(CancellationToken.None);
 
         // When
         var bookingInfo = await bookingService.CreateBookingAsync(eventId, CancellationToken.None);
@@ -55,10 +54,10 @@ public class BookingServiceTest : TraitAttributes
     public async Task CreateMultiBookingsForEvent_Success(int bookingCount)
     {
         // Given
-        var ctx = new EventManagerTestContext();
-        await using var scope = ctx.CreateScope();
-        var eventId = await ctx.GetRandomEventId(CancellationToken.None);
+        await using var scope = context.CreateAsyncScope();
         var bookingService = scope.ServiceProvider.GetRequiredService<IBookingService>();
+
+        var eventId = await context.GetRandomEventId(CancellationToken.None);
 
         // When
         var bookingIds = Enumerable
@@ -81,11 +80,11 @@ public class BookingServiceTest : TraitAttributes
     public async Task GetBookingById_Success()
     {
         // Given
-        var ctx = new EventManagerTestContext();
-        await using var scope = ctx.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        await using var scope = context.CreateAsyncScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
         var bookingService = scope.ServiceProvider.GetRequiredService<IBookingService>();
-        var eventId = await ctx.GetRandomEventId(CancellationToken.None);
+        
+        var eventId = await context.GetRandomEventId(CancellationToken.None);
         var booking = new Booking()
         {
             Id = Guid.NewGuid(),
@@ -96,7 +95,7 @@ public class BookingServiceTest : TraitAttributes
 
         // When
         var bookingCreated = booking.ToInfo();
-        await db.AddBookingAsync(booking, CancellationToken.None);
+        await dbContext.AddBookingAsync(booking, CancellationToken.None);
         var bookingFound = await bookingService.GetBookingByIdAsync(booking.Id, CancellationToken.None);
 
         // Then
@@ -117,8 +116,8 @@ public class BookingServiceTest : TraitAttributes
     public async Task TestBookingQueue_Success()
     {
         // Given
-        var ctx = new EventManagerTestContext();
-        var queue = ctx.ServiceProvider.GetRequiredService<IAsyncQueue<Booking>>();
+        var serviceProvider = context.CreateServiceProvider();
+        var queue = serviceProvider.GetRequiredService<IAsyncQueue<Booking>>();
         var queuedBooking = new Booking()
         {
             Id = Guid.NewGuid(),
@@ -146,8 +145,8 @@ public class BookingServiceTest : TraitAttributes
     public async Task TestRunStopBackgroundService_Success()
     {
         // Given
-        var ctx = new EventManagerTestContext();
-        var service = ctx.ServiceProvider.GetRequiredService<IAppBackgroundService>();
+        var serviceProvider = context.CreateServiceProvider();
+        var service = serviceProvider.GetRequiredService<IAppBackgroundService>();
 
         // When
         var statusBeforeStart = service.Status;
@@ -180,11 +179,12 @@ public class BookingServiceTest : TraitAttributes
     public async Task TestChangeStatusOneEvent_Success()
     {
         // Given        
-        var ctx = new EventManagerTestContext();
-        await using var scope = ctx.CreateScope();
+        var serviceProvider = context.CreateServiceProvider();
+        await using var scope = serviceProvider.CreateAsyncScope();
         var bookingService = scope.ServiceProvider.GetRequiredService<IBookingService>();
-        var backService = ctx.ServiceProvider.GetRequiredService<IAppBackgroundService>();
-        var eventId = await ctx.GetRandomEventId(CancellationToken.None);
+        var backService = serviceProvider.GetRequiredService<IAppBackgroundService>();
+        
+        var eventId = await context.GetRandomEventId(CancellationToken.None);
 
         // When
         var bookingCreated = await bookingService.CreateBookingAsync(eventId, CancellationToken.None);
@@ -197,7 +197,7 @@ public class BookingServiceTest : TraitAttributes
         await Task.Delay(TimeSpan.FromSeconds(3));
 
         BookingInfo? bookingAfterChange;
-        await using (var scope2 = ctx.CreateScope())
+        await using (var scope2 = serviceProvider.CreateAsyncScope())
         {
             bookingAfterChange = await scope2.ServiceProvider
                 .GetRequiredService<IBookingService>()
@@ -232,8 +232,7 @@ public class BookingServiceTest : TraitAttributes
     public async Task CreateBookingNotExistEvent_Fail()
     {
         // Given
-        var ctx = new EventManagerTestContext();
-        await using var scope = ctx.CreateScope();
+        await using var scope = context.CreateAsyncScope();
         var bookingService = scope.ServiceProvider.GetRequiredService<IBookingService>();
         var eventId = Guid.NewGuid();
 
@@ -250,11 +249,11 @@ public class BookingServiceTest : TraitAttributes
     public async Task CreateBookingForDeletedEvent_Fail()
     {
         // Given
-        var ctx = new EventManagerTestContext();
-        await using var scope = ctx.CreateScope();
+        await using var scope = context.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
         var bookingService = scope.ServiceProvider.GetRequiredService<IBookingService>();
-        var eventId = await ctx.GetRandomEventId(CancellationToken.None);
+        
+        var eventId = await context.GetRandomEventId(CancellationToken.None);
 
         // When
         var deletingEvent = await dbContext.GetEventAsync(eventId, CancellationToken.None);
@@ -276,9 +275,9 @@ public class BookingServiceTest : TraitAttributes
     public async Task GetBookingById_Fail()
     {
         // Given
-        var ctx = new EventManagerTestContext();
-        await using var scope = ctx.CreateScope();
+        await using var scope = context.CreateAsyncScope();
         var bookingService = scope.ServiceProvider.GetRequiredService<IBookingService>();
+        
         var bookingId = Guid.NewGuid();
 
         // Then

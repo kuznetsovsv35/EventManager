@@ -21,7 +21,7 @@ public class EventServiceTest(EventManagerTestContext context) : TraitAttributes
     public async Task CreateEvent_Success()
     {
         // Given
-        using var scope = context.CreateScope();
+        await using var scope = context.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
         
@@ -57,7 +57,7 @@ public class EventServiceTest(EventManagerTestContext context) : TraitAttributes
     public async Task CreateEvent_Null()
     {
         // Given 
-        using var scope = context.CreateScope();
+        await using var scope = context.CreateAsyncScope();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
         // When
@@ -84,7 +84,7 @@ public class EventServiceTest(EventManagerTestContext context) : TraitAttributes
     public async Task CreateEvent_Fail(EventInputData inputData)
     {
         // Given
-        using var scope = context.CreateScope();
+        await using var scope = context.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
@@ -104,7 +104,7 @@ public class EventServiceTest(EventManagerTestContext context) : TraitAttributes
     public async Task GetAllEvents_Success()
     {
         // Given
-        using var scope = context.CreateScope();
+        await using var scope = context.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
         
@@ -125,7 +125,7 @@ public class EventServiceTest(EventManagerTestContext context) : TraitAttributes
     public async Task GetEventByID_Success()
     {
         // Given
-        using var scope = context.CreateScope();
+        await using var scope = context.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
@@ -150,7 +150,7 @@ public class EventServiceTest(EventManagerTestContext context) : TraitAttributes
     public async Task GetEventByID_Fail()
     {
         // Given
-        using var scope = context.CreateScope();
+        await using var scope = context.CreateAsyncScope();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
         var requestedId = Guid.NewGuid();
@@ -170,7 +170,7 @@ public class EventServiceTest(EventManagerTestContext context) : TraitAttributes
     public async Task UpdateEvent_Success()
     {
         // Given
-        using var scope = context.CreateScope();
+        await using var scope = context.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
@@ -199,10 +199,10 @@ public class EventServiceTest(EventManagerTestContext context) : TraitAttributes
     /// </summary>
     [Trait(Category, Category_Service)]
     [Fact]
-    public void UpdateEventByID_Fail()
+    public async Task UpdateEventByID_Fail()
     {
         // Given
-        using var scope = context.CreateScope();
+        await using var scope = context.CreateAsyncScope();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
         EventInputData inputData = new()
@@ -231,7 +231,7 @@ public class EventServiceTest(EventManagerTestContext context) : TraitAttributes
     public async Task UpdateEven_Fail(EventInputData inputData)
     {
         // Given
-        using var scope = context.CreateScope();
+        await using var scope = context.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
@@ -251,7 +251,7 @@ public class EventServiceTest(EventManagerTestContext context) : TraitAttributes
     public async Task DeleteEvent_Success()
     {
         // Given
-        using var scope = context.CreateScope();
+        await using var scope = context.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
@@ -273,10 +273,10 @@ public class EventServiceTest(EventManagerTestContext context) : TraitAttributes
     /// </summary>
     [Trait(Category, Category_Service)]
     [Fact]
-    public void DeleteEventByID_Fail()
+    public async Task DeleteEventByID_Fail()
     {
         // Given
-        using var scope = context.CreateScope();
+        await using var scope = context.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
@@ -301,7 +301,7 @@ public class EventServiceTest(EventManagerTestContext context) : TraitAttributes
     public async Task SimpleFilterByTitle_Success()
     {
         // Given
-        using var scope = context.CreateScope();
+        await using var scope = context.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
@@ -341,7 +341,7 @@ public class EventServiceTest(EventManagerTestContext context) : TraitAttributes
     public async Task IterationFilterByTitle_Success(string title)
     {
         // Given
-        using var scope = context.CreateScope();
+        await using var scope = context.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
@@ -383,7 +383,7 @@ public class EventServiceTest(EventManagerTestContext context) : TraitAttributes
     public async Task FilterByStartDate_Success(DateTime startAt)
     {
         // Given
-        using var scope = context.CreateScope();
+        await using var scope = context.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
@@ -426,7 +426,7 @@ public class EventServiceTest(EventManagerTestContext context) : TraitAttributes
     public async Task FilterByEndDate_Success(DateTime endAt)
     {
         // Given
-        using var scope = context.CreateScope();
+        await using var scope = context.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
         
@@ -472,7 +472,7 @@ public class EventServiceTest(EventManagerTestContext context) : TraitAttributes
     public async Task CombinedFilter_Success(string? title, DateTime? startAt, DateTime? endAt)
     {
         // Given
-        using var scope = context.CreateScope();
+        await using var scope = context.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
@@ -528,7 +528,7 @@ public class EventServiceTest(EventManagerTestContext context) : TraitAttributes
     public async Task PaginateResult_Success(int page, int pageSize, int expectedPageCount, int expectedPageSize)
     {
         // Given
-        using var scope = context.CreateScope();
+        await using var scope = context.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 

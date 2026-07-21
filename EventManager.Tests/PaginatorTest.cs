@@ -27,7 +27,7 @@ public class PaginatorTest(EventManagerTestContext context) : TraitAttributes, I
     public async Task ValidateParameters_Fail(int page, int pageSize)
     {
         // Given
-        using var scope = context.CreateScope();
+        await using var scope = context.CreateAsyncScope();
         var paginator = scope.ServiceProvider.GetRequiredService<IPaginator<Event>>();
         var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
         // When
@@ -55,7 +55,7 @@ public class PaginatorTest(EventManagerTestContext context) : TraitAttributes, I
     public async Task PaginateResult_Success(int page, int pageSize, int expectedPageCount, int expectedPageSize)
     {
         // Given
-        using var scope = context.CreateScope();
+        await using var scope = context.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
         var paginator = scope.ServiceProvider.GetRequiredService<IPaginator<Event>>();
         

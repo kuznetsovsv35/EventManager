@@ -15,8 +15,6 @@ namespace EventManager.Tests;
 public class EventManagerTestContext
 {
     public IServiceProvider ServiceProvider { get; }
-
-    public AsyncServiceScope CreateScope() => ServiceProvider.CreateAsyncScope();
     
     public async Task<Guid> GetRandomEventId(CancellationToken cancellation)
     {
@@ -28,9 +26,11 @@ public class EventManagerTestContext
     }
     readonly TestAppDbContext _dbContext = new($"Test_{Guid.NewGuid()}");
 
+    readonly IServiceCollection _services;
+
     public EventManagerTestContext()
     {
-        ServiceProvider = new ServiceCollection()
+        _services = new ServiceCollection()
             .AddSingleton<IAsyncQueue<Booking>, AsyncQueue<Booking>>()
             .AddScoped(_ => _dbContext.CreateNewInstance())
             .AddScoped<IFilter<Event>, FilterService<Event>>()
@@ -44,7 +44,10 @@ public class EventManagerTestContext
                 mock.Setup(x => x.CreateScope()).Returns(provider.CreateScope());
                 return mock.Object;
             })
-            .AddSingleton<IAppBackgroundService, AppBackgroundService>()
-            .BuildServiceProvider();
+            .AddSingleton<IAppBackgroundService, AppBackgroundService>();
+        ServiceProvider = CreateServiceProvider();
     }
+
+    internal IServiceProvider CreateServiceProvider() => _services.BuildServiceProvider();
+    internal AsyncServiceScope CreateAsyncScope() => ServiceProvider.CreateAsyncScope();
 }

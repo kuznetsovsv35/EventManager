@@ -18,7 +18,7 @@ public class FilterEventTest(EventManagerTestContext context) : TraitAttributes,
     public async Task Reset_Success()
     {
         // Given
-        using var scope = context.CreateScope();
+        await using var scope = context.CreateAsyncScope();
         var filterService = scope.ServiceProvider.GetRequiredService<IFilter<Event>>();
 
         // When
@@ -33,7 +33,7 @@ public class FilterEventTest(EventManagerTestContext context) : TraitAttributes,
     public async Task AddNullCondition_Fail()
     {
         // Given
-        using var scope = context.CreateScope();
+        await using var scope = context.CreateAsyncScope();
         var filterService = scope.ServiceProvider.GetRequiredService<IFilter<Event>>();
 
         // Then
@@ -47,7 +47,7 @@ public class FilterEventTest(EventManagerTestContext context) : TraitAttributes,
     public async Task SimpleFilterByTitle_Success()
     {
         // Given
-        using var scope = context.CreateScope();
+        await using var scope = context.CreateAsyncScope();
         var filterService = scope.ServiceProvider.GetRequiredService<IFilter<Event>>();
         var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
         
@@ -92,7 +92,7 @@ public class FilterEventTest(EventManagerTestContext context) : TraitAttributes,
     public async Task PartialFilterByTitle_Success(string title)
     {
         // Given
-        using var scope = context.CreateScope();
+        await using var scope = context.CreateAsyncScope();
         var filterService = scope.ServiceProvider.GetRequiredService<IFilter<Event>>();
         var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
         
@@ -123,7 +123,7 @@ public class FilterEventTest(EventManagerTestContext context) : TraitAttributes,
     public async Task IterationFilterByTitle_Success(string title)
     {
         // Given
-        using var scope = context.CreateScope();
+        await using var scope = context.CreateAsyncScope();
         var filterService = scope.ServiceProvider.GetRequiredService<IFilter<Event>>();
         var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
         
@@ -160,7 +160,7 @@ public class FilterEventTest(EventManagerTestContext context) : TraitAttributes,
     public async Task FilterByStartDate_Success(DateTime startAt)
     {
         // Given
-        using var scope = context.CreateScope();
+        await using var scope = context.CreateAsyncScope();
         var filterService = scope.ServiceProvider.GetRequiredService<IFilter<Event>>();
         var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
         
@@ -198,7 +198,7 @@ public class FilterEventTest(EventManagerTestContext context) : TraitAttributes,
     public async Task FilterByEndDate_Success(DateTime endAt)
     {
         // Given
-        using var scope = context.CreateScope();
+        await using var scope = context.CreateAsyncScope();
         var filterService = scope.ServiceProvider.GetRequiredService<IFilter<Event>>();
         var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
         
@@ -238,7 +238,7 @@ public class FilterEventTest(EventManagerTestContext context) : TraitAttributes,
     public async Task CombinedFilter_Success(string? title, DateTime? startAt, DateTime? endAt)
     {
         // Given
-        using var scope = context.CreateScope();
+        await using var scope = context.CreateAsyncScope();
         var filterService = scope.ServiceProvider.GetRequiredService<IFilter<Event>>();
         var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
         
