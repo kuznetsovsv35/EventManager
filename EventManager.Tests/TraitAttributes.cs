@@ -7,4 +7,5 @@ public class TraitAttributes
     protected const string Category_Paginator = "Paginator";
     protected const string Category_Service = "Service";
     protected const string Category_Booking = "Booking";
+    protected const string Category_Validation = "Validation";
 }

@@ -6,19 +6,23 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EventManager.Tests;
 
-public class TestAppDbContext : AppDbContext
+class TestAppDbContext : AppDbContext
 {
-    public static readonly int EventCount = 30;
+    internal const int EventCount = 30;
 
-    public static readonly int EventDuration = 45;
+    internal const int EventDuration = 45;
 
-    public static readonly DateTime StartAt = new(2026, 6, 28, 10, 0, 0);
+    internal const int MinTotalSeats = 10;
 
-    public static readonly DateTime EndAt = StartAt.AddDays(EventCount);
+    internal const int MaxTotalSeats = 100;
 
-    public string DatabaseName { get; }
+    internal static readonly DateTime StartAt = new(2026, 6, 28, 10, 0, 0);
 
-    public TestAppDbContext(string databaseName) : base(
+    internal static readonly DateTime EndAt = StartAt.AddDays(EventCount);
+
+    internal string DatabaseName { get; }
+
+    internal TestAppDbContext(string databaseName) : base(
         new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase(databaseName)
             .Options)
@@ -27,7 +31,7 @@ public class TestAppDbContext : AppDbContext
         Database.EnsureCreated();
     }
 
-    public IAppDbContext CreateNewInstance()
+    internal IAppDbContext CreateNewInstance()
         => new AppDbContext(
             new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase(DatabaseName)
@@ -38,12 +42,12 @@ public class TestAppDbContext : AppDbContext
         base.OnModelCreating(modelBuilder);
         modelBuilder.Entity<Event>().HasData(
             [.. Enumerable.Range(1, EventCount)
-            .Select(i => new Event(0)
+            .Select(i => new Event(Random.Shared.Next(MinTotalSeats, MaxTotalSeats))
             {
                 Title = $"Event Title {i}",
                 StartAt = StartAt.AddDays(i - 1),
                 EndAt = StartAt.AddDays(i - 1).AddMinutes(EventDuration),
-                Description = $"Event Description {i}"
+                Description = $"Event Description {i}",
             })]
         );
     }

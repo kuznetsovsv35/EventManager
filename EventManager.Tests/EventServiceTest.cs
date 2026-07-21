@@ -41,7 +41,7 @@ public class EventServiceTest(EventManagerTestContext context) : TraitAttributes
         };
 
         // When
-        var outData = eventService.CreateEvent(inData);
+        var outData = await eventService.CreateEventAsync(inData, CancellationToken.None);
 
         // Then
         var actualCount = await dbContext.GetEvents().CountAsync();
@@ -63,7 +63,7 @@ public class EventServiceTest(EventManagerTestContext context) : TraitAttributes
         // When
 
         // Then
-        Assert.Throws<ArgumentNullException>(() => eventService.CreateEvent(null!));
+        await Assert.ThrowsAnyAsync<ArgumentNullException>(async () => await eventService.CreateEventAsync(null!, CancellationToken.None));
     }
 
     /// <summary>
@@ -91,7 +91,7 @@ public class EventServiceTest(EventManagerTestContext context) : TraitAttributes
         // When
 
         // Then
-        var ex = Assert.Throws<ValidationException>(() => eventService.CreateEvent(inputData));
+        var ex = await Assert.ThrowsAnyAsync<ValidationException>(async() => await eventService.CreateEventAsync(inputData, CancellationToken.None));
         Assert.NotNull(ex?.ValidationResult?.MemberNames);
         Assert.NotEmpty(ex.ValidationResult.MemberNames);
     }
@@ -135,7 +135,7 @@ public class EventServiceTest(EventManagerTestContext context) : TraitAttributes
             .SingleAsync(CancellationToken.None)).ToOutputData();
 
         // When
-        var foundEvent = eventService.GetEvent(requestedId);
+        var foundEvent = await eventService.GetEventAsync(requestedId, CancellationToken.None);
 
         // Then
         Assert.NotNull(foundEvent);
@@ -158,7 +158,7 @@ public class EventServiceTest(EventManagerTestContext context) : TraitAttributes
         // When
 
         // Then
-        var ex = Assert.Throws<EventNotFoundException>(() => eventService.GetEvent(requestedId));
+        var ex = await Assert.ThrowsAsync<EventNotFoundException>(async () => await eventService.GetEventAsync(requestedId, CancellationToken.None));
         Assert.Equal(requestedId, ex.ObjectKey);
     }
 
@@ -186,7 +186,7 @@ public class EventServiceTest(EventManagerTestContext context) : TraitAttributes
         };
 
         // When
-        var outData = eventService.UpdateEvent(requestedId, inputData);
+        var outData = await eventService.UpdateEventAsync(requestedId, inputData, CancellationToken.None);
 
         // Then
         Assert.NotNull(outData);
@@ -218,7 +218,7 @@ public class EventServiceTest(EventManagerTestContext context) : TraitAttributes
         // When
 
         // Then
-        var ex = Assert.Throws<EventNotFoundException>(() => eventService.UpdateEvent(requestedId, inputData));
+        var ex = await Assert.ThrowsAsync<EventNotFoundException>(async() => await eventService.UpdateEventAsync(requestedId, inputData, CancellationToken.None));
         Assert.Equal(requestedId, ex.ObjectKey);
     }
 
@@ -240,7 +240,7 @@ public class EventServiceTest(EventManagerTestContext context) : TraitAttributes
         // When
 
         // Then
-        Assert.Throws<ValidationException>(() => eventService.UpdateEvent(requestedId, inputData));
+        await Assert.ThrowsAsync<ValidationException>(async () => await eventService.UpdateEventAsync(requestedId, inputData, CancellationToken.None));
     }
 
     /// <summary>
@@ -260,7 +260,7 @@ public class EventServiceTest(EventManagerTestContext context) : TraitAttributes
         var expectedEvent = requestedEvent.ToOutputData();
 
         // When
-        var deletedEvent = eventService.DeleteEvent(requestedId);
+        var deletedEvent = await eventService.DeleteEventAsync(requestedId, CancellationToken.None);
 
         // Then
         var foundEvent = await dbContext.GetEvents(e => e.Id == requestedId).SingleOrDefaultAsync(CancellationToken.None);
@@ -285,7 +285,7 @@ public class EventServiceTest(EventManagerTestContext context) : TraitAttributes
         // When
 
         // Then
-        var ex = Assert.Throws<EventNotFoundException>(() => eventService.DeleteEvent(requestedId));
+        var ex = await Assert.ThrowsAsync<EventNotFoundException>(() => eventService.DeleteEventAsync(requestedId, CancellationToken.None));
         Assert.Equal(requestedId, ex.ObjectKey);
     }
 
@@ -543,7 +543,7 @@ public class EventServiceTest(EventManagerTestContext context) : TraitAttributes
             .ToList();
 
         // When
-        var pageResult = eventService.GetEvents(null, new() { CurrentPage = page, PageSize = pageSize });
+        var pageResult = await eventService.GetEvents(null, new() { CurrentPage = page, PageSize = pageSize }, CancellationToken.None);
 
         // Then
         Assert.Equal(expectedPageCount, pageResult.PageCount);

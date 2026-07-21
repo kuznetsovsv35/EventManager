@@ -257,7 +257,7 @@ public class BookingServiceTest(EventManagerTestContext context) : TraitAttribut
 
         // When
         var deletingEvent = await dbContext.GetEventAsync(eventId, CancellationToken.None);
-        dbContext.DeleteEvent(eventId);
+        await dbContext.DeleteEventAsync(eventId, CancellationToken.None);
         var deletedEvent = await dbContext.GetEventAsync(eventId, CancellationToken.None);
 
         // Then

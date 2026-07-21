@@ -15,37 +15,37 @@ public class EventService(
     IFilter<Event> filter,
     IPaginator<Event> paginator) : IEventService
 {
-    public EventOutputData CreateEvent(EventInputData data)
+    async Task<EventOutputData> IEventService.CreateEventAsync(EventInputData data, CancellationToken cancellation)
     {
         if (data == null)
             throw new ArgumentNullException(nameof(data));
 
         var e = data.ToEvent();
-        dbContext.AddEvent(e);
+        await dbContext.AddEventAsync(e, cancellation);
         return e.ToOutputData();
     }
 
-    public EventOutputData DeleteEvent(Guid id)
+    async Task<EventOutputData> IEventService.DeleteEventAsync(Guid id, CancellationToken cancellation)
     {
-        if (dbContext.DeleteEvent(id) is Event e)
+        if (await dbContext.DeleteEventAsync(id, cancellation) is Event e)
             return e.ToOutputData();
 
         throw new EventNotFoundException(nameof(id), id);
     }
 
-    public IAsyncEnumerable<EventOutputData> GetAllEvents()
+    IAsyncEnumerable<EventOutputData> IEventService.GetAllEvents()
         => dbContext
             .GetEvents()
             .Select(x => x.ToOutputData())
             .AsAsyncEnumerable();
 
-    public PaginateResult<EventOutputData> GetEvents(FilterParams? filterParams, PageParams pageParams)
-        => paginator.Paginate(
+    Task<PaginateResult<EventOutputData>> IEventService.GetEvents(FilterParams? filterParams, PageParams pageParams, CancellationToken cancellation)
+        => paginator.PaginateAsync(
             FilterEvents(filterParams),
             pageParams.CurrentPage, pageParams.PageSize,
-            e => e.ToOutputData());
+            e => e.ToOutputData(), cancellation);
 
-    public IAsyncEnumerable<EventOutputData> GetEvents(FilterParams? filterParams)
+    IAsyncEnumerable<EventOutputData> IEventService.GetEvents(FilterParams? filterParams)
         => FilterEvents(filterParams)
             .Select(e => e.ToOutputData())
             .AsAsyncEnumerable();
@@ -72,20 +72,20 @@ public class EventService(
         return dbContext.GetEvents(f.Expression);
     }
 
-    public EventOutputData GetEvent(Guid id)
+    async Task<EventOutputData> IEventService.GetEventAsync(Guid id, CancellationToken cancellation)
     {
-        if (dbContext.GetEvent(id) is Event e)
+        if (await dbContext.GetEventAsync(id, cancellation) is Event e)
             return e.ToOutputData();
 
         throw new EventNotFoundException(nameof(id), id);
     }
 
-    public EventOutputData UpdateEvent(Guid id, EventInputData data)
+    async Task<EventOutputData> IEventService.UpdateEventAsync(Guid id, EventInputData data, CancellationToken cancellation)
     {
-        if (dbContext.GetEvents(e => e.Id == id).FirstOrDefault() is Event e)
+        if (await dbContext.GetEvents(e => e.Id == id).FirstOrDefaultAsync(cancellation) is Event e)
         {
             data.Update(e);
-            dbContext.UpdateEvent(e);
+            await dbContext.UpdateEventAsync(e, cancellation);
             return e.ToOutputData();
         }
         throw new EventNotFoundException(nameof(id), id);

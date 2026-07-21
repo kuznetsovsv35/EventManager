@@ -33,8 +33,8 @@ public class PaginatorTest(EventManagerTestContext context) : TraitAttributes, I
         // When
 
         // Then
-        Assert.Throws<PaginatorParamException>(
-            () => paginator.Paginate(dbContext.GetEvents(), page, pageSize, x => x));
+        await Assert.ThrowsAnyAsync<PaginatorParamException>(async() 
+            => await paginator.PaginateAsync(dbContext.GetEvents(), page, pageSize, x => x, CancellationToken.None));
     }
 
     /// <summary>

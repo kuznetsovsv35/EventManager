@@ -14,22 +14,22 @@ public class EventsController(IEventService eventService) : ControllerBase
 {
     [HttpGet]
     [ProducesResponseType<PaginateResult<EventOutputData>>(StatusCodes.Status200OK)]
-    public ActionResult<IEnumerable<EventOutputData>> GetEvents(
-        [FromQuery] EventQueryParams queryParams
-        ) => Ok(eventService.GetEvents(queryParams, queryParams));
+    public async Task<ActionResult<PaginateResult<EventOutputData>>> GetEvents(
+        [FromQuery] EventQueryParams queryParams, CancellationToken cancellation) 
+            => Ok(await eventService.GetEvents(queryParams, queryParams, cancellation));
 
     [HttpGet("{id:guid}")]
     [ProducesResponseType<EventOutputData>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
-    public ActionResult<EventOutputData> GetEvent(Guid id)
-        => Ok(eventService.GetEvent(id));
+    public async Task<ActionResult<EventOutputData>> GetEvent(Guid id, CancellationToken cancellation)
+        => Ok(await eventService.GetEventAsync(id, cancellation));
 
     [HttpPost]
     [ProducesResponseType<EventOutputData>(StatusCodes.Status201Created)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
-    public ActionResult<EventOutputData> PostEvent([FromBody] EventInputData inputData)
+    public async Task<ActionResult<EventOutputData>> PostEvent([FromBody] EventInputData inputData, CancellationToken cancellation)
     {
-        var e = eventService.CreateEvent(inputData);
+        var e = await eventService.CreateEventAsync(inputData, cancellation);
         return CreatedAtAction(
             nameof(GetEvent),
             new { id = e.Id },
@@ -40,12 +40,12 @@ public class EventsController(IEventService eventService) : ControllerBase
     [ProducesResponseType<EventOutputData>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
-    public ActionResult<EventOutputData> UpdateEvent(Guid id, [FromBody] EventInputData data)
-        => Ok(eventService.UpdateEvent(id, data));
+    public async Task<ActionResult<EventOutputData>> UpdateEvent(Guid id, [FromBody] EventInputData data, CancellationToken cancellation)
+        => Ok(await eventService.UpdateEventAsync(id, data, cancellation));
 
     [HttpDelete("{id:guid}")]
     [ProducesResponseType<EventOutputData>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
-    public ActionResult<EventOutputData> DeleteEvent(Guid id)
-        => Ok(eventService.DeleteEvent(id));
+    public async Task<ActionResult<EventOutputData>> DeleteEvent(Guid id, CancellationToken cancellation)
+        => Ok(await eventService.DeleteEventAsync(id, cancellation));
 }

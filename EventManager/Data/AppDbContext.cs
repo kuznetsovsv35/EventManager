@@ -22,34 +22,13 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         return Events.AsNoTracking().Where(filter);
     }
 
-    Event? IAppDbContext.GetEvent(Guid id)
-        => Events.AsNoTracking().Where(x => x.Id == id).FirstOrDefault();
-
     Task<Event?> IAppDbContext.GetEventAsync(Guid id, CancellationToken cancellation)
         => Events.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, cancellation);
-
-    void IAppDbContext.AddEvent(Event @event)
-    {
-        Events.Add(@event);
-        SaveChanges();
-    }
 
     Task IAppDbContext.AddEventAsync(Event @event, CancellationToken cancellation)
     {
         Events.Add(@event);
         return SaveChangesAsync(cancellation);
-    }
-
-    Event? IAppDbContext.DeleteEvent(Guid id)
-    {
-        Event? @event = Events.AsNoTracking().FirstOrDefault(x => x.Id == id);
-        if (@event is not null)
-        {
-            Events.Remove(@event);
-            SaveChanges();
-        }
-
-        return @event;
     }
 
     async Task<Event?> IAppDbContext.DeleteEventAsync(Guid id, CancellationToken cancellation)
@@ -65,16 +44,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         return @event;
     }
 
-    public bool UpdateEvent(Event @event)
+    Task IAppDbContext.UpdateEventAsync(Event @event, CancellationToken cancellation)
     {
         Events.Update(@event);
-        return SaveChanges() != 0;
-    }
-
-    async Task<bool> IAppDbContext.UpdateEventAsync(Event @event, CancellationToken cancellation)
-    {
-        Events.Update(@event);
-        return (await SaveChangesAsync(cancellation)) != 0;
+        return SaveChangesAsync(cancellation);
     }
     #endregion
     
@@ -92,10 +65,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     Task<Booking?> IAppDbContext.GetBookingAsync(Guid id, CancellationToken cancellation)
         => Bookings.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, cancellation);
 
-    async Task IAppDbContext.AddBookingAsync(Booking booking, CancellationToken cancellation)
+    Task IAppDbContext.AddBookingAsync(Booking booking, CancellationToken cancellation)
     {
         Bookings.Add(booking);
-        await SaveChangesAsync(cancellation);
+        return SaveChangesAsync(cancellation);
     }
 
     async Task<Booking?> IAppDbContext.DeleteBookingAsync(Guid id, CancellationToken cancellation)
@@ -109,10 +82,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         return booking;
     }
 
-    async Task<bool> IAppDbContext.UpdateBookingAsync(Booking booking, CancellationToken cancellation)
+    Task IAppDbContext.UpdateBookingAsync(Booking booking, CancellationToken cancellation)
     {
         Bookings.Update(booking);
-        return (await SaveChangesAsync(cancellation)) != 0;
+        return SaveChangesAsync(cancellation);
     }
     #endregion
 }

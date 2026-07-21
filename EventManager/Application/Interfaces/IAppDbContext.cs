@@ -15,28 +15,27 @@ public interface IAppDbContext
     /// <returns></returns>
     IQueryable<Event> GetEvents(Expression<Func<Event, bool>>? filter = null);
 
-    Event? GetEvent(Guid id);
     Task<Event?> GetEventAsync(Guid id, CancellationToken cancellation);
 
     /// <summary>
     /// Добавляет событие в набор данных.
     /// </summary>
     /// <param name="event"></param>
-    void AddEvent(Event @event);
+    /// <param name="cancellation"></param>
     Task AddEventAsync(Event @event, CancellationToken cancellation);
 
     /// <summary>
     /// Обновляет событие.
     /// </summary>
     /// <param name="event"></param>
-    bool UpdateEvent(Event @event);
-    Task<bool> UpdateEventAsync(Event @event, CancellationToken cancellation);
+    /// <param name="cancellation"></param>
+    Task UpdateEventAsync(Event @event, CancellationToken cancellation);
 
     /// <summary>
     /// Удаляет событие из набора данных.
     /// </summary>
     /// <param name="id"></param>
-    Event? DeleteEvent(Guid id);
+    /// <param name="cancellation"></param>
     Task<Event?> DeleteEventAsync(Guid id, CancellationToken cancellation);
 
     /// <summary>
@@ -68,12 +67,12 @@ public interface IAppDbContext
     /// <param name="booking"></param>
     /// <param name="cancellation"></param>
     /// <returns></returns>
-    Task<bool> UpdateBookingAsync(Booking booking, CancellationToken cancellation);
+    Task UpdateBookingAsync(Booking booking, CancellationToken cancellation);
 
     /// <summary>
     /// Удаляет бронь.
     /// </summary>
-    /// <param name="booking"></param>
+    /// <param name="id"></param>
     /// <param name="cancellation"></param>
     /// <returns></returns>
     Task<Booking?> DeleteBookingAsync(Guid id, CancellationToken cancellation);
