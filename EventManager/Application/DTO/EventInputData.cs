@@ -4,7 +4,7 @@ namespace EventManager.Application.DataTransfer;
 /// Входные данные запроса создания и обновления события.
 /// </summary>
 [EventInputDataValidation]
-public class EventInputData
+public class EventInputData()
 {
     [EventInputDataValidation("Заголовок события не может быть пустым.")]
     public string? Title { get; set; }
