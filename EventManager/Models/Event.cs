@@ -32,7 +32,7 @@ public class Event
 
     public void ReleaseSeats(int count = 1) => AvailableSeats = Math.Min(AvailableSeats + count, TotalSeats);
 
-    internal void UpdateTotalSeats(int totalSeats)
+    public void UpdateTotalSeats(int totalSeats)
     {
         var reservedCount = TotalSeats - AvailableSeats;
         totalSeats = Math.Max(totalSeats, reservedCount);
