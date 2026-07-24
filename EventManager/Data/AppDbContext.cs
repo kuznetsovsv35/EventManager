@@ -44,10 +44,18 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         return @event;
     }
 
-    Task IAppDbContext.UpdateEventAsync(Event @event, CancellationToken cancellation)
+    async Task IAppDbContext.UpdateEventAsync(Event @event, CancellationToken cancellation)
     {
-        Events.Update(@event);
-        return SaveChangesAsync(cancellation);
+        if (await Events.FindAsync(@event.Id) is Event dest)
+        {
+            dest.Title = @event.Title;
+            dest.Description = @event.Description;
+            dest.StartAt = @event.StartAt;
+            dest.EndAt = @event.EndAt;
+            //dest.TotalSeats
+            //dest.AvailableSeats = @event.AvailableSeats;
+            await SaveChangesAsync(cancellation);
+        }
     }
     #endregion
     
@@ -73,7 +81,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
     async Task<Booking?> IAppDbContext.DeleteBookingAsync(Guid id, CancellationToken cancellation)
     {
-        Booking? booking = await Bookings.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, cancellation);
+        Booking? booking = await Bookings.FindAsync(id, cancellation);
         if (booking is not null)
         {
             Bookings.Remove(booking);
@@ -82,10 +90,14 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         return booking;
     }
 
-    Task IAppDbContext.UpdateBookingAsync(Booking booking, CancellationToken cancellation)
+    async Task IAppDbContext.UpdateBookingAsync(Booking booking, CancellationToken cancellation)
     {
-        Bookings.Update(booking);
-        return SaveChangesAsync(cancellation);
+        if (await Bookings.FindAsync(booking.Id, cancellation) is Booking dest)
+        {
+            dest.Status = booking.Status;
+            dest.ProcessedAt = booking.ProcessedAt;
+            await SaveChangesAsync(cancellation);
+        }
     }
     #endregion
 }

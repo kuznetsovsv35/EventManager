@@ -2,7 +2,6 @@ using EventManager.Application.DataTransfer;
 using EventManager.Application.Interfaces;
 using EventManager.Infrastructure;
 using EventManager.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace EventManager.Application.Services;
 
@@ -21,8 +20,10 @@ public class BookingService(IAppDbContext dbContext, IAsyncQueue<Booking> bookin
                 Status = BookingStatus.Pending
             };
 
-            await dbContext.AddBookingAsync(booking, cancellation);
-            await bookingQueue.Enqueue(booking, cancellation);
+            await Task.WhenAll(
+                dbContext.AddBookingAsync(booking, cancellation),
+                bookingQueue.Enqueue(booking, cancellation)
+            );
             return booking.ToInfo();
         }
 
