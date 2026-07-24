@@ -34,9 +34,10 @@ public class Event
 
     internal void UpdateTotalSeats(int totalSeats)
     {
-        var delta = totalSeats - TotalSeats;
-        AvailableSeats += delta;
+        var reservedCount = TotalSeats - AvailableSeats;
+        totalSeats = Math.Max(totalSeats, reservedCount);
         TotalSeats = totalSeats;
+        AvailableSeats =  TotalSeats - reservedCount;
     }
 
     Event() {}
