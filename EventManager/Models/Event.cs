@@ -19,26 +19,22 @@ public class Event
 
     public int TotalSeats { get; private set; }
 
-    public int AvailableSeats { get; private set; }
+    public int ReservedCount { get; private set; }
+
+    public int AvailableSeats => TotalSeats - ReservedCount;
 
     public bool TryReserveSeats(int count = 1)
     {
         if (AvailableSeats - count < 0)
             return false;
         
-        AvailableSeats -= count;
+        ReservedCount += count;
         return true;
     }
 
-    public void ReleaseSeats(int count = 1) => AvailableSeats = Math.Min(AvailableSeats + count, TotalSeats);
+    public void ReleaseSeats(int count = 1) => ReservedCount -= Math.Min(ReservedCount, count);
 
-    public void UpdateTotalSeats(int totalSeats)
-    {
-        var reservedCount = TotalSeats - AvailableSeats;
-        totalSeats = Math.Max(totalSeats, reservedCount);
-        TotalSeats = totalSeats;
-        AvailableSeats =  TotalSeats - reservedCount;
-    }
+    public void UpdateTotalSeats(int totalSeats) => TotalSeats = Math.Max(totalSeats, ReservedCount);
 
     Event() {}
 
@@ -46,6 +42,5 @@ public class Event
     { 
         Id = Guid.NewGuid();
         TotalSeats = totalSeats; 
-        AvailableSeats = TotalSeats;
     }
 }
