@@ -29,7 +29,7 @@ public interface IAppDbContext
     /// </summary>
     /// <param name="event"></param>
     /// <param name="cancellation"></param>
-    Task UpdateEventAsync(Event @event, CancellationToken cancellation);
+    Task<Event?> UpdateEventAsync(Guid id, Action<Event> updater, CancellationToken cancellation);
 
     /// <summary>
     /// Удаляет событие из набора данных.
@@ -67,7 +67,7 @@ public interface IAppDbContext
     /// <param name="booking"></param>
     /// <param name="cancellation"></param>
     /// <returns></returns>
-    Task UpdateBookingAsync(Booking booking, CancellationToken cancellation);
+    Task UpdateBookingAsync(Guid id, Action<Booking> updater, CancellationToken cancellation);
 
     /// <summary>
     /// Удаляет бронь.

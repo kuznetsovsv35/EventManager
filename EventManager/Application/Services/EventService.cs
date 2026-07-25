@@ -82,12 +82,9 @@ public class EventService(
 
     async Task<EventOutputData> IEventService.UpdateEventAsync(Guid id, EventInputData data, CancellationToken cancellation)
     {
-        if (await dbContext.GetEvents(e => e.Id == id).FirstOrDefaultAsync(cancellation) is Event e)
-        {
-            data.Update(e);
-            await dbContext.UpdateEventAsync(e, cancellation);
-            return e.ToOutputData();
-        }
-        throw new EventNotFoundException(nameof(id), id);
+        var e = await dbContext.UpdateEventAsync(id, dest => data.Update(dest), cancellation);
+        return e is not null 
+            ? e.ToOutputData()
+            : throw new EventNotFoundException(nameof(id), id);
     }
 }

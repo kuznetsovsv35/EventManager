@@ -44,18 +44,16 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         return @event;
     }
 
-    async Task IAppDbContext.UpdateEventAsync(Event @event, CancellationToken cancellation)
+    async Task<Event?> IAppDbContext.UpdateEventAsync(Guid id, Action<Event> updater, CancellationToken cancellation)
     {
-        if (await Events.FindAsync(@event.Id) is Event dest)
+        if (await Events.FindAsync(id) is Event dest)
         {
-            dest.Title = @event.Title;
-            dest.Description = @event.Description;
-            dest.StartAt = @event.StartAt;
-            dest.EndAt = @event.EndAt;
-            //dest.TotalSeats
-            //dest.AvailableSeats = @event.AvailableSeats;
+            updater(dest);
             await SaveChangesAsync(cancellation);
+            return dest;
         }
+
+        return null;
     }
     #endregion
     
@@ -90,12 +88,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         return booking;
     }
 
-    async Task IAppDbContext.UpdateBookingAsync(Booking booking, CancellationToken cancellation)
+    async Task IAppDbContext.UpdateBookingAsync(Guid id, Action<Booking> updater, CancellationToken cancellation)
     {
-        if (await Bookings.FindAsync(booking.Id, cancellation) is Booking dest)
+        if (await Bookings.FindAsync(id, cancellation) is Booking dest)
         {
-            dest.Status = booking.Status;
-            dest.ProcessedAt = booking.ProcessedAt;
+            updater(dest);
             await SaveChangesAsync(cancellation);
         }
     }

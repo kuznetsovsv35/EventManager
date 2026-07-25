@@ -62,26 +62,26 @@ public class AppBackgroundService(
         var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
 
         var temp = await dbContext.GetBookings(x => x.Id == booking.Id && x.Status == BookingStatus.Pending)
-            .GroupJoin(dbContext.GetEvents(), b => b.EventId, e => e.Id, (
-                booking, events) => new
-                {
-                    Booking = booking,
-                    Event = events.FirstOrDefault()
-                })
+            .GroupJoin(dbContext.GetEvents(), b => b.EventId, e => e.Id, (booking, events) => new
+            {
+                Booking = booking,
+                Event = events.FirstOrDefault()
+            })
             .FirstOrDefaultAsync(cancellation);
 
-        if (temp is { Booking: Booking destBooking })
+        if (temp is { Booking: Booking })
         {
             await Task.Delay(TimeSpan.FromSeconds(2), cancellation);
 
-            destBooking.Status = temp is { Event: Event }
-                ? BookingStatus.Confirmed
-                : BookingStatus.Rejected;
-            destBooking.ProcessedAt = DateTime.Now;
+            await dbContext.UpdateBookingAsync(booking.Id, destBooking => 
+            {
+                destBooking.Status = temp is { Event: Event }
+                    ? BookingStatus.Confirmed
+                    : BookingStatus.Rejected;
+                destBooking.ProcessedAt = DateTime.Now;
+            }, cancellation);
 
-            await dbContext.UpdateBookingAsync(destBooking, cancellation);
-
-            logger.LogInformation("Бронь {Booking} для события {Event} обработана.", destBooking.Id, destBooking.EventId);
+            logger.LogInformation("Бронь {Booking} для события {Event} обработана.", booking.Id, booking.EventId);
         }
     }
 }
