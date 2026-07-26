@@ -17,10 +17,11 @@ public class BookingService(IAppDbContext dbContext, IAsyncQueue<Booking> bookin
             {
                 cancellation.ThrowIfCancellationRequested();
             
-                if (!@event.TryReserveSeats())
+                if (@event.TryReserveSeats())
                 {
+                    return;
                 }
-                return;
+                throw new NoAvailableSeatsException(eventId);
             }
             throw new EventNotFoundException(nameof(eventId), eventId);
         }, cancellation);
