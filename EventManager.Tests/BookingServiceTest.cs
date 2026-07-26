@@ -47,28 +47,30 @@ public class BookingServiceTest(EventManagerTestContext context) : TraitAttribut
     /// <param name="bookingCount"></param>
     /// <returns></returns>
     [Trait(Category, Category_Booking)]
-    [Theory]
-    [InlineData([10])]
-    [InlineData([20])]
-    [InlineData([50])]
-    public async Task CreateMultiBookingsForEvent_Success(int bookingCount)
+    [Fact]
+    public async Task CreateMultiBookingsForEvent_Success()
     {
         // Given
         await using var scope = context.CreateAsyncScope();
         var bookingService = scope.ServiceProvider.GetRequiredService<IBookingService>();
-
+        var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
         var eventId = await context.GetRandomEventId(CancellationToken.None);
+        var bookingCount = (await eventService.GetEventAsync(eventId, CancellationToken.None)).AvailableSeats;
 
         // When
-        var bookingIds = Enumerable
+        var bookingTasks = Enumerable
             .Range(0, bookingCount)
-            .Select(async _ => (await bookingService.CreateBookingAsync(eventId, CancellationToken.None)).Id)
-            .Select(t => t.Result)
+            .Select(_ => bookingService.CreateBookingAsync(eventId, CancellationToken.None))
             .ToList();
+        
+        var bookingIds = (await Task.WhenAll(bookingTasks)).Select(t => t.Id).ToList();
+        var availableSeats = (await eventService.GetEventAsync(eventId, CancellationToken.None)).AvailableSeats;
 
         // Then
+        Assert.True(bookingCount > 0);
         Assert.Equal(bookingCount, bookingIds.Count);
         Assert.Distinct(bookingIds);
+        Assert.Equal(0, availableSeats);
     }
 
     /// <summary>
