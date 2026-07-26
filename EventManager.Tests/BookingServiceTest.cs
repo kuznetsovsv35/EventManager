@@ -87,13 +87,7 @@ public class BookingServiceTest(EventManagerTestContext context) : TraitAttribut
         var bookingService = scope.ServiceProvider.GetRequiredService<IBookingService>();
         
         var eventId = await context.GetRandomEventId(CancellationToken.None);
-        var booking = new Booking()
-        {
-            Id = Guid.NewGuid(),
-            EventId = eventId,
-            Status = BookingStatus.Pending,
-            CreatedAt = DateTime.Now,
-        };
+        var booking = new Booking(eventId);
 
         // When
         var bookingCreated = booking.ToInfo();
@@ -120,13 +114,7 @@ public class BookingServiceTest(EventManagerTestContext context) : TraitAttribut
         // Given
         var serviceProvider = context.CreateServiceProvider();
         var queue = serviceProvider.GetRequiredService<IAsyncQueue<Booking>>();
-        var queuedBooking = new Booking()
-        {
-            Id = Guid.NewGuid(),
-            EventId = Guid.NewGuid(),
-            Status = BookingStatus.Pending,
-            CreatedAt = DateTime.Now,
-        };
+        var queuedBooking = new Booking(Guid.NewGuid());
 
         // When
         var queueTask = queue.Dequeue(CancellationToken.None);

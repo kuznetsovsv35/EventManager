@@ -9,58 +9,25 @@ public class BookingService(IAppDbContext dbContext, IAsyncQueue<Booking> bookin
 {
     public async Task<BookingInfo> CreateBookingAsync(Guid eventId, CancellationToken cancellation)
     {
-        ISyncDataContext<Event> syncContext = dbContext.CreateSyncContext<Event>();
-
-        await syncContext.ExecuteActionAsync(async(events) =>
+        var booking = await dbContext.CreateSyncContext<Event>().ExecuteActionAsync(async() =>
         {
-            if (await events.FindAsync(eventId, cancellation) is Event @event)
+            if (await dbContext.Events.FindAsync(eventId, cancellation) is Event @event)
             {
                 cancellation.ThrowIfCancellationRequested();
             
                 if (@event.TryReserveSeats())
                 {
-                    return;
+                    var booking = new Booking(eventId);
+                    dbContext.Bookings.Add(booking);
+                    return booking;
                 }
                 throw new NoAvailableSeatsException(eventId);
             }
             throw new EventNotFoundException(nameof(eventId), eventId);
         }, cancellation);
 
-        var booking = new Booking()
-        {
-            Id = Guid.NewGuid(),
-            EventId = eventId,
-            CreatedAt = DateTime.Now,
-            Status = BookingStatus.Pending
-        };
-
-        await Task.WhenAll(
-            dbContext.AddBookingAsync(booking, cancellation),
-            bookingQueue.Enqueue(booking, cancellation)
-        );
+        await bookingQueue.Enqueue(booking, cancellation);
         return booking.ToInfo();
-
-        /*
-        if (await dbContext.GetEventAsync(eventId, cancellation) is Event @event)
-        {
-            cancellation.ThrowIfCancellationRequested();
-            var booking = new Booking()
-            {
-                Id = Guid.NewGuid(),
-                EventId = eventId,
-                CreatedAt = DateTime.Now,
-                Status = BookingStatus.Pending
-            };
-
-            await Task.WhenAll(
-                dbContext.AddBookingAsync(booking, cancellation),
-                bookingQueue.Enqueue(booking, cancellation)
-            );
-            return booking.ToInfo();
-        }
-
-        throw new EventNotFoundException(nameof(eventId), eventId);
-        */
     }
 
     public async Task<BookingInfo> GetBookingByIdAsync(Guid bookingId, CancellationToken cancellation)

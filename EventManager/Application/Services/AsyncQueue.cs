@@ -54,4 +54,24 @@ public class AsyncQueue<T> : IAsyncQueue<T>
         
         _trigger.Release();
     }
+
+    public async Task<IEnumerable<T>> DequeueAll(CancellationToken cancellation)
+    {
+        while (true)
+        {
+            await _trigger.WaitAsync(cancellation);
+            await _lock.WaitAsync(cancellation);
+            try
+            {
+                var items = new T [_queue.Count]; 
+                _queue.CopyTo(items, 0);
+                Interlocked.Exchange(ref _trigger, new(0))?.Dispose();
+                return items;
+            }
+            finally
+            {
+                _lock.Release();
+            }
+        }        
+    }
 }

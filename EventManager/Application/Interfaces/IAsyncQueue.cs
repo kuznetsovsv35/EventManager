@@ -21,6 +21,13 @@ public interface IAsyncQueue<T>
     Task<T> Dequeue(CancellationToken cancellation);
 
     /// <summary>
+    /// Изъять из очереди все записи.
+    /// </summary>
+    /// <param name="cancellation"></param>
+    /// <returns></returns>
+    Task<IEnumerable<T>> DequeueAll(CancellationToken cancellation);
+
+    /// <summary>
     /// Очистка очереди.
     /// </summary>
     /// <returns></returns>

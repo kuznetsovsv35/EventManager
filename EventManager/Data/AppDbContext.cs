@@ -12,8 +12,11 @@ namespace EventManager.Data;
 /// <param name="options"></param>
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options), IAppDbContext
 {
+    #region Общие
+    #endregion
+
     #region  Events
-    protected DbSet<Event> Events { get; set; }
+    public DbSet<Event> Events { get; private set; }
 
     IQueryable<Event> IAppDbContext.GetEvents(Expression<Func<Event, bool>>? filter)
     {
@@ -59,7 +62,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     #endregion
     
     #region  Bookings
-    protected DbSet<Booking> Bookings { get; set; }
+    public DbSet<Booking> Bookings { get; private set; }
 
     IQueryable<Booking> IAppDbContext.GetBookings(Expression<Func<Booking, bool>>? filter)
     {
@@ -102,18 +105,37 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     #region Инфраструктура синхронизации.
     static readonly ConcurrentDictionary<int, SemaphoreSlim> _locks = new();
 
-    class SyncDataContext<T>(AppDbContext dbContext) : ISyncDataContext<T> where T : class
+    class SyncDataContext<T>(AppDbContext dbContext) : ISyncDataContext
     {
         static int _hashCode  = typeof(T).GUID.GetHashCode();
         SemaphoreSlim _lock = _locks.GetOrAdd(_hashCode, (_) => new(1, 1));
-        DbSet<T> _dbSet = dbContext.Set<T>();
            
-        async Task ISyncDataContext<T>.ExecuteActionAsync(Func<DbSet<T>, Task> action, CancellationToken cancellation)
+        async Task<TResult> ISyncDataContext.ExecuteActionAsync<TResult>(Func<Task<TResult>> action, CancellationToken cancellation)
         {
             await _lock.WaitAsync(cancellation);
             try
             {
-                await action(_dbSet);
+                var result = await action();
+                await dbContext.SaveChangesAsync(cancellation);
+                return result;
+            }
+            catch
+            {
+                RollbackChanges();
+                throw;
+            }
+            finally
+            {
+                _lock.Release();
+            }
+        }
+
+        async Task ISyncDataContext.ExecuteActionAsync(Func<Task> action, CancellationToken cancellation)
+        {
+            await _lock.WaitAsync(cancellation);
+            try
+            {
+                await action();
                 await dbContext.SaveChangesAsync(cancellation);
             }
             catch
@@ -129,13 +151,13 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
         void RollbackChanges()
         {
-            var entries = dbContext.ChangeTracker.Entries<T>().Where(x => x.State != EntityState.Unchanged).ToList();
+            var entries = dbContext.ChangeTracker.Entries().Where(x => x.State != EntityState.Unchanged).ToList();
             foreach(var entry in entries)
                 entry.State = EntityState.Unchanged;
         }
     }
 
-    ISyncDataContext<T> IAppDbContext.CreateSyncContext<T>() where T : class
+    ISyncDataContext IAppDbContext.CreateSyncContext<T>()
         => new SyncDataContext<T>(this);
     #endregion
 }

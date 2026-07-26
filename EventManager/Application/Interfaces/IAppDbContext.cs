@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using EventManager.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace EventManager.Application.Interfaces;
 
@@ -8,6 +9,11 @@ namespace EventManager.Application.Interfaces;
 /// </summary>
 public interface IAppDbContext
 {
+    /// <summary>
+    /// Набор данных событий.
+    /// </summary>
+    DbSet<Event> Events { get; }
+    
     /// <summary>
     /// Возвращает запрос отфильтрованного набора.
     /// </summary>
@@ -37,6 +43,11 @@ public interface IAppDbContext
     /// <param name="id"></param>
     /// <param name="cancellation"></param>
     Task<Event?> DeleteEventAsync(Guid id, CancellationToken cancellation);
+
+    /// <summary>
+    /// Набор данных броней.
+    /// </summary>
+    DbSet<Booking> Bookings { get; }
 
     /// <summary>
     /// Возвращает объект запроса отфильтрованного набора броней.
@@ -77,5 +88,10 @@ public interface IAppDbContext
     /// <returns></returns>
     Task<Booking?> DeleteBookingAsync(Guid id, CancellationToken cancellation);
 
-    ISyncDataContext<T> CreateSyncContext<T>() where T : class;
+    /// <summary>
+    /// Создание контекста синхронизации.
+    /// </summary>
+    /// <typeparam name="T">Тип сущности.</typeparam>
+    /// <returns></returns>
+    ISyncDataContext CreateSyncContext<T>();
 }

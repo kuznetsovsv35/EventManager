@@ -35,7 +35,9 @@ public class AppBackgroundService(
             {
                 try
                 {
-                    await ProcessBooking(await bookingQueue.Dequeue(stoppingToken), stoppingToken);
+                    var tasks = (await bookingQueue.DequeueAll(stoppingToken))
+                        .Select(booking => ProcessBookingAsync(booking, stoppingToken));
+                    await Task.WhenAll(tasks); 
                 }
                 catch (OperationCanceledException canceled) when (canceled.CancellationToken.IsCancellationRequested)
                 {
@@ -56,7 +58,7 @@ public class AppBackgroundService(
         }
     }
 
-    async Task ProcessBooking(Booking booking, CancellationToken cancellation)
+    async Task ProcessBookingAsync(Booking booking, CancellationToken cancellation)
     {
         await using var scope = scopeFactory.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
@@ -64,24 +66,57 @@ public class AppBackgroundService(
         var temp = await dbContext.GetBookings(x => x.Id == booking.Id && x.Status == BookingStatus.Pending)
             .GroupJoin(dbContext.GetEvents(), b => b.EventId, e => e.Id, (booking, events) => new
             {
-                Booking = booking,
-                Event = events.FirstOrDefault()
+                booking.Status,
+                EventId = GetFirstId(events),
             })
             .FirstOrDefaultAsync(cancellation);
 
-        if (temp is { Booking: Booking })
-        {
+        if (temp is { Status: BookingStatus.Pending })
+        {         
             await Task.Delay(TimeSpan.FromSeconds(2), cancellation);
-
-            await dbContext.UpdateBookingAsync(booking.Id, destBooking => 
+            var bookingConfirmed = true;
+            
+            if (temp is { EventId: Guid eventId })
+            {                                
+                if (!bookingConfirmed)
+                {
+                    await dbContext.CreateSyncContext<Event>().ExecuteActionAsync(async() =>
+                    {
+                        if (await dbContext.Events.FindAsync(eventId) is Event dest)
+                            dest.ReleaseSeats();
+                    }, CancellationToken.None);
+                }
+            }
+            else
             {
-                destBooking.Status = temp is { Event: Event }
-                    ? BookingStatus.Confirmed
-                    : BookingStatus.Rejected;
-                destBooking.ProcessedAt = DateTime.Now;
-            }, cancellation);
+                bookingConfirmed = false;
+            }
 
-            logger.LogInformation("Бронь {Booking} для события {Event} обработана.", booking.Id, booking.EventId);
+            await dbContext.CreateSyncContext<Booking>().ExecuteActionAsync(async() =>
+            {
+                if (await dbContext.Bookings.FindAsync(booking.Id) is Booking dest)
+                {
+                    if (bookingConfirmed)
+                        dest.Confirm();
+                    else
+                    {
+                        dest.Reject();
+                    }
+                }
+            }, CancellationToken.None);
+
+            if (bookingConfirmed)
+                logger.LogInformation("Бронь {Booking} для события {Event} подтверждена.", booking.Id, booking.EventId);
+            else
+                logger.LogWarning("Бронь {Booking} для события {Event} отклонена.", booking.Id, booking.EventId);
         }
+        else
+            logger.LogError("Бронь {Booking} для события {Event} в БД не найдена.", booking.Id, booking.EventId);
+    }
+    static Guid? GetFirstId(IEnumerable<Event> events)
+    {
+        if (events.FirstOrDefault() is Event @event)
+            return @event.Id;
+        return null;
     }
 }

@@ -75,9 +75,9 @@ public class DataTransferTest : TraitAttributes
     }
 
     public static readonly IEnumerable<object[]> Bookings = [
-        [new Booking() { Id = Guid.NewGuid(), EventId = Guid.NewGuid(), CreatedAt = DateTime.Now, Status = BookingStatus.Confirmed }],
-        [new Booking() { Id = Guid.NewGuid(), EventId = Guid.NewGuid(), CreatedAt = DateTime.Now, Status = BookingStatus.Pending }],
-        [new Booking() { Id = Guid.NewGuid(), EventId = Guid.NewGuid(), CreatedAt = DateTime.Now, Status = BookingStatus.Rejected }],
+        [new Booking(Guid.NewGuid())],
+        [new Booking(Guid.NewGuid())],
+        [new Booking(Guid.NewGuid())],
     ];
 
     [Trait(Category, Category_DTO)]
@@ -86,8 +86,21 @@ public class DataTransferTest : TraitAttributes
     public async Task Booking_Info_Success(Booking booking)
     {
         // Given
-    
+        var expectedStatus = Random.Shared.Next(0, 1) % 2 == 0
+            ? BookingStatus.Confirmed
+            : BookingStatus.Rejected;
+
         // When
+        switch(expectedStatus)
+        {
+            case BookingStatus.Confirmed:
+                booking.Confirm();
+                break;
+            case BookingStatus.Rejected:
+                booking.Reject();
+                break;
+        }
+        
         var info = booking.ToInfo();
     
         // Then
@@ -95,6 +108,7 @@ public class DataTransferTest : TraitAttributes
         Assert.Equal(booking.EventId, info.EventId);
         Assert.Equal(booking.Status, info.Status);
         Assert.Equal(booking.ProcessedAt, info.ProcessedAt);
+        Assert.Equal(expectedStatus, info.Status);
     }
 
 }
