@@ -76,4 +76,6 @@ public interface IAppDbContext
     /// <param name="cancellation"></param>
     /// <returns></returns>
     Task<Booking?> DeleteBookingAsync(Guid id, CancellationToken cancellation);
+
+    ISyncDataContext<T> CreateSyncContext<T>() where T : class;
 }

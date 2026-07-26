@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Linq.Expressions;
 using EventManager.Application.Interfaces;
 using EventManager.Models;
@@ -96,5 +97,45 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             await SaveChangesAsync(cancellation);
         }
     }
+    #endregion
+
+    #region Инфраструктура синхронизации.
+    static readonly ConcurrentDictionary<int, SemaphoreSlim> _locks = new();
+
+    class SyncDataContext<T>(AppDbContext dbContext) : ISyncDataContext<T> where T : class
+    {
+        static int _hashCode  = typeof(T).GUID.GetHashCode();
+        SemaphoreSlim _lock = _locks.GetOrAdd(_hashCode, (_) => new(1, 1));
+        DbSet<T> _dbSet = dbContext.Set<T>();
+           
+        async Task ISyncDataContext<T>.ExecuteActionAsync(Func<DbSet<T>, Task> action, CancellationToken cancellation)
+        {
+            await _lock.WaitAsync(cancellation);
+            try
+            {
+                await action(_dbSet);
+                await dbContext.SaveChangesAsync(cancellation);
+            }
+            catch
+            {
+                RollbackChanges();
+                throw;
+            }
+            finally
+            {
+                _lock.Release();
+            }
+        }
+
+        void RollbackChanges()
+        {
+            var entries = dbContext.ChangeTracker.Entries<T>().Where(x => x.State != EntityState.Unchanged).ToList();
+            foreach(var entry in entries)
+                entry.State = EntityState.Unchanged;
+        }
+    }
+
+    ISyncDataContext<T> IAppDbContext.CreateSyncContext<T>() where T : class
+        => new SyncDataContext<T>(this);
     #endregion
 }
