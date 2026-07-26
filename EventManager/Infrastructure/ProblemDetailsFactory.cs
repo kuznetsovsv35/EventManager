@@ -57,4 +57,13 @@ public static class ProblemDetailsFactory
             Detail = detail ?? "Ресурс не найден.",
             Status = StatusCodes.Status404NotFound,
         });
+
+    public static ProblemDetailsBuilder<ProblemDetails> Conflict(string? detail = null, string? title = null)
+        => new(new()
+        {
+            Type = "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.8",
+            Title = title ?? "Конфликт",
+            Detail = detail ?? "Состояние ресурса изменено, обновление невозможно",
+            Status = StatusCodes.Status409Conflict,
+        });
 }
