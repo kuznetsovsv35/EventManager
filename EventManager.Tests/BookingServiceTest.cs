@@ -20,7 +20,8 @@ public class BookingServiceTest(EventManagerTestContext context) : TraitAttribut
     public async Task CreateBookingExistingEvent_Success()
     {
         // Given
-        await using var scope = context.CreateAsyncScope();
+        var serviceProvider = context.CreateServiceProvider();
+        await using var scope = serviceProvider.CreateAsyncScope();
         var bookingService = scope.ServiceProvider.GetRequiredService<IBookingService>();
         var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
 
@@ -44,14 +45,14 @@ public class BookingServiceTest(EventManagerTestContext context) : TraitAttribut
     /// <summary>
     /// Создание несколько броней для одного события.
     /// </summary>
-    /// <param name="bookingCount"></param>
     /// <returns></returns>
     [Trait(Category, Category_Booking)]
     [Fact]
     public async Task CreateMultiBookingsForEvent_Success()
     {
         // Given
-        await using var scope = context.CreateAsyncScope();
+        var serviceProvider = context.CreateServiceProvider();
+        await using var scope = serviceProvider.CreateAsyncScope();
         var bookingService = scope.ServiceProvider.GetRequiredService<IBookingService>();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
         var eventId = await context.GetRandomEventId(CancellationToken.None);
@@ -74,6 +75,53 @@ public class BookingServiceTest(EventManagerTestContext context) : TraitAttribut
     }
 
     /// <summary>
+    /// Тест лимита бронирования (попыток вдвое больше чем мест для случайного события).
+    /// </summary>
+    /// <returns></returns>
+    [Trait(Category, Category_Booking)]
+    [Fact]
+    public async Task TestSeatLimit_Success()
+    {
+        // Given
+        var serviceProvider = context.CreateServiceProvider();
+        await using var scope = serviceProvider.CreateAsyncScope();
+        var bookingService = scope.ServiceProvider.GetRequiredService<IBookingService>();
+        var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
+        var eventId = await context.GetRandomEventId(CancellationToken.None);
+        var bookingCount = (await eventService.GetEventAsync(eventId, CancellationToken.None)).AvailableSeats * 2;
+        var expectedSuccessCount = bookingCount / 2;
+        var expectedFailCount = bookingCount - expectedSuccessCount;
+        
+        var successCount = 0;
+        var failCount = 0;
+        var processedCount = 0;
+
+        // When
+        await Task.WhenAll(Enumerable
+            .Range(0, bookingCount)
+            .Select(async(_) => 
+            {
+                try
+                {
+                    await bookingService.CreateBookingAsync(eventId, CancellationToken.None);
+                    Interlocked.Increment(ref successCount);
+                }
+                catch(NoAvailableSeatsException)
+                {
+                    Interlocked.Increment(ref failCount);
+                }
+                Interlocked.Increment(ref processedCount);
+            }));
+    
+        // Then
+        Assert.Equal(bookingCount, processedCount);
+        Assert.Equal(bookingCount, expectedSuccessCount + expectedFailCount);
+        Assert.Equal(bookingCount, successCount + failCount);
+        Assert.Equal(expectedSuccessCount, successCount);
+        Assert.Equal(expectedFailCount, failCount);
+    }
+
+    /// <summary>
     /// Получение информации о брони по идентификатору.
     /// </summary>
     /// <returns></returns>
@@ -82,7 +130,8 @@ public class BookingServiceTest(EventManagerTestContext context) : TraitAttribut
     public async Task GetBookingById_Success()
     {
         // Given
-        await using var scope = context.CreateAsyncScope();
+        var serviceProvider = context.CreateServiceProvider();
+        await using var scope = serviceProvider.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
         var bookingService = scope.ServiceProvider.GetRequiredService<IBookingService>();
         
@@ -239,7 +288,8 @@ public class BookingServiceTest(EventManagerTestContext context) : TraitAttribut
     public async Task CreateBookingForDeletedEvent_Fail()
     {
         // Given
-        await using var scope = context.CreateAsyncScope();
+        var serviceProvider = context.CreateServiceProvider();
+        await using var scope = serviceProvider.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
         var bookingService = scope.ServiceProvider.GetRequiredService<IBookingService>();
         
