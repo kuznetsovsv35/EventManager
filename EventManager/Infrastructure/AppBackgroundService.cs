@@ -22,6 +22,8 @@ public class AppBackgroundService(
 
     public BackgroundServiceStatus Status => _status;
 
+    public event EventHandler<Booking>? ProcessBooking;
+
     public override Task StartAsync(CancellationToken cancellation)
     {
         Interlocked.CompareExchange(ref _status, BackgroundServiceStatus.Starting, BackgroundServiceStatus.Stopped);
@@ -123,9 +125,11 @@ public class AppBackgroundService(
             dbContext.Bookings.Update(booking);
         }, cancellation);
 
-    static Task CustomProcessBooking(Booking booking, CancellationToken cancellation)
+    Task CustomProcessBooking(Booking booking, CancellationToken cancellation)
     {
-        booking.Confirm();
+        ProcessBooking?.Invoke(this, booking);
+        if (booking.Status == BookingStatus.Pending)
+            booking.Confirm();
         return Task.Delay(ProcessingDelay);
     }
 }
