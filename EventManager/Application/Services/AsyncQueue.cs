@@ -63,8 +63,9 @@ public class AsyncQueue<T> : IAsyncQueue<T>
             await _lock.WaitAsync(cancellation);
             try
             {
-                var items = new T [_queue.Count]; 
-                _queue.CopyTo(items, 0);
+                var items = new List<T>(_queue.Count); 
+                items.AddRange(_queue);
+                _queue.Clear();
                 Interlocked.Exchange(ref _trigger, new(0))?.Dispose();
                 return items;
             }
