@@ -82,10 +82,17 @@ public class AppBackgroundService(
 
         if (temp is { Booking: Booking })
         {         
-            await CustomProcessBooking(booking, cancellation);
-            
-            if (booking.Status == BookingStatus.Confirmed && temp is { Event: null })
+            try
+            {
+                await CustomProcessBooking(booking, cancellation);
+                if (temp is { Event: null })
+                    throw new EventNotFoundException(nameof(booking.EventId), booking.EventId);
+            }
+            catch(Exception ex) when (ex is not OperationCanceledException)
+            {
                 booking.Reject();
+                logger.LogError(ex, "Ошибка обработки брони {Booking} для события {Event}.", booking.Id, booking.EventId);
+            }
 
             await UpdateData(dbContext, booking, cancellation);
 
