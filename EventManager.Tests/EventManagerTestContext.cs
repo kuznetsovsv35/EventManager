@@ -24,15 +24,14 @@ public class EventManagerTestContext
         var eventIndex = Random.Shared.Next(eventCount);
         return (await dbContext.GetEvents().Skip(eventIndex).FirstAsync(cancellation)).Id;
     }
-    readonly TestAppDbContext _dbContext = new($"Test_{Guid.NewGuid()}");
-
     readonly IServiceCollection _services;
 
     public EventManagerTestContext()
     {
         _services = new ServiceCollection()
             .AddSingleton<IAsyncQueue<Booking>, AsyncQueue<Booking>>()
-            .AddScoped(_ => _dbContext.CreateNewInstance())
+            .AddSingleton(_ => new TestAppDbContext($"Test_{Guid.NewGuid()}"))
+            .AddScoped(provider => provider.GetRequiredService<TestAppDbContext>().CreateNewInstance())
             .AddScoped<IFilter<Event>, FilterService<Event>>()
             .AddScoped<IPaginator<Event>, PaginateService<Event>>()
             .AddScoped<IEventService, EventService>()
