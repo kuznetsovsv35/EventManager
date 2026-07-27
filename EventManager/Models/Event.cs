@@ -25,7 +25,7 @@ public class Event
 
     public bool TryReserveSeats(int count = 1)
     {
-        if (AvailableSeats - count < 0)
+        if (AvailableSeats <  count)
             return false;
         
         ReservedCount += count;

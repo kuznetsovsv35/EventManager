@@ -58,7 +58,7 @@ public class Booking
 
     bool TryChangeStatus(BookingStatus status)
     {
-        if (Status == BookingStatus.Pending)
+        if (Status == BookingStatus.Pending || status == BookingStatus.Rejected)
         {
             Status = status;
             ProcessedAt = DateTime.Now;
