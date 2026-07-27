@@ -9,7 +9,7 @@ public class BookingService(IAppDbContext dbContext, IAsyncQueue<Booking> bookin
 {
     public async Task<BookingInfo> CreateBookingAsync(Guid eventId, CancellationToken cancellation)
     {
-        var booking = await dbContext.CreateSyncContext<Event>().ExecuteActionAsync(async() =>
+        var booking = await dbContext.CreateSyncContext<Booking>().ExecuteActionAsync(async() =>
         {
             if (await dbContext.Events.FindAsync(eventId, cancellation) is Event @event)
             {

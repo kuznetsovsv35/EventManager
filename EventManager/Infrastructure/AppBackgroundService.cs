@@ -9,6 +9,15 @@ public class AppBackgroundService(
     IAsyncQueue<Booking> bookingQueue,
     ILogger<AppBackgroundService> logger) : BackgroundService, IAppBackgroundService
 {
+    /// <summary>
+    /// Имитация обработки брони.
+    /// </summary>
+    static readonly TimeSpan ProcessingDelay = TimeSpan.FromSeconds(2);
+    /// <summary>
+    /// Пауза восстановления сервиса после исключения.
+    /// </summary>
+    static readonly TimeSpan RecoveryPause = TimeSpan.FromSeconds(1);
+
     BackgroundServiceStatus _status = BackgroundServiceStatus.Stopped;
 
     public BackgroundServiceStatus Status => _status;
@@ -47,7 +56,7 @@ public class AppBackgroundService(
                 {
                     logger.LogError(ex, "Ошибка обработки.");
                     if (!stoppingToken.IsCancellationRequested)
-                        await Task.Delay(TimeSpan.FromSeconds(1), stoppingToken);
+                        await Task.Delay(RecoveryPause, stoppingToken);
                 }
             }
         }
@@ -66,57 +75,50 @@ public class AppBackgroundService(
         var temp = await dbContext.GetBookings(x => x.Id == booking.Id && x.Status == BookingStatus.Pending)
             .GroupJoin(dbContext.GetEvents(), b => b.EventId, e => e.Id, (booking, events) => new
             {
-                booking.Status,
-                EventId = GetFirstId(events),
+                Booking = booking,
+                Event = events.FirstOrDefault(),
             })
             .FirstOrDefaultAsync(cancellation);
 
-        if (temp is { Status: BookingStatus.Pending })
+        if (temp is { Booking: Booking })
         {         
-            await Task.Delay(TimeSpan.FromSeconds(2), cancellation);
-            var bookingConfirmed = true;
+            await CustomProcessBooking(booking, cancellation);
             
-            if (temp is { EventId: Guid eventId })
-            {                                
-                if (!bookingConfirmed)
-                {
-                    await dbContext.CreateSyncContext<Event>().ExecuteActionAsync(async() =>
-                    {
-                        if (await dbContext.Events.FindAsync(eventId) is Event dest)
-                            dest.ReleaseSeats();
-                    }, CancellationToken.None);
-                }
-            }
-            else
-            {
-                bookingConfirmed = false;
-            }
+            if (booking.Status == BookingStatus.Confirmed && temp is { Event: null })
+                booking.Reject();
 
-            await dbContext.CreateSyncContext<Booking>().ExecuteActionAsync(async() =>
-            {
-                if (await dbContext.Bookings.FindAsync(booking.Id) is Booking dest)
-                {
-                    if (bookingConfirmed)
-                        dest.Confirm();
-                    else
-                    {
-                        dest.Reject();
-                    }
-                }
-            }, CancellationToken.None);
+            await UpdateData(dbContext, booking, cancellation);
 
-            if (bookingConfirmed)
-                logger.LogInformation("Бронь {Booking} для события {Event} подтверждена.", booking.Id, booking.EventId);
-            else
-                logger.LogWarning("Бронь {Booking} для события {Event} отклонена.", booking.Id, booking.EventId);
+            switch (booking.Status)
+            {
+                case BookingStatus.Confirmed:
+                    logger.LogInformation("Бронь {Booking} для события {Event} подтверждена.", booking.Id, booking.EventId);
+                    break;
+                case BookingStatus.Rejected:
+                    logger.LogWarning("Бронь {Booking} для события {Event} отклонена.", booking.Id, booking.EventId);
+                    break;
+                default:
+                    throw new InvalidDataException($"Неверный статус брони {booking.Id}.");
+            }
         }
         else
             logger.LogError("Бронь {Booking} для события {Event} в БД не найдена.", booking.Id, booking.EventId);
     }
-    static Guid? GetFirstId(IEnumerable<Event> events)
+
+    static Task UpdateData(IAppDbContext dbContext, Booking booking, CancellationToken cancellation)
+        => dbContext.CreateSyncContext<Booking>().ExecuteActionAsync(async() =>
+        {
+            if (booking.Status == BookingStatus.Rejected)
+            {
+                if (await dbContext.Events.FindAsync(booking.EventId, cancellation) is Event @event)
+                    @event.ReleaseSeats();
+            }
+            dbContext.Bookings.Update(booking);
+        }, cancellation);
+
+    static Task CustomProcessBooking(Booking booking, CancellationToken cancellation)
     {
-        if (events.FirstOrDefault() is Event @event)
-            return @event.Id;
-        return null;
+        booking.Confirm();
+        return Task.Delay(ProcessingDelay);
     }
 }
