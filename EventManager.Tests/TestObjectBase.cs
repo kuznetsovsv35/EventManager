@@ -1,6 +1,6 @@
 namespace EventManager.Tests;
 
-public class TraitAttributes
+public class TestObjectBase
 {
     protected const string Category = "Category";
     protected const string Category_Filters = "Filters";

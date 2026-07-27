@@ -130,6 +130,6 @@ public class AppBackgroundService(
         ProcessBooking?.Invoke(this, booking);
         if (booking.Status == BookingStatus.Pending)
             booking.Confirm();
-        return Task.Delay(ProcessingDelay);
+        return Task.Delay(ProcessingDelay, cancellation);
     }
 }

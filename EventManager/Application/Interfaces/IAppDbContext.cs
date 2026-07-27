@@ -13,7 +13,7 @@ public interface IAppDbContext
     /// Набор данных событий.
     /// </summary>
     DbSet<Event> Events { get; }
-    
+
     /// <summary>
     /// Возвращает запрос отфильтрованного набора.
     /// </summary>

@@ -22,7 +22,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     {
         if (filter == null)
             return Events.AsNoTracking();
-        
+
         return Events.AsNoTracking().Where(filter);
     }
 
@@ -60,7 +60,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         return null;
     }
     #endregion
-    
+
     #region  Bookings
     public DbSet<Booking> Bookings { get; private set; }
 
@@ -107,9 +107,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
 
     class SyncDataContext<T>(AppDbContext dbContext) : ISyncDataContext
     {
-        static int _hashCode  = typeof(T).GUID.GetHashCode();
+        static int _hashCode = typeof(T).GUID.GetHashCode();
         SemaphoreSlim _lock = _locks.GetOrAdd(_hashCode, (_) => new(1, 1));
-           
+
         async Task<TResult> ISyncDataContext.ExecuteActionAsync<TResult>(Func<Task<TResult>> action, CancellationToken cancellation)
         {
             await _lock.WaitAsync(cancellation);
@@ -152,7 +152,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         void RollbackChanges()
         {
             var entries = dbContext.ChangeTracker.Entries().Where(x => x.State != EntityState.Unchanged).ToList();
-            foreach(var entry in entries)
+            foreach (var entry in entries)
                 entry.State = EntityState.Unchanged;
         }
     }

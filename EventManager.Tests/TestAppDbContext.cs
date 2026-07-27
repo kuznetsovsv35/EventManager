@@ -6,6 +6,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EventManager.Tests;
 
+/// <summary>
+/// Репозиторий с тестовыми данными.
+/// </summary>
 class TestAppDbContext : AppDbContext
 {
     internal const int EventCount = 30;

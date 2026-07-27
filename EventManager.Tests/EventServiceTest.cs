@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace EventManager.Tests;
 
-public class EventServiceTest(EventManagerTestContext context) : TraitAttributes, IClassFixture<EventManagerTestContext>
+public class EventServiceTest(EventManagerTestContext context) : TestObjectBase, IClassFixture<EventManagerTestContext>
 {
     ////////////////////////////////////////////////////////////////////////////////////////////
     /// Тесты управления событиями.
@@ -24,7 +24,7 @@ public class EventServiceTest(EventManagerTestContext context) : TraitAttributes
         await using var scope = context.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
-        
+
         var title = "Simple event";
         var startAt = new DateTime(2026, 6, 28, 10, 0, 00);
         var endAt = new DateTime(2026, 6, 28, 10, 30, 00);
@@ -91,7 +91,7 @@ public class EventServiceTest(EventManagerTestContext context) : TraitAttributes
         // When
 
         // Then
-        var ex = await Assert.ThrowsAnyAsync<ValidationException>(async() => await eventService.CreateEventAsync(inputData, CancellationToken.None));
+        var ex = await Assert.ThrowsAnyAsync<ValidationException>(async () => await eventService.CreateEventAsync(inputData, CancellationToken.None));
         Assert.NotNull(ex?.ValidationResult?.MemberNames);
         Assert.NotEmpty(ex.ValidationResult.MemberNames);
     }
@@ -107,7 +107,7 @@ public class EventServiceTest(EventManagerTestContext context) : TraitAttributes
         await using var scope = context.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
-        
+
         var expected = await dbContext.GetEvents().Select(x => x.ToOutputData()).ToListAsync();
 
         // When
@@ -218,7 +218,7 @@ public class EventServiceTest(EventManagerTestContext context) : TraitAttributes
         // When
 
         // Then
-        var ex = await Assert.ThrowsAsync<EventNotFoundException>(async() => await eventService.UpdateEventAsync(requestedId, inputData, CancellationToken.None));
+        var ex = await Assert.ThrowsAsync<EventNotFoundException>(async () => await eventService.UpdateEventAsync(requestedId, inputData, CancellationToken.None));
         Assert.Equal(requestedId, ex.ObjectKey);
     }
 
@@ -429,7 +429,7 @@ public class EventServiceTest(EventManagerTestContext context) : TraitAttributes
         await using var scope = context.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
-        
+
         var endDate = endAt.AddDays(1).Date;
         var expected = await dbContext
             .GetEvents(x => x.EndAt < endDate)

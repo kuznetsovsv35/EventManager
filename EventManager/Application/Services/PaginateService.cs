@@ -8,7 +8,7 @@ namespace EventManager.Application.Services;
 public class PaginateService<T> : IPaginator<T>
 {
     async Task<PaginateResult<TView>> IPaginator<T>.PaginateAsync<TView>(
-        IQueryable<T> values, 
+        IQueryable<T> values,
         int page, int pageSize, Func<T, TView> viewFactory,
         CancellationToken cancellation)
     {

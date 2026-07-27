@@ -4,24 +4,32 @@ using EventManager.Models;
 
 namespace EventManager.Tests;
 
-public class DataTransferTest : TraitAttributes
+/// <summary>
+/// Тесты DTO.
+/// </summary>
+public class DataTransferTest : TestObjectBase
 {
     public static readonly IEnumerable<object[]> ValidEventInputData = [
         [new EventInputData() { Title = "First Event Title", StartAt = new DateTime(2023, 07, 23), EndAt = new DateTime(2023, 07, 24), TotalSeats = 10}],
         [new EventInputData() { Title = "Second Event Title", StartAt = new DateTime(2026, 01, 23), EndAt = new DateTime(2026, 02, 23), TotalSeats = 20}],
         [new EventInputData() { Title = "Third Event Title", StartAt = new DateTime(2026, 01, 23), EndAt = new DateTime(2027, 01, 23), TotalSeats = 30}]
     ];
-    
+
+    /// <summary>
+    /// Тест преобразования входных данных в сущность события.
+    /// </summary>
+    /// <param name="inputData"></param>
+    /// <returns></returns>
     [Trait(Category, Category_DTO)]
     [Theory]
     [MemberData(nameof(ValidEventInputData))]
     public async Task InputData_Event_Success(EventInputData inputData)
     {
         // Given
-    
+
         // When
         var @event = inputData.ToEvent();
-    
+
         // Then
         Assert.Equal(inputData.Title, @event.Title);
         Assert.Equal(inputData.StartAt, @event.StartAt);
@@ -35,15 +43,21 @@ public class DataTransferTest : TraitAttributes
         [new EventInputData() { Title = "Third Event Title", StartAt = new DateTime(2026, 01, 23), EndAt = new DateTime(2027, 01, 23), TotalSeats = 0}, nameof(EventInputData.TotalSeats)]
     ];
 
+    /// <summary>
+    /// Тест валидации входных данных (неудачно).
+    /// </summary>
+    /// <param name="inputData"></param>
+    /// <param name="expectedMembers"></param>
+    /// <returns></returns>
     [Trait(Category, Category_DTO)]
     [Theory]
     [MemberData(nameof(InvalidEventInputData))]
     public async Task InputData_Event_Fail(EventInputData inputData, params string[] expectedMembers)
     {
         // Given
-    
+
         // When
-    
+
         // Then
         var ex = Assert.Throws<ValidationException>(() => _ = inputData.ToEvent());
         Assert.NotNull(ex?.ValidationResult?.MemberNames);
@@ -57,16 +71,21 @@ public class DataTransferTest : TraitAttributes
         [new Event(30) { Title = "Third Event Title", StartAt = new DateTime(2026, 01, 23), EndAt = new DateTime(2027, 01, 23)}]
     ];
 
+    /// <summary>
+    /// Тест преобразования сущности события в выходные данные.
+    /// </summary>
+    /// <param name="event"></param>
+    /// <returns></returns>
     [Trait(Category, Category_DTO)]
     [Theory]
     [MemberData(nameof(ValidEventIs))]
     public async Task Event_OutputData_Success(Event @event)
     {
         // Given
-    
+
         // When
         var outputData = @event.ToOutputData();
-    
+
         // Then
         Assert.Equal(@event.Title, outputData.Title);
         Assert.Equal(@event.StartAt, outputData.StartAt);
@@ -80,6 +99,11 @@ public class DataTransferTest : TraitAttributes
         [new Booking(Guid.NewGuid())],
     ];
 
+    /// <summary>
+    /// Тест преобразования сущности брони в выходные данные.
+    /// </summary>
+    /// <param name="booking"></param>
+    /// <returns></returns>
     [Trait(Category, Category_DTO)]
     [Theory]
     [MemberData(nameof(Bookings))]
@@ -91,7 +115,7 @@ public class DataTransferTest : TraitAttributes
             : BookingStatus.Rejected;
 
         // When
-        switch(expectedStatus)
+        switch (expectedStatus)
         {
             case BookingStatus.Confirmed:
                 booking.Confirm();
@@ -100,9 +124,9 @@ public class DataTransferTest : TraitAttributes
                 booking.Reject();
                 break;
         }
-        
+
         var info = booking.ToInfo();
-    
+
         // Then
         Assert.Equal(booking.Id, info.Id);
         Assert.Equal(booking.EventId, info.EventId);

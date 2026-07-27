@@ -11,7 +11,7 @@ namespace EventManager.Tests;
 /// Тест разбивки на страницы.
 /// </summary>
 /// <param name="fixture"></param>
-public class PaginatorTest(EventManagerTestContext context) : TraitAttributes, IClassFixture<EventManagerTestContext>
+public class PaginatorTest(EventManagerTestContext context) : TestObjectBase, IClassFixture<EventManagerTestContext>
 {
     /// <summary>
     /// Тест валидации параметров на страницы.
@@ -33,7 +33,7 @@ public class PaginatorTest(EventManagerTestContext context) : TraitAttributes, I
         // When
 
         // Then
-        await Assert.ThrowsAnyAsync<PaginatorParamException>(async() 
+        await Assert.ThrowsAnyAsync<PaginatorParamException>(async ()
             => await paginator.PaginateAsync(dbContext.GetEvents(), page, pageSize, x => x, CancellationToken.None));
     }
 
@@ -58,7 +58,7 @@ public class PaginatorTest(EventManagerTestContext context) : TraitAttributes, I
         await using var scope = context.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
         var paginator = scope.ServiceProvider.GetRequiredService<IPaginator<Event>>();
-        
+
         var expectedTotalCount = await dbContext.GetEvents().CountAsync();
         var expectedValues = await dbContext
             .GetEvents()
@@ -69,8 +69,8 @@ public class PaginatorTest(EventManagerTestContext context) : TraitAttributes, I
 
         // When
         var pageResult = await paginator.PaginateAsync(
-            dbContext.GetEvents(), 
-            page, pageSize, x => x.ToOutputData(), 
+            dbContext.GetEvents(),
+            page, pageSize, x => x.ToOutputData(),
             CancellationToken.None);
 
         // Then

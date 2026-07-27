@@ -2,7 +2,10 @@ using EventManager.Models;
 
 namespace EventManager.Tests;
 
-public class ManageSeatsTest : TraitAttributes
+/// <summary>
+/// Тесты логики управления местами на событиях.
+/// </summary>
+public class ManageSeatsTest : TestObjectBase
 {
     public static readonly IEnumerable<object[]> ReserveSeats_Data = [
         [new Event(10) { Title = "First Event Title", StartAt = new DateTime(2023, 07, 23), EndAt = new DateTime(2023, 07, 24)}],
@@ -19,10 +22,10 @@ public class ManageSeatsTest : TraitAttributes
         var totalSeats = @event.TotalSeats;
         var reserveCount = @event.AvailableSeats / 2;
         var expectedAvailableSeats = @event.AvailableSeats - reserveCount;
-    
+
         // When
         var reserveResult = @event.TryReserveSeats(reserveCount);
-    
+
         // Then
         Assert.True(reserveResult);
         Assert.Equal(totalSeats, @event.TotalSeats);
@@ -38,10 +41,10 @@ public class ManageSeatsTest : TraitAttributes
         var totalSeats = @event.TotalSeats;
         var reserveCount = @event.AvailableSeats + 1;
         var expectedAvailableSeats = @event.AvailableSeats;
-    
+
         // When
         var reserveResult = @event.TryReserveSeats(reserveCount);
-    
+
         // Then
         Assert.False(reserveResult);
         Assert.Equal(totalSeats, @event.TotalSeats);
@@ -56,10 +59,10 @@ public class ManageSeatsTest : TraitAttributes
         // Given
         var totalSeats = @event.TotalSeats;
         var reserveCount = Random.Shared.Next(1, @event.AvailableSeats + 1);
-        var releaseCount = Random.Shared.Next(1, reserveCount + 1);        
+        var releaseCount = Random.Shared.Next(1, reserveCount + 1);
         var expectedAfterReserve = @event.AvailableSeats - reserveCount;
         var expectedAfterRelease = expectedAfterReserve + releaseCount;
-   
+
         // When
         var reserveResult = @event.TryReserveSeats(reserveCount);
         var totalAfterReserve = @event.TotalSeats;
@@ -68,7 +71,7 @@ public class ManageSeatsTest : TraitAttributes
         @event.ReleaseSeats(releaseCount);
         var totalAfterRelease = @event.TotalSeats;
         var availableAfterRelease = @event.AvailableSeats;
-        
+
         // Then
         Assert.True(reserveResult);
         Assert.Equal(totalSeats, totalAfterReserve);
@@ -93,12 +96,12 @@ public class ManageSeatsTest : TraitAttributes
         var totalSeats = @event.TotalSeats;
         var reserveCount = Random.Shared.Next(1, @event.AvailableSeats + 1);
         var newTotalSeats = Random.Shared.Next(1, totalSeats + 1);
-    
+
         // When
         var reserveResult = @event.TryReserveSeats(reserveCount);
         var availableSeats = @event.AvailableSeats;
         @event.UpdateTotalSeats(newTotalSeats);
-    
+
         // Then
         Assert.True(reserveResult);
 

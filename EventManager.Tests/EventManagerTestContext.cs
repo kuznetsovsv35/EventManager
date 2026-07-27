@@ -10,12 +10,12 @@ using Moq;
 namespace EventManager.Tests;
 
 /// <summary>
-/// Контекст метода теста.
+/// Контекст методов теста.
 /// </summary>
 public class EventManagerTestContext
 {
     public IServiceProvider ServiceProvider { get; }
-    
+
     public async Task<Guid> GetRandomEventId(CancellationToken cancellation)
     {
         await using var scope = ServiceProvider.CreateAsyncScope();

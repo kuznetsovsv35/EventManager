@@ -1,5 +1,3 @@
-using EventManager.Models;
-
 namespace EventManager.Infrastructure;
 
 public class EventNotFoundException : ObjectNotFoundException<Guid>

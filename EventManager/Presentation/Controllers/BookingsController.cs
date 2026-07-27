@@ -4,6 +4,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EventManager.Presentation.Controllers;
 
+/// <summary>
+/// Контролер управления бронированием.
+/// </summary>
+/// <param name="bookingService"></param>
 [ApiController]
 [Route("[controller]")]
 public class BookingsController(IBookingService bookingService) : ControllerBase

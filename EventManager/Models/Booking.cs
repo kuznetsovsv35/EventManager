@@ -30,7 +30,7 @@ public class Booking
     /// <summary>
     /// Статус бронирования.
     /// </summary>
-    public BookingStatus Status { get; private set ; }
+    public BookingStatus Status { get; private set; }
 
     /// <summary>
     /// Момент создания брони.
@@ -42,8 +42,12 @@ public class Booking
     /// </summary>
     public DateTime? ProcessedAt { get; private set; }
 
-    Booking() {}
+    Booking() { }
 
+    /// <summary>
+    /// Конструктор события.
+    /// </summary>
+    /// <param name="eventId"></param>
     public Booking(Guid eventId)
     {
         Id = Guid.NewGuid();
@@ -52,8 +56,16 @@ public class Booking
         CreatedAt = DateTime.Now;
     }
 
+    /// <summary>
+    /// Подтверждает бронь.
+    /// </summary>
+    /// <returns></returns>
     public bool Confirm() => TryChangeStatus(BookingStatus.Confirmed);
 
+    /// <summary>
+    /// Отклоняет бронь.
+    /// </summary>
+    /// <returns></returns>
     public bool Reject() => TryChangeStatus(BookingStatus.Rejected);
 
     bool TryChangeStatus(BookingStatus status)

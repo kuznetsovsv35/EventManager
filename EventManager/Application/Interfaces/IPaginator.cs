@@ -14,8 +14,8 @@ public interface IPaginator<T>
     /// <param name="cancellation"></param>
     /// <returns></returns>
     Task<PaginateResult<TView>> PaginateAsync<TView>(
-        IQueryable<T> values, 
-        int page, int pageSize, 
+        IQueryable<T> values,
+        int page, int pageSize,
         Func<T, TView> viewFactory,
         CancellationToken cancellation);
 }

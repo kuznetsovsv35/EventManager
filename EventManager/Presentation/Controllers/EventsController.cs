@@ -15,7 +15,7 @@ public class EventsController(IEventService eventService) : ControllerBase
     [HttpGet]
     [ProducesResponseType<PaginateResult<EventOutputData>>(StatusCodes.Status200OK)]
     public async Task<ActionResult<PaginateResult<EventOutputData>>> GetEvents(
-        [FromQuery] EventQueryParams queryParams, CancellationToken cancellation) 
+        [FromQuery] EventQueryParams queryParams, CancellationToken cancellation)
             => Ok(await eventService.GetEvents(queryParams, queryParams, cancellation));
 
     [HttpGet("{id:guid}")]

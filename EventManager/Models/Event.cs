@@ -23,24 +23,41 @@ public class Event
 
     public int AvailableSeats => TotalSeats - ReservedCount;
 
+    /// <summary>
+    /// Попытка забронировать места.
+    /// </summary>
+    /// <param name="count"></param>
+    /// <returns></returns>
     public bool TryReserveSeats(int count = 1)
     {
-        if (AvailableSeats <  count)
+        if (AvailableSeats < count)
             return false;
-        
+
         ReservedCount += count;
         return true;
     }
 
+    /// <summary>
+    /// Освободить места.
+    /// </summary>
+    /// <param name="count"></param>
     public void ReleaseSeats(int count = 1) => ReservedCount -= Math.Min(ReservedCount, count);
 
+    /// <summary>
+    /// Обновить общее количество мест.
+    /// </summary>
+    /// <param name="totalSeats"></param>
     public void UpdateTotalSeats(int totalSeats) => TotalSeats = Math.Max(totalSeats, ReservedCount);
 
-    Event() {}
+    Event() { }
 
-    public Event(int totalSeats) : this() 
-    { 
+    /// <summary>
+    /// Конструктор события.
+    /// </summary>
+    /// <param name="totalSeats"></param>
+    public Event(int totalSeats) : this()
+    {
         Id = Guid.NewGuid();
-        TotalSeats = totalSeats; 
+        TotalSeats = totalSeats;
     }
 }

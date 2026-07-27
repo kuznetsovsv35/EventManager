@@ -11,7 +11,7 @@ namespace EventManager.Tests;
 /// Модульные тесты сервиса фильтрации.
 /// </summary>
 /// <param name="fixture"></param>
-public class FilterEventTest(EventManagerTestContext context) : TraitAttributes, IClassFixture<EventManagerTestContext>
+public class FilterEventTest(EventManagerTestContext context) : TestObjectBase, IClassFixture<EventManagerTestContext>
 {
     [Trait(Category, Category_Filters)]
     [Fact]
@@ -50,7 +50,7 @@ public class FilterEventTest(EventManagerTestContext context) : TraitAttributes,
         await using var scope = context.CreateAsyncScope();
         var filterService = scope.ServiceProvider.GetRequiredService<IFilter<Event>>();
         var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
-        
+
         const string titleAll = "Event title";
         const string titleNone = "AbcDeF";
 
@@ -95,7 +95,7 @@ public class FilterEventTest(EventManagerTestContext context) : TraitAttributes,
         await using var scope = context.CreateAsyncScope();
         var filterService = scope.ServiceProvider.GetRequiredService<IFilter<Event>>();
         var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
-        
+
         Expression<Func<Event, bool>> expr = x => x.Title.Contains(title, StringComparison.OrdinalIgnoreCase);
         var expected = await dbContext
             .GetEvents(expr)
@@ -126,7 +126,7 @@ public class FilterEventTest(EventManagerTestContext context) : TraitAttributes,
         await using var scope = context.CreateAsyncScope();
         var filterService = scope.ServiceProvider.GetRequiredService<IFilter<Event>>();
         var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
-        
+
         Expression<Func<Event, bool>> expression = x => x.Title.Contains(title, StringComparison.OrdinalIgnoreCase);
         var expected = await dbContext
             .GetEvents(expression)
@@ -163,7 +163,7 @@ public class FilterEventTest(EventManagerTestContext context) : TraitAttributes,
         await using var scope = context.CreateAsyncScope();
         var filterService = scope.ServiceProvider.GetRequiredService<IFilter<Event>>();
         var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
-        
+
         Expression<Func<Event, bool>> expression = x => x.StartAt >= startAt;
         var expected = await dbContext
             .GetEvents(expression)
@@ -201,8 +201,8 @@ public class FilterEventTest(EventManagerTestContext context) : TraitAttributes,
         await using var scope = context.CreateAsyncScope();
         var filterService = scope.ServiceProvider.GetRequiredService<IFilter<Event>>();
         var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
-        
-        endAt = endAt.AddDays(1).Date;        
+
+        endAt = endAt.AddDays(1).Date;
         Expression<Func<Event, bool>> expression = x => x.EndAt < endAt;
         var expected = await dbContext
             .GetEvents(expression)
@@ -241,7 +241,7 @@ public class FilterEventTest(EventManagerTestContext context) : TraitAttributes,
         await using var scope = context.CreateAsyncScope();
         var filterService = scope.ServiceProvider.GetRequiredService<IFilter<Event>>();
         var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
-        
+
         endAt = endAt?.AddDays(1).Date;
         var expected = await dbContext
             .GetEvents(

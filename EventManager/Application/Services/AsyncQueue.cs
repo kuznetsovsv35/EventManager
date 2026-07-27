@@ -51,7 +51,7 @@ public class AsyncQueue<T> : IAsyncQueue<T>
         {
             _lock.Release();
         }
-        
+
         _trigger.Release();
     }
 
@@ -63,7 +63,7 @@ public class AsyncQueue<T> : IAsyncQueue<T>
             await _lock.WaitAsync(cancellation);
             try
             {
-                var items = new List<T>(_queue.Count); 
+                var items = new List<T>(_queue.Count);
                 items.AddRange(_queue);
                 _queue.Clear();
                 Interlocked.Exchange(ref _trigger, new(0))?.Dispose();
@@ -73,6 +73,6 @@ public class AsyncQueue<T> : IAsyncQueue<T>
             {
                 _lock.Release();
             }
-        }        
+        }
     }
 }
