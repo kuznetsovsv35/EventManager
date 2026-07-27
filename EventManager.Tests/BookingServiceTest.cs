@@ -279,6 +279,23 @@ public class BookingServiceTest(EventManagerTestContext context) : TraitAttribut
         await Assert.ThrowsAsync<EventNotFoundException>(() => bookingService.CreateBookingAsync(eventId, CancellationToken.None));
     }
 
+    [Trait(Category, Category_Booking)]
+    [Fact]
+    public async Task CreateBookingNoAvailableSeats_Fail()
+    {
+        // Given
+        var serviceProvider = context.CreateServiceProvider();
+        await using var scope = serviceProvider.CreateAsyncScope();
+        var bookingService = scope.ServiceProvider.GetRequiredService<IBookingService>();
+        var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
+        var eventId = await context.GetRandomEventId(CancellationToken.None);
+
+    
+        // When
+    
+        // Then
+    }
+
     /// <summary>
     /// Тест неудачной попытки создать бронь для удаленного события.
     /// </summary>
