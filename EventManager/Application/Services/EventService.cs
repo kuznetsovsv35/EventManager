@@ -82,7 +82,16 @@ public class EventService(
 
     async Task<EventOutputData> IEventService.UpdateEventAsync(Guid id, EventInputData data, CancellationToken cancellation)
     {
-        var e = await dbContext.UpdateEventAsync(id, dest => data.Update(dest), cancellation);
+        var e = await dbContext.CreateSyncContext<Booking>().ExecuteActionAsync(async() => 
+        {
+            if (await dbContext.Events.FindAsync(id) is Event @event)
+            {
+                data.Update(@event);
+                return @event;
+            }
+            return null;
+        }, cancellation);
+        
         return e is not null 
             ? e.ToOutputData()
             : throw new EventNotFoundException(nameof(id), id);
