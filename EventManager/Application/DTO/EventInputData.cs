@@ -4,7 +4,7 @@ namespace EventManager.Application.DataTransfer;
 /// Входные данные запроса создания и обновления события.
 /// </summary>
 [EventInputDataValidation]
-public class EventInputData
+public class EventInputData()
 {
     [EventInputDataValidation("Заголовок события не может быть пустым.")]
     public string? Title { get; set; }
@@ -17,6 +17,9 @@ public class EventInputData
     [EventInputDataValidation("Момент окончания события не может быть раньше момента начала.")]
     public DateTime EndAt { get; set; }
 
+    [EventInputDataValidation("Общее число мест должно быть положительным числом")]
+    public int TotalSeats { get; set; }
+
     public override bool Equals(object? obj)
     {
         if (ReferenceEquals(this, obj))
@@ -26,7 +29,8 @@ public class EventInputData
             return Title == inputData.Title
                 && StartAt == inputData.StartAt
                 && EndAt == inputData.EndAt
-                && Description == inputData.Description;
+                && Description == inputData.Description
+                && TotalSeats == inputData.TotalSeats;
 
         return base.Equals(obj);
     }

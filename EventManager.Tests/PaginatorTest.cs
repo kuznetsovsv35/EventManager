@@ -1,4 +1,9 @@
+using EventManager.Application.DataTransfer;
+using EventManager.Application.Interfaces;
 using EventManager.Infrastructure;
+using EventManager.Models;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EventManager.Tests;
 
@@ -6,7 +11,7 @@ namespace EventManager.Tests;
 /// Тест разбивки на страницы.
 /// </summary>
 /// <param name="fixture"></param>
-public class PaginatorTest(PaginatorFixture fixture) : TraitAttributes, IClassFixture<PaginatorFixture>
+public class PaginatorTest(EventManagerTestContext context) : TestObjectBase, IClassFixture<EventManagerTestContext>
 {
     /// <summary>
     /// Тест валидации параметров на страницы.
@@ -19,15 +24,17 @@ public class PaginatorTest(PaginatorFixture fixture) : TraitAttributes, IClassFi
     [InlineData([0, 10])]
     [InlineData([1, -20])]
     [InlineData([1, 0])]
-    public void ValidateParameters_Fail(int page, int pageSize)
+    public async Task ValidateParameters_Fail(int page, int pageSize)
     {
         // Given
-
+        await using var scope = context.CreateAsyncScope();
+        var paginator = scope.ServiceProvider.GetRequiredService<IPaginator<Event>>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
         // When
 
         // Then
-        Assert.Throws<PaginatorParamException>(
-            () => fixture.Paginator.Paginate(fixture.Events, page, pageSize, x => x));
+        await Assert.ThrowsAnyAsync<PaginatorParamException>(async ()
+            => await paginator.PaginateAsync(dbContext.GetEvents(), page, pageSize, x => x, CancellationToken.None));
     }
 
     /// <summary>
@@ -45,16 +52,26 @@ public class PaginatorTest(PaginatorFixture fixture) : TraitAttributes, IClassFi
     [InlineData([2, 7, 5, 7])]
     [InlineData([5, 7, 5, 2])]
     [InlineData([1, 30, 1, 30])]
-    public void PaginateResult_Success(int page, int pageSize, int expectedPageCount, int expectedPageSize)
+    public async Task PaginateResult_Success(int page, int pageSize, int expectedPageCount, int expectedPageSize)
     {
         // Given
-        var expectedTotalCount = fixture.Events.Count();
-        var expectedValues = fixture.Events
+        await using var scope = context.CreateAsyncScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        var paginator = scope.ServiceProvider.GetRequiredService<IPaginator<Event>>();
+
+        var expectedTotalCount = await dbContext.GetEvents().CountAsync();
+        var expectedValues = await dbContext
+            .GetEvents()
             .Skip((page - 1) * pageSize)
-            .Take(pageSize);
+            .Take(pageSize)
+            .Select(x => x.ToOutputData())
+            .ToListAsync();
 
         // When
-        var pageResult = fixture.Paginator.Paginate(fixture.Events, page, pageSize, x => x);
+        var pageResult = await paginator.PaginateAsync(
+            dbContext.GetEvents(),
+            page, pageSize, x => x.ToOutputData(),
+            CancellationToken.None);
 
         // Then
         Assert.Equal(expectedPageCount, pageResult.PageCount);

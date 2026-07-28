@@ -1,5 +1,9 @@
 using System.Linq.Expressions;
+using EventManager.Application.DataTransfer;
+using EventManager.Application.Interfaces;
 using EventManager.Models;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace EventManager.Tests;
 
@@ -7,16 +11,18 @@ namespace EventManager.Tests;
 /// Модульные тесты сервиса фильтрации.
 /// </summary>
 /// <param name="fixture"></param>
-public class FilterEventTest(FilterEventFixture fixture) : TraitAttributes, IClassFixture<FilterEventFixture>
+public class FilterEventTest(EventManagerTestContext context) : TestObjectBase, IClassFixture<EventManagerTestContext>
 {
     [Trait(Category, Category_Filters)]
     [Fact]
-    public void Reset_Success()
+    public async Task Reset_Success()
     {
         // Given
+        await using var scope = context.CreateAsyncScope();
+        var filterService = scope.ServiceProvider.GetRequiredService<IFilter<Event>>();
 
         // When
-        var filter = fixture.FilterService.Reset();
+        var filter = filterService.Reset();
 
         // Then
         Assert.Null(filter.Expression);
@@ -24,79 +30,88 @@ public class FilterEventTest(FilterEventFixture fixture) : TraitAttributes, ICla
 
     [Trait(Category, Category_Filters)]
     [Fact]
-    public void AddNullCondition_Fail()
+    public async Task AddNullCondition_Fail()
     {
         // Given
-        var filter = fixture.FilterService.Reset();
+        await using var scope = context.CreateAsyncScope();
+        var filterService = scope.ServiceProvider.GetRequiredService<IFilter<Event>>();
 
         // Then
-        var ex = Assert.Throws<ArgumentNullException>(() => filter.AddCondition(null!));
+        var ex = Assert.Throws<ArgumentNullException>(() => filterService.AddCondition(null!));
         Assert.NotNull(ex.ParamName);
         Assert.NotEmpty(ex.ParamName);
     }
 
     [Trait(Category, Category_Filters)]
     [Fact]
-    public void SimpleFilterByTitle_Success()
+    public async Task SimpleFilterByTitle_Success()
     {
         // Given
+        await using var scope = context.CreateAsyncScope();
+        var filterService = scope.ServiceProvider.GetRequiredService<IFilter<Event>>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+
         const string titleAll = "Event title";
         const string titleNone = "AbcDeF";
-        var titleAllLowCase = titleAll.ToLower();
-        var titleNoneLowCase = titleNone.ToLower();
 
-        Expression<Func<Event, bool>> exprTitleAll = x => x.Title.ToLower().Contains(titleAllLowCase);  // all event expected
-        Expression<Func<Event, bool>> exprTitleNone = x => x.Title.ToLower().Contains(titleNoneLowCase);      // No events        
+        Expression<Func<Event, bool>> exprTitleAll = x => x.Title.Contains(titleAll, StringComparison.OrdinalIgnoreCase);  // all event expected
+        Expression<Func<Event, bool>> exprTitleNone = x => x.Title.Contains(titleNone, StringComparison.OrdinalIgnoreCase);      // No events        
 
-        var expectedAll = fixture.Events.Where(exprTitleAll).ToList();
-        var expectedAllCount = expectedAll.Count;
+        var expectedAll = await dbContext
+            .GetEvents(exprTitleAll)
+            .Select(x => x.ToOutputData())
+            .ToListAsync();
 
         // When
-        var actualAll = fixture.FilterService
+        var actualAll = await filterService
             .Reset()
             .AddCondition(exprTitleAll)
-            .ApplyFilter(fixture.Events)
-            .ToList();
+            .ApplyFilter(dbContext.GetEvents())
+            .Select(x => x.ToOutputData())
+            .ToListAsync();
 
-        var actualAllCount = actualAll.Count;
 
-        var actualNone = fixture.FilterService
+        var actualNone = await filterService
             .Reset()
             .AddCondition(exprTitleNone)
-            .ApplyFilter(fixture.Events)
-            .ToList();
+            .ApplyFilter(dbContext.GetEvents())
+            .Select(x => x.ToOutputData())
+            .ToListAsync();
 
         // Then
         Assert.Equal(expectedAll, actualAll);
         Assert.All(actualAll, item => Assert.Contains(titleAll, item.Title, StringComparison.OrdinalIgnoreCase));
-        Assert.Equal(expectedAllCount, actualAllCount);
         Assert.Empty(actualNone);
     }
 
     [Trait(Category, Category_Filters)]
     [Theory]
-    [InlineData(["event Title 1", 11])]
-    [InlineData(["Event title 2", 11])]
-    [InlineData(["event Title 3", 2])]
-    public void PartialFilterByTitle_Success(string title, int expectedCount)
+    [InlineData(["event Title 1"])]
+    [InlineData(["Event title 2"])]
+    [InlineData(["event Title 3"])]
+    public async Task PartialFilterByTitle_Success(string title)
     {
         // Given
-        var titleLowCase = title.ToLower();
-        Expression<Func<Event, bool>> expr = x => x.Title.ToLower().Contains(titleLowCase);
-        var expected = fixture.Events.Where(expr).ToList();
+        await using var scope = context.CreateAsyncScope();
+        var filterService = scope.ServiceProvider.GetRequiredService<IFilter<Event>>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+
+        Expression<Func<Event, bool>> expr = x => x.Title.Contains(title, StringComparison.OrdinalIgnoreCase);
+        var expected = await dbContext
+            .GetEvents(expr)
+            .Select(x => x.ToOutputData())
+            .ToListAsync();
 
         // When        
-        var actual = fixture.FilterService.Reset()
+        var actual = await filterService.Reset()
             .AddCondition(expr)
-            .ApplyFilter(fixture.Events)
-            .ToList();
-        var actualCount = actual.Count;
+            .ApplyFilter(dbContext.GetEvents())
+            .Select(x => x.ToOutputData())
+            .ToListAsync();
 
         // Then
-        Assert.Equal(expectedCount, expected.Count);
         Assert.All(actual, (item) => Assert.Contains(title, item.Title, StringComparison.OrdinalIgnoreCase));
         Assert.Equal(expected, actual);
-        Assert.Equal(expectedCount, actualCount);
     }
 
     public static readonly IEnumerable<object[]> Titles
@@ -105,125 +120,143 @@ public class FilterEventTest(FilterEventFixture fixture) : TraitAttributes, ICla
     [Trait(Category, Category_Filters)]
     [Theory]
     [MemberData(nameof(Titles))]
-    public void IterationFilterByTitle_Success(string title)
+    public async Task IterationFilterByTitle_Success(string title)
     {
         // Given
-        var titleLowCase = title.ToLower();
-        Expression<Func<Event, bool>> expression = x => x.Title.ToLower().Contains(titleLowCase);
-        var expected = fixture.Events.Where(expression).ToList();
-        var expectedCount = expected.Count;
+        await using var scope = context.CreateAsyncScope();
+        var filterService = scope.ServiceProvider.GetRequiredService<IFilter<Event>>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+
+        Expression<Func<Event, bool>> expression = x => x.Title.Contains(title, StringComparison.OrdinalIgnoreCase);
+        var expected = await dbContext
+            .GetEvents(expression)
+            .Select(x => x.ToOutputData())
+            .ToListAsync();
 
         // When
-        var actual = fixture.FilterService.Reset()
+        var actual = await filterService.Reset()
             .AddCondition(expression)
-            .ApplyFilter(fixture.Events)
-            .ToList();
-        var actualCount = actual.Count;
+            .ApplyFilter(dbContext.GetEvents())
+            .Select(x => x.ToOutputData())
+            .ToListAsync();
 
-        Assert.Equal(expectedCount, actualCount);
         Assert.Equal(expected, actual);
         Assert.All(actual, item => Assert.Contains(title, item.Title, StringComparison.OrdinalIgnoreCase));
     }
 
     public static readonly IEnumerable<object[]> StartDates =
         [
-            [new DateTime(2026, 1, 1), 30],
-            [new DateTime(2026, 6, 28), 30],
-            [new DateTime(2026, 6, 30), 28],
-            [new DateTime(2026, 7, 10), 18],
-            [new DateTime(2026, 7, 20), 8],
-            [new DateTime(2026, 7, 28), 0],
-            [new DateTime(2026, 8, 10), 0],
+            [new DateTime(2026, 1, 1)],
+            [new DateTime(2026, 6, 28)],
+            [new DateTime(2026, 6, 30)],
+            [new DateTime(2026, 7, 10)],
+            [new DateTime(2026, 7, 20)],
+            [new DateTime(2026, 7, 28)],
+            [new DateTime(2026, 8, 10)],
         ];
     [Trait(Category, Category_Filters)]
     [Theory]
     [MemberData(nameof(StartDates))]
-    public void FilterByStartDate_Success(DateTime startAt, int expectedCount)
+    public async Task FilterByStartDate_Success(DateTime startAt)
     {
         // Given
+        await using var scope = context.CreateAsyncScope();
+        var filterService = scope.ServiceProvider.GetRequiredService<IFilter<Event>>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+
         Expression<Func<Event, bool>> expression = x => x.StartAt >= startAt;
-        var expected = fixture.Events.Where(expression).ToList();
+        var expected = await dbContext
+            .GetEvents(expression)
+            .Select(x => x.ToOutputData())
+            .ToListAsync();
 
         // When
-        var actual = fixture.FilterService.Reset()
+        var actual = await filterService.Reset()
             .AddCondition(expression)
-            .ApplyFilter(fixture.Events)
-            .ToList();
-        var actualCount = actual.Count;
+            .ApplyFilter(dbContext.GetEvents())
+            .Select(x => x.ToOutputData())
+            .ToListAsync();
 
         // Then
-        Assert.Equal(expectedCount, expected.Count);
         Assert.Equal(expected, actual);
         Assert.All(actual, item => Assert.True(item.StartAt >= startAt));
-        Assert.Equal(expectedCount, actualCount);
     }
 
     public static readonly IEnumerable<object[]> EndDates =
         [
-            [new DateTime(2026, 1, 1), 0],
-            [new DateTime(2026, 6, 28), 1],
-            [new DateTime(2026, 6, 30), 3],
-            [new DateTime(2026, 7, 10), 13],
-            [new DateTime(2026, 7, 20), 23],
-            [new DateTime(2026, 7, 28), 30],
-            [new DateTime(2026, 8, 10), 30],
+            [new DateTime(2026, 1, 1)],
+            [new DateTime(2026, 6, 28)],
+            [new DateTime(2026, 6, 30)],
+            [new DateTime(2026, 7, 10)],
+            [new DateTime(2026, 7, 20)],
+            [new DateTime(2026, 7, 28)],
+            [new DateTime(2026, 8, 10)],
         ];
     [Trait(Category, Category_Filters)]
     [Theory]
     [MemberData(nameof(EndDates))]
-    public void FilterByEndDate_Success(DateTime endAt, int expectedCount)
+    public async Task FilterByEndDate_Success(DateTime endAt)
     {
         // Given
+        await using var scope = context.CreateAsyncScope();
+        var filterService = scope.ServiceProvider.GetRequiredService<IFilter<Event>>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+
         endAt = endAt.AddDays(1).Date;
         Expression<Func<Event, bool>> expression = x => x.EndAt < endAt;
-        var expected = fixture.Events.Where(expression).ToList();
+        var expected = await dbContext
+            .GetEvents(expression)
+            .Select(x => x.ToOutputData())
+            .ToListAsync();
 
         // When
-        var actual = fixture.FilterService.Reset()
+        var actual = await filterService.Reset()
             .AddCondition(expression)
-            .ApplyFilter(fixture.Events)
-            .ToList();
-        var actualCount = actual.Count;
+            .ApplyFilter(dbContext.GetEvents())
+            .Select(x => x.ToOutputData())
+            .ToListAsync();
 
         // Then
-        Assert.Equal(expectedCount, expected.Count);
         Assert.Equal(expected, actual);
         Assert.All(actual, item => Assert.True(item.EndAt < endAt));
-        Assert.Equal(expectedCount, actual.Count());
     }
 
     public static readonly IEnumerable<object[]> Combined =
         [
-            ["Event", new DateTime(2026, 5, 1), new DateTime(2026, 5, 2), 0],
-            ["Title", new DateTime(2026, 6, 28), new DateTime(2026, 6, 30), 3],
-            [null!, new DateTime(2026, 6, 30), null!, 28],
-            ["bcd", new DateTime(2026, 7, 10), new DateTime(2026, 7, 15), 0],
-            ["Ev", null!, new DateTime(2026, 7, 21), 24],
-            ["Ti", new DateTime(2026, 7, 27), new DateTime(2026, 7, 20), 0],
-            ["nt Ti", new DateTime(2026, 8, 10), new DateTime(2026, 8, 10), 0],
+            ["Event", new DateTime(2026, 5, 1), new DateTime(2026, 5, 2)],
+            ["Title", new DateTime(2026, 6, 28), new DateTime(2026, 6, 30)],
+            [null!, new DateTime(2026, 6, 30), null!],
+            ["bcd", new DateTime(2026, 7, 10), new DateTime(2026, 7, 15)],
+            ["Ev", null!, new DateTime(2026, 7, 21)],
+            ["Ti", new DateTime(2026, 7, 27), new DateTime(2026, 7, 20)],
+            ["nt Ti", new DateTime(2026, 8, 10), new DateTime(2026, 8, 10)],
         ];
 
     [Trait(Category, Category_Filters)]
     [Theory]
     [MemberData(nameof(Combined))]
-    public void CombinedFilter_Success(string? title, DateTime? startAt, DateTime? endAt, int expectedCount)
+    public async Task CombinedFilter_Success(string? title, DateTime? startAt, DateTime? endAt)
     {
         // Given
-        var titleLowCase = title?.ToLower();
-        endAt = endAt?.AddDays(1).Date;
+        await using var scope = context.CreateAsyncScope();
+        var filterService = scope.ServiceProvider.GetRequiredService<IFilter<Event>>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
 
-        var expected = fixture.Events
-            .Where(x => (string.IsNullOrEmpty(titleLowCase) || x.Title.ToLower().Contains(titleLowCase))
+        endAt = endAt?.AddDays(1).Date;
+        var expected = await dbContext
+            .GetEvents(
+                x => (string.IsNullOrEmpty(title) || x.Title.Contains(title, StringComparison.OrdinalIgnoreCase))
                 && (startAt == null || x.StartAt >= startAt.Value)
                 && (endAt == null || x.EndAt < endAt.Value))
-            .ToList();
+            .Select(x => x.ToOutputData())
+            .ToListAsync();
 
-        Expression<Func<Event, bool>>? exprTitle = titleLowCase is null ? null : x => x.Title.ToLower().Contains(titleLowCase);
+        Expression<Func<Event, bool>>? exprTitle = title is null ? null : x => x.Title.Contains(title, StringComparison.OrdinalIgnoreCase);
         Expression<Func<Event, bool>>? exprStartAt = startAt is null ? null : x => x.StartAt >= startAt.Value;
         Expression<Func<Event, bool>>? exprEndAt = endAt is null ? null : x => x.EndAt <= endAt;
 
         // When
-        var filter = fixture.FilterService.Reset();
+        var filter = filterService.Reset();
 
         if (exprTitle != null)
             filter.AddCondition(exprTitle);
@@ -234,12 +267,12 @@ public class FilterEventTest(FilterEventFixture fixture) : TraitAttributes, ICla
         if (exprEndAt != null)
             filter.AddCondition(exprEndAt);
 
-        var actual = filter.ApplyFilter(fixture.Events).ToList();
-        var actualCount = actual.Count;
+        var actual = await filter
+            .ApplyFilter(dbContext.GetEvents())
+            .Select(x => x.ToOutputData())
+            .ToListAsync();
 
         // Then
-        Assert.Equal(expectedCount, expected.Count);
-
         Assert.Equal(expected, actual);
 
         Assert.All(actual, item =>
@@ -253,7 +286,5 @@ public class FilterEventTest(FilterEventFixture fixture) : TraitAttributes, ICla
                 if (endAt.HasValue)
                     Assert.True(item.EndAt < endAt);
             });
-
-        Assert.Equal(expectedCount, actual.Count());
     }
 }

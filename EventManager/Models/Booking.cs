@@ -20,25 +20,62 @@ public class Booking
     /// <summary>
     /// Уникальный идентификатор.
     /// </summary>
-    public required Guid Id { get; set; }
+    public Guid Id { get; private set; }
 
     /// <summary>
     /// Идентификатор связанного события.
     /// </summary>
-    public required Guid EventId { get; set; }
+    public Guid EventId { get; private set; }
 
     /// <summary>
     /// Статус бронирования.
     /// </summary>
-    public required BookingStatus Status { get; set; }
+    public BookingStatus Status { get; private set; }
 
     /// <summary>
     /// Момент создания брони.
     /// </summary>
-    public required DateTime CreatedAt { get; set; }
+    public DateTime CreatedAt { get; private set; }
 
     /// <summary>
     /// Момент обработки брони сервисом.
     /// </summary>
-    public DateTime? ProcessedAt { get; set; }
+    public DateTime? ProcessedAt { get; private set; }
+
+    Booking() { }
+
+    /// <summary>
+    /// Конструктор события.
+    /// </summary>
+    /// <param name="eventId"></param>
+    public Booking(Guid eventId)
+    {
+        Id = Guid.NewGuid();
+        EventId = eventId;
+        Status = BookingStatus.Pending;
+        CreatedAt = DateTime.Now;
+    }
+
+    /// <summary>
+    /// Подтверждает бронь.
+    /// </summary>
+    /// <returns></returns>
+    public bool Confirm() => TryChangeStatus(BookingStatus.Confirmed);
+
+    /// <summary>
+    /// Отклоняет бронь.
+    /// </summary>
+    /// <returns></returns>
+    public bool Reject() => TryChangeStatus(BookingStatus.Rejected);
+
+    bool TryChangeStatus(BookingStatus status)
+    {
+        if (Status == BookingStatus.Pending || status == BookingStatus.Rejected)
+        {
+            Status = status;
+            ProcessedAt = DateTime.Now;
+            return true;
+        }
+        return false;
+    }
 }

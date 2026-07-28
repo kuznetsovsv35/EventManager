@@ -10,28 +10,31 @@ using Moq;
 namespace EventManager.Tests;
 
 /// <summary>
-/// Контекст метода теста.
+/// Контекст методов теста.
 /// </summary>
-class BookingServiceTestContext
+public class EventManagerTestContext
 {
     public IServiceProvider ServiceProvider { get; }
 
-    public AsyncServiceScope CreateScope() => ServiceProvider.CreateAsyncScope();
     public async Task<Guid> GetRandomEventId(CancellationToken cancellation)
     {
         await using var scope = ServiceProvider.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
-        int eventCount = await dbContext.Events.CountAsync<Event>(cancellation);
+        int eventCount = await dbContext.GetEvents().CountAsync<Event>(cancellation);
         var eventIndex = Random.Shared.Next(eventCount);
-        return (await dbContext.Events.Skip(eventIndex).FirstAsync(cancellation)).Id;
+        return (await dbContext.GetEvents().Skip(eventIndex).FirstAsync(cancellation)).Id;
     }
-    readonly TestAppDbContext _dbContext = new($"Test_{Guid.NewGuid()}");
+    readonly IServiceCollection _services;
 
-    internal BookingServiceTestContext()
+    public EventManagerTestContext()
     {
-        ServiceProvider = new ServiceCollection()
+        _services = new ServiceCollection()
             .AddSingleton<IAsyncQueue<Booking>, AsyncQueue<Booking>>()
-            .AddScoped(_ => _dbContext.CreateNewInstance())
+            .AddSingleton(_ => new TestAppDbContext($"Test_{Guid.NewGuid()}"))
+            .AddScoped(provider => provider.GetRequiredService<TestAppDbContext>().CreateNewInstance())
+            .AddScoped<IFilter<Event>, FilterService<Event>>()
+            .AddScoped<IPaginator<Event>, PaginateService<Event>>()
+            .AddScoped<IEventService, EventService>()
             .AddScoped<IBookingService, BookingService>()
             .AddSingleton(_ => LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<AppBackgroundService>())
             .AddSingleton(provider =>
@@ -40,7 +43,10 @@ class BookingServiceTestContext
                 mock.Setup(x => x.CreateScope()).Returns(provider.CreateScope());
                 return mock.Object;
             })
-            .AddSingleton<IAppBackgroundService, AppBackgroundService>()
-            .BuildServiceProvider();
+            .AddSingleton<IAppBackgroundService, AppBackgroundService>();
+        ServiceProvider = CreateServiceProvider();
     }
+
+    internal IServiceProvider CreateServiceProvider() => _services.BuildServiceProvider();
+    internal AsyncServiceScope CreateAsyncScope() => ServiceProvider.CreateAsyncScope();
 }

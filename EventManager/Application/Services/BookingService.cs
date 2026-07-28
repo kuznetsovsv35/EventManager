@@ -2,7 +2,6 @@ using EventManager.Application.DataTransfer;
 using EventManager.Application.Interfaces;
 using EventManager.Infrastructure;
 using EventManager.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace EventManager.Application.Services;
 
@@ -10,28 +9,30 @@ public class BookingService(IAppDbContext dbContext, IAsyncQueue<Booking> bookin
 {
     public async Task<BookingInfo> CreateBookingAsync(Guid eventId, CancellationToken cancellation)
     {
-        if (await dbContext.Events.SingleOrDefaultAsync(x => x.Id == eventId, cancellation) is Event @event)
+        var booking = await dbContext.CreateSyncContext<Booking>().ExecuteActionAsync(async () =>
         {
-            cancellation.ThrowIfCancellationRequested();
-            var booking = new Booking()
+            if (await dbContext.Events.FindAsync(eventId, cancellation) is Event @event)
             {
-                Id = Guid.NewGuid(),
-                EventId = eventId,
-                CreatedAt = DateTime.Now,
-                Status = BookingStatus.Pending
-            };
+                cancellation.ThrowIfCancellationRequested();
 
-            await dbContext.AddBookingAsync(booking, cancellation);
-            await bookingQueue.Enqueue(booking, cancellation);
-            return booking.ToInfo();
-        }
+                if (@event.TryReserveSeats())
+                {
+                    var booking = new Booking(eventId);
+                    dbContext.Bookings.Add(booking);
+                    return booking;
+                }
+                throw new NoAvailableSeatsException(eventId);
+            }
+            throw new EventNotFoundException(nameof(eventId), eventId);
+        }, cancellation);
 
-        throw new EventNotFoundException(nameof(eventId), eventId);
+        await bookingQueue.Enqueue(booking, cancellation);
+        return booking.ToInfo();
     }
 
     public async Task<BookingInfo> GetBookingByIdAsync(Guid bookingId, CancellationToken cancellation)
     {
-        if (await dbContext.Bookings.SingleOrDefaultAsync(x => x.Id == bookingId, cancellation) is Booking booking)
+        if (await dbContext.GetBookingAsync(bookingId, cancellation) is Booking booking)
             return booking.ToInfo();
 
         throw new BookingNotFoundException(nameof(bookingId), bookingId);

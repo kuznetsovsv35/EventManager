@@ -2,6 +2,7 @@ using EventManager.Application.DataTransfer;
 using EventManager.Application.Interfaces;
 using EventManager.Infrastructure;
 using EventManager.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace EventManager.Application.Services;
 
@@ -14,50 +15,47 @@ public class EventService(
     IFilter<Event> filter,
     IPaginator<Event> paginator) : IEventService
 {
-    public EventOutputData CreateEvent(EventInputData data)
+    async Task<EventOutputData> IEventService.CreateEventAsync(EventInputData data, CancellationToken cancellation)
     {
         if (data == null)
             throw new ArgumentNullException(nameof(data));
 
         var e = data.ToEvent();
-        dbContext.AddEvent(e);
+        await dbContext.AddEventAsync(e, cancellation);
         return e.ToOutputData();
     }
 
-    public EventOutputData DeleteEvent(Guid id)
+    async Task<EventOutputData> IEventService.DeleteEventAsync(Guid id, CancellationToken cancellation)
     {
-        if (dbContext.Events.FirstOrDefault(e => e.Id == id) is Event e)
-        {
-            dbContext.DeleteEvent(e);
+        if (await dbContext.DeleteEventAsync(id, cancellation) is Event e)
             return e.ToOutputData();
-        }
 
         throw new EventNotFoundException(nameof(id), id);
     }
 
-    public IEnumerable<EventOutputData> GetAllEvents()
-        => dbContext.Events.AsEnumerable().Select(x => x.ToOutputData());
+    IAsyncEnumerable<EventOutputData> IEventService.GetAllEvents()
+        => dbContext
+            .GetEvents()
+            .Select(x => x.ToOutputData())
+            .AsAsyncEnumerable();
 
-    public PaginateResult<EventOutputData> GetEvents(FilterParams? filterParams, PageParams pageParams)
-        => paginator.Paginate(
-            FilterEvents(dbContext.Events, filterParams),
+    Task<PaginateResult<EventOutputData>> IEventService.GetEvents(FilterParams? filterParams, PageParams pageParams, CancellationToken cancellation)
+        => paginator.PaginateAsync(
+            FilterEvents(filterParams),
             pageParams.CurrentPage, pageParams.PageSize,
-            e => e.ToOutputData());
+            e => e.ToOutputData(), cancellation);
 
-    public IEnumerable<EventOutputData> GetEvents(FilterParams? filterParams)
-        => FilterEvents(dbContext.Events, filterParams)
-            .AsEnumerable()
-            .Select(e => e.ToOutputData());
+    IAsyncEnumerable<EventOutputData> IEventService.GetEvents(FilterParams? filterParams)
+        => FilterEvents(filterParams)
+            .Select(e => e.ToOutputData())
+            .AsAsyncEnumerable();
 
-    IQueryable<Event> FilterEvents(IQueryable<Event> events, FilterParams? filterParams)
+    IQueryable<Event> FilterEvents(FilterParams? filterParams)
     {
         var f = filter.Reset();
 
         if (filterParams is { Title: string title })
-        {
-            string titleLowCase = title.ToLower();
-            f.AddCondition(e => e.Title.ToLower().Contains(titleLowCase));
-        }
+            f.AddCondition(e => e.Title.Contains(title, StringComparison.OrdinalIgnoreCase));
 
         if (filterParams is { From: DateTime from })
         {
@@ -71,25 +69,31 @@ public class EventService(
             f.AddCondition(e => e.EndAt < toDate);
         }
 
-        return f.ApplyFilter(events);
+        return dbContext.GetEvents(f.Expression);
     }
 
-    public EventOutputData GetEvent(Guid id)
+    async Task<EventOutputData> IEventService.GetEventAsync(Guid id, CancellationToken cancellation)
     {
-        if (dbContext.Events.FirstOrDefault(e => e.Id == id) is Event e)
+        if (await dbContext.GetEventAsync(id, cancellation) is Event e)
             return e.ToOutputData();
 
         throw new EventNotFoundException(nameof(id), id);
     }
 
-    public EventOutputData UpdateEvent(Guid id, EventInputData data)
+    async Task<EventOutputData> IEventService.UpdateEventAsync(Guid id, EventInputData data, CancellationToken cancellation)
     {
-        if (dbContext.Events.FirstOrDefault(e => e.Id == id) is Event e)
+        var e = await dbContext.CreateSyncContext<Booking>().ExecuteActionAsync(async () =>
         {
-            data.Update(e);
-            dbContext.UpdateEvent(e);
-            return e.ToOutputData();
-        }
-        throw new EventNotFoundException(nameof(id), id);
+            if (await dbContext.Events.FindAsync(id) is Event @event)
+            {
+                data.Update(@event);
+                return @event;
+            }
+            return null;
+        }, cancellation);
+
+        return e is not null
+            ? e.ToOutputData()
+            : throw new EventNotFoundException(nameof(id), id);
     }
 }

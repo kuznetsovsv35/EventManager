@@ -35,6 +35,7 @@ public class ErrorHandler(RequestDelegate next, ILogger<ErrorHandler> logger)
         {
             ValidationException => StatusCodes.Status400BadRequest,
             EventNotFoundException => StatusCodes.Status404NotFound,
+            NoAvailableSeatsException => StatusCodes.Status409Conflict,
             _ => StatusCodes.Status500InternalServerError,
         };
 
@@ -53,6 +54,7 @@ public class ErrorHandler(RequestDelegate next, ILogger<ErrorHandler> logger)
                 pe.Message, $"параметр: {pe.ParamName}, значение: {pe.ParamValue}"),
 
             ObjectNotFoundException<Guid> notFound => ProblemDetailsFactory.NotFound($"{notFound.Message}: (ID={notFound.ObjectKey})."),
+            NoAvailableSeatsException noAvailableSeats => ProblemDetailsFactory.Conflict($"{noAvailableSeats.Message}: (ID={noAvailableSeats.EventId})."),
 
             _ => ProblemDetailsFactory.InternalServiceError(exception.Message)
         };

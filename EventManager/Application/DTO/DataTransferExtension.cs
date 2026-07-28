@@ -9,9 +9,8 @@ public static class DataTransferExtension
     {
         data.Check();
 
-        return new Event()
+        return new Event(data.TotalSeats)
         {
-            Id = Guid.NewGuid(),
             Title = data.Title!,
             Description = data.Description,
             StartAt = data.StartAt,
@@ -27,7 +26,7 @@ public static class DataTransferExtension
         e.Description = data.Description;
         e.StartAt = data.StartAt;
         e.EndAt = data.EndAt;
-
+        e.UpdateTotalSeats(data.TotalSeats);
         return e;
     }
 
@@ -39,6 +38,8 @@ public static class DataTransferExtension
             Description = e.Description,
             StartAt = e.StartAt,
             EndAt = e.EndAt,
+            TotalSeats = e.TotalSeats,
+            AvailableSeats = e.AvailableSeats,
         };
 
     public static void Check(this EventInputData data)

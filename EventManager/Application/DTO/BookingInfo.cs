@@ -2,6 +2,9 @@ using EventManager.Models;
 
 namespace EventManager.Application.DataTransfer;
 
+/// <summary>
+/// Информации бронирования.
+/// </summary>
 public class BookingInfo
 {
     public required Guid Id { get; init; }
