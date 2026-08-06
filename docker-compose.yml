@@ -37,33 +37,16 @@ services:
       timeout: 10s
       retries: 15
 
-  # ─────────────────────────── Базы данных (по одной на сервис) ───────────────────────────
-  users-db:
+  # ─────────────────────────── Базы данных (все сервисы) ───────────────────────────
+  event-api-db:
     image: postgres:16
-    container_name: eventapi-users-db
-    environment:
-      POSTGRES_DB: users
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    ports:
-      - "5432:5432"
-    volumes:
-      - users-db-data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
-  events-db:
-    image: postgres:16
-    container_name: eventapi-events-db
+    container_name: event-api-db
     environment:
       POSTGRES_DB: events
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
-      - "5432:5433"
+      - "5432:5432"
     volumes:
       - events-db-data:/var/lib/postgresql/data
     healthcheck:
@@ -72,23 +55,60 @@ services:
       timeout: 5s
       retries: 10
 
-  bookings-db:
-    image: postgres:16
-    container_name: eventapi-bookings-db
-    environment:
-      POSTGRES_DB: bookings
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    ports:
-      - "5432:5434"
-    volumes:
-      - bookings-db-data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
+  # ─────────────────────────── Базы данных (по одной на сервис) ───────────────────────────
+  #users-db:
+  #  image: postgres:16
+  #  container_name: eventapi-users-db
+  #  environment:
+  #    POSTGRES_DB: users
+  #    POSTGRES_USER: postgres
+  #    POSTGRES_PASSWORD: postgres
+  #  ports:
+  #    - "5432:5432"
+  #  volumes:
+  #    - users-db-data:/var/lib/postgresql/data
+  #  healthcheck:
+  #    test: ["CMD-SHELL", "pg_isready -U postgres"]
+  #    interval: 5s
+  #    timeout: 5s
+  #    retries: 10
+
+  #events-db:
+  #  image: postgres:16
+  #  container_name: eventapi-events-db
+  #  environment:
+  #    POSTGRES_DB: events
+  #    POSTGRES_USER: postgres
+  #    POSTGRES_PASSWORD: postgres
+  #  ports:
+  #    - "5432:5433"
+  #  volumes:
+  #    - events-db-data:/var/lib/postgresql/data
+  #  healthcheck:
+  #    test: ["CMD-SHELL", "pg_isready -U postgres"]
+  #    interval: 5s
+  #    timeout: 5s
+  #    retries: 10
+
+  #bookings-db:
+  #  image: postgres:16
+  #  container_name: eventapi-bookings-db
+  #  environment:
+  #    POSTGRES_DB: bookings
+  #    POSTGRES_USER: postgres
+  #    POSTGRES_PASSWORD: postgres
+  #  ports:
+  #    - "5432:5434"
+  #  volumes:
+  #    - bookings-db-data:/var/lib/postgresql/data
+  #  healthcheck:
+  #    test: ["CMD-SHELL", "pg_isready -U postgres"]
+  #    interval: 5s
+  #    timeout: 5s
+  #    retries: 10
+
 volumes:
-  users-db-data:
   events-db-data:
-  bookings-db-data:
+#  users-db-data:
+#  events-db-data:
+#  bookings-db-data:

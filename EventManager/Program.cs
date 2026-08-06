@@ -5,7 +5,7 @@ using EventManager.Presentation;
 var builder = WebApplication.CreateBuilder(args);
 
 // Добавляем инфраструктуру.
-builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
 // Добавляем функциональность приложения.
 builder.Services.AddApplication();
 // Добавляем представления.
