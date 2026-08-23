@@ -10,9 +10,16 @@ namespace EventManager.Data;
 /// Контекст хранения данных события.
 /// </summary>
 /// <param name="options"></param>
-public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options), IAppDbContext
+public class AppDbContext : DbContext, IAppDbContext
 {
     #region Общие
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+    {
+        Database.EnsureCreated();
+    }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+        => modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
     #endregion
 
     #region  Events
@@ -140,7 +147,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             }
             catch
             {
-                RollbackChanges();
+                //RollbackChanges();
                 throw;
             }
             finally

@@ -15,11 +15,22 @@ public static class DependencyInjection
         return builder;
     }
 
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddInfrastructure(this IServiceCollection services, 
+        IConfiguration configuration,
+        IWebHostEnvironment environment)
     {
         services.AddDbContext<AppDbContext>(options =>
         {
-            options.UseInMemoryDatabase($"{nameof(EventManager)}.db");
+            //options.UseInMemoryDatabase($"{nameof(EventManager)}.db");
+            var connectionString = configuration.GetConnectionString("Default") 
+                ?? throw new InvalidOperationException("Нет строки подключения к БД");
+            var builder = options.UseNpgsql(connectionString);
+
+            if (environment.IsDevelopment())
+            {
+                builder.LogTo(Console.WriteLine);
+                options.EnableDetailedErrors();
+            }
         });
 
         services.AddScoped<IAppDbContext>(provider => provider.GetRequiredService<AppDbContext>());

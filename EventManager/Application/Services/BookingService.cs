@@ -23,7 +23,7 @@ public class BookingService(IAppDbContext dbContext, IAsyncQueue<Booking> bookin
                 }
                 throw new NoAvailableSeatsException(eventId);
             }
-            throw new EventNotFoundException(nameof(eventId), eventId);
+            throw new EventNotFoundException(eventId, nameof(eventId));
         }, cancellation);
 
         await bookingQueue.Enqueue(booking, cancellation);
@@ -35,6 +35,6 @@ public class BookingService(IAppDbContext dbContext, IAsyncQueue<Booking> bookin
         if (await dbContext.GetBookingAsync(bookingId, cancellation) is Booking booking)
             return booking.ToInfo();
 
-        throw new BookingNotFoundException(nameof(bookingId), bookingId);
+        throw new BookingNotFoundException(bookingId, nameof(bookingId));
     }
 }

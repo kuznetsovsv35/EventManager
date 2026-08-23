@@ -74,21 +74,13 @@ public class AppBackgroundService(
         await using var scope = scopeFactory.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
 
-        var temp = await dbContext.GetBookings(x => x.Id == booking.Id && x.Status == BookingStatus.Pending)
-            .GroupJoin(dbContext.GetEvents(), b => b.EventId, e => e.Id, (booking, events) => new
-            {
-                Booking = booking,
-                Event = events.FirstOrDefault(),
-            })
-            .FirstOrDefaultAsync(cancellation);
-
-        if (temp is { Booking: Booking })
+        if (booking is not null)
         {         
             try
             {
                 await CustomProcessBooking(booking, cancellation);
-                if (temp is { Event: null })
-                    throw new EventNotFoundException(nameof(booking.EventId), booking.EventId);
+                if (booking is { Event: null })
+                    throw new EventNotFoundException(booking.EventId, nameof(booking.EventId));
             }
             catch(Exception ex) when (ex is not OperationCanceledException)
             {
@@ -117,10 +109,10 @@ public class AppBackgroundService(
     static Task UpdateData(IAppDbContext dbContext, Booking booking, CancellationToken cancellation)
         => dbContext.CreateSyncContext<Booking>().ExecuteActionAsync(async() =>
         {
-            if (booking.Status == BookingStatus.Rejected)
+            if (booking.Status == BookingStatus.Rejected && booking.Event is not null)
             {
-                if (await dbContext.Events.FindAsync(booking.EventId, cancellation) is Event @event)
-                    @event.ReleaseSeats();
+                booking.Event.ReleaseSeats();
+                dbContext.Events.Update(booking.Event);
             }
             dbContext.Bookings.Update(booking);
         }, cancellation);
