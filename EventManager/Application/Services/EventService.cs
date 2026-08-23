@@ -30,7 +30,7 @@ public class EventService(
         if (await dbContext.DeleteEventAsync(id, cancellation) is Event e)
             return e.ToOutputData();
 
-        throw new EventNotFoundException(nameof(id), id);
+        throw new EventNotFoundException(id, nameof(id));
     }
 
     IAsyncEnumerable<EventOutputData> IEventService.GetAllEvents()
@@ -55,7 +55,10 @@ public class EventService(
         var f = filter.Reset();
 
         if (filterParams is { Title: string title })
-            f.AddCondition(e => e.Title.Contains(title, StringComparison.OrdinalIgnoreCase));
+        {
+            var s = title.ToLower();
+            f.AddCondition(e => e.Title.ToLower().Contains(s));
+        }
 
         if (filterParams is { From: DateTime from })
         {
@@ -77,7 +80,7 @@ public class EventService(
         if (await dbContext.GetEventAsync(id, cancellation) is Event e)
             return e.ToOutputData();
 
-        throw new EventNotFoundException(nameof(id), id);
+        throw new EventNotFoundException(id, nameof(id));
     }
 
     async Task<EventOutputData> IEventService.UpdateEventAsync(Guid id, EventInputData data, CancellationToken cancellation)
@@ -94,6 +97,6 @@ public class EventService(
 
         return e is not null
             ? e.ToOutputData()
-            : throw new EventNotFoundException(nameof(id), id);
+            : throw new EventNotFoundException(id, nameof(id));
     }
 }
