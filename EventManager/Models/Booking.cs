@@ -27,6 +27,8 @@ public class Booking
     /// </summary>
     public Guid EventId { get; private set; }
 
+    public Event Event {get; private set; } = null!;
+
     /// <summary>
     /// Статус бронирования.
     /// </summary>
@@ -42,6 +44,9 @@ public class Booking
     /// </summary>
     public DateTime? ProcessedAt { get; private set; }
 
+    /// <summary>
+    /// Приватный конструктор без параметров.
+    /// </summary>
     Booking() { }
 
     /// <summary>
@@ -53,7 +58,7 @@ public class Booking
         Id = Guid.NewGuid();
         EventId = eventId;
         Status = BookingStatus.Pending;
-        CreatedAt = DateTime.Now;
+        CreatedAt = DateTime.UtcNow;
     }
 
     /// <summary>
@@ -73,7 +78,7 @@ public class Booking
         if (Status == BookingStatus.Pending || status == BookingStatus.Rejected)
         {
             Status = status;
-            ProcessedAt = DateTime.Now;
+            ProcessedAt = DateTime.UtcNow;
             return true;
         }
         return false;

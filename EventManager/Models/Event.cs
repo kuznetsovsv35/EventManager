@@ -23,6 +23,8 @@ public class Event
 
     public int AvailableSeats => TotalSeats - ReservedCount;
 
+    public List<Booking> Bookings { get; set; } = null!;
+
     /// <summary>
     /// Попытка забронировать места.
     /// </summary>
@@ -49,6 +51,9 @@ public class Event
     /// <param name="totalSeats"></param>
     public void UpdateTotalSeats(int totalSeats) => TotalSeats = Math.Max(totalSeats, ReservedCount);
 
+    /// <summary>
+    /// Приватный конструктор без параметров.
+    /// </summary>
     Event() { }
 
     /// <summary>
