@@ -29,7 +29,7 @@ public class EventManagerTestContext
     public EventManagerTestContext()
     {
         _services = new ServiceCollection()
-            .AddSingleton<IAsyncQueue<Booking>, AsyncQueue<Booking>>()
+            .AddSingleton<IAsyncQueue<Guid>, AsyncQueue<Guid>>()
             .AddSingleton(_ => new TestAppDbContext($"Test_{Guid.NewGuid()}"))
             .AddScoped(provider => provider.GetRequiredService<TestAppDbContext>().CreateNewInstance())
             .AddScoped<IFilter<Event>, FilterService<Event>>()

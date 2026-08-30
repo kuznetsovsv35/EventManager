@@ -80,7 +80,7 @@ public class AppDbContext : DbContext, IAppDbContext
     }
 
     Task<Booking?> IAppDbContext.GetBookingAsync(Guid id, CancellationToken cancellation)
-        => Bookings.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, cancellation);
+        => Bookings.AsNoTracking().Include(b => b.Event).FirstOrDefaultAsync(x => x.Id == id, cancellation);
 
     Task IAppDbContext.AddBookingAsync(Booking booking, CancellationToken cancellation)
     {

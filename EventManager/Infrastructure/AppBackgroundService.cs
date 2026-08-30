@@ -6,7 +6,7 @@ namespace EventManager.Infrastructure;
 
 public class AppBackgroundService(
     IServiceScopeFactory scopeFactory,
-    IAsyncQueue<Booking> bookingQueue,
+    IAsyncQueue<Guid> bookingQueue,
     ILogger<AppBackgroundService> logger) : BackgroundService, IAppBackgroundService
 {
     /// <summary>
@@ -69,10 +69,11 @@ public class AppBackgroundService(
         }
     }
 
-    async Task ProcessBookingAsync(Booking booking, CancellationToken cancellation)
+    async Task ProcessBookingAsync(Guid bookingId, CancellationToken cancellation)
     {
         await using var scope = scopeFactory.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        var booking = await dbContext.GetBookingAsync(bookingId, cancellation);
 
         if (booking is not null)
         {         
@@ -103,7 +104,7 @@ public class AppBackgroundService(
             }
         }
         else
-            logger.LogError("Бронь {Booking} для события {Event} в БД не найдена.", booking.Id, booking.EventId);
+            logger.LogError("Бронь {Booking} для события в БД не найдена.", bookingId);
     }
 
     static Task UpdateData(IAppDbContext dbContext, Booking booking, CancellationToken cancellation)
