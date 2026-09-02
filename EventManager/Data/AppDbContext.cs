@@ -14,96 +14,97 @@ public class AppDbContext : DbContext, IAppDbContext
 {
     #region Общие
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
-        => Database.Migrate();
+    {
+        Database.EnsureDeleted();
+        Database.Migrate();
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
         => modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
     #endregion
 
     #region  Events
-    public DbSet<Event> Events { get; private set; }
-
-    IQueryable<Event> IAppDbContext.GetEvents(Expression<Func<Event, bool>>? filter)
+    IQueryable<Event> IObjectRepository<Event, Guid>.GetObjects(Expression<Func<Event, bool>>? filter)
     {
-        if (filter == null)
-            return Events.AsNoTracking();
-
-        return Events.AsNoTracking().Where(filter);
+        if (filter is null)
+            return Set<Event>().AsNoTracking();
+        return Set<Event>().AsNoTracking().Where(filter);
     }
 
-    Task<Event?> IAppDbContext.GetEventAsync(Guid id, CancellationToken cancellation)
-        => Events.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, cancellation);
+    Task<Event?> IObjectRepository<Event, Guid>.GetObjectAsync(Guid id, CancellationToken cancellation)
+        => Set<Event>().AsNoTracking().FirstOrDefaultAsync(e => e.Id == id, cancellation);
 
-    Task IAppDbContext.AddEventAsync(Event @event, CancellationToken cancellation)
+    async Task<Event> IObjectRepository<Event, Guid>.AddObjectAsync(Event @event, CancellationToken cancellation)
     {
-        Events.Add(@event);
-        return SaveChangesAsync(cancellation);
-    }
-
-    async Task<Event?> IAppDbContext.DeleteEventAsync(Guid id, CancellationToken cancellation)
-    {
-        Event? @event = await Events.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, cancellation);
-
-        if (@event is not null)
-        {
-            Events.Remove(@event);
-            await SaveChangesAsync(cancellation);
-        }
-
+        Set<Event>().Add(@event);
+        await SaveChangesAsync(cancellation);
         return @event;
     }
-
-    async Task<Event?> IAppDbContext.UpdateEventAsync(Guid id, Action<Event> updater, CancellationToken cancellation)
+    
+    async Task<Event?> IObjectRepository<Event, Guid>.UpdateObjectAsync(Guid id, Action<Event> updater, CancellationToken cancellation)
     {
-        if (await Events.FindAsync(id) is Event dest)
+        if (await Set<Event>().FindAsync(id, cancellation) is Event dest)
         {
             updater(dest);
             await SaveChangesAsync(cancellation);
             return dest;
         }
+        return null;
+    }
 
+    async Task<Event?> IObjectRepository<Event, Guid>.DeleteObjectAsync(Guid id, CancellationToken cancellation)
+    {
+        var dbSet = Set<Event>();
+        if (await dbSet.FindAsync(id, cancellation) is Event @event)
+        {
+            dbSet.Remove(@event);
+            await SaveChangesAsync(cancellation);
+            return @event;
+        }
         return null;
     }
     #endregion
 
     #region  Bookings
-    public DbSet<Booking> Bookings { get; private set; }
-
-    IQueryable<Booking> IAppDbContext.GetBookings(Expression<Func<Booking, bool>>? filter)
+    IQueryable<Booking> IObjectRepository<Booking, Guid>.GetObjects(Expression<Func<Booking, bool>>? filter)
     {
         if (filter == null)
-            return Bookings.AsNoTracking();
+            return Set<Booking>().AsNoTracking();
 
-        return Bookings.AsNoTracking().Where(filter);
+        return Set<Booking>().AsNoTracking().Where(filter);
     }
 
-    Task<Booking?> IAppDbContext.GetBookingAsync(Guid id, CancellationToken cancellation)
-        => Bookings.AsNoTracking().Include(b => b.Event).FirstOrDefaultAsync(x => x.Id == id, cancellation);
-
-    Task IAppDbContext.AddBookingAsync(Booking booking, CancellationToken cancellation)
+    Task<Booking?> IObjectRepository<Booking, Guid>.GetObjectAsync(Guid id, CancellationToken cancellation)
+        => Set<Booking>().AsNoTracking().Include(b => b.Event).FirstOrDefaultAsync(x => x.Id == id, cancellation);
+    
+    async Task<Booking> IObjectRepository<Booking, Guid>.AddObjectAsync(Booking booking, CancellationToken cancellation)
     {
-        Bookings.Add(booking);
-        return SaveChangesAsync(cancellation);
-    }
-
-    async Task<Booking?> IAppDbContext.DeleteBookingAsync(Guid id, CancellationToken cancellation)
-    {
-        Booking? booking = await Bookings.FindAsync(id, cancellation);
-        if (booking is not null)
-        {
-            Bookings.Remove(booking);
-            await SaveChangesAsync(cancellation);
-        }
+        Set<Booking>().Add(booking);
+        await SaveChangesAsync(cancellation);
         return booking;
     }
 
-    async Task IAppDbContext.UpdateBookingAsync(Guid id, Action<Booking> updater, CancellationToken cancellation)
+    async Task<Booking?> IObjectRepository<Booking, Guid>.UpdateObjectAsync(Guid id, Action<Booking> updater, CancellationToken cancellation)
     {
-        if (await Bookings.FindAsync(id, cancellation) is Booking dest)
+        if (await Set<Booking>().FindAsync(id, cancellation) is Booking dest)
         {
             updater(dest);
             await SaveChangesAsync(cancellation);
+            return dest;
         }
+        return null;
+    }
+
+    async Task<Booking?> IObjectRepository<Booking, Guid>.DeleteObjectAsync(Guid id, CancellationToken cancellation)
+    {
+        var dbSet = Set<Booking>();
+        if (await dbSet.FindAsync(id, cancellation) is Booking booking)
+        {
+            dbSet.Remove(booking);
+            await SaveChangesAsync(cancellation);
+            return booking;
+        }
+        return null;
     }
     #endregion
 

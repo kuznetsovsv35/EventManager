@@ -5,7 +5,7 @@ using EventManager.Models;
 
 namespace EventManager.Application.Services;
 
-public class BookingService(IAppDbContext dbContext, IAsyncQueue<Guid> bookingQueue) : IBookingService
+public class BookingService(IBookingRepository repository, IAsyncQueue<Guid> bookingQueue) : IBookingService
 {
     public async Task<BookingInfo> CreateBookingAsync(Guid eventId, CancellationToken cancellation)
     {
@@ -32,7 +32,7 @@ public class BookingService(IAppDbContext dbContext, IAsyncQueue<Guid> bookingQu
 
     public async Task<BookingInfo> GetBookingByIdAsync(Guid bookingId, CancellationToken cancellation)
     {
-        if (await dbContext.GetBookingAsync(bookingId, cancellation) is Booking booking)
+        if (await repository.GetObjectAsync(bookingId, cancellation) is Booking booking)
             return booking.ToInfo();
 
         throw new BookingNotFoundException(bookingId, nameof(bookingId));

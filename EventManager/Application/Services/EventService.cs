@@ -11,7 +11,7 @@ namespace EventManager.Application.Services;
 /// </summary>
 /// <param name="dbContext"></param>
 public class EventService(
-    IAppDbContext dbContext,
+    IEventRepository repository,
     IFilter<Event> filter,
     IPaginator<Event> paginator) : IEventService
 {
@@ -21,23 +21,23 @@ public class EventService(
             throw new ArgumentNullException(nameof(data));
 
         var e = data.ToEvent();
-        await dbContext.AddEventAsync(e, cancellation);
+        await repository.AddObjectAsync(e, cancellation);
         return e.ToOutputData();
     }
 
     async Task<EventOutputData> IEventService.DeleteEventAsync(Guid id, CancellationToken cancellation)
     {
-        if (await dbContext.DeleteEventAsync(id, cancellation) is Event e)
+        if (await repository.DeleteObjectAsync(id, cancellation) is Event e)
             return e.ToOutputData();
 
         throw new EventNotFoundException(id, nameof(id));
     }
 
-    IAsyncEnumerable<EventOutputData> IEventService.GetAllEvents()
-        => dbContext
-            .GetEvents()
+    IEnumerable<EventOutputData> IEventService.GetAllEvents()
+        => repository
+            .GetObjects()
             .Select(x => x.ToOutputData())
-            .AsAsyncEnumerable();
+            .ToList();
 
     Task<PaginateResult<EventOutputData>> IEventService.GetEvents(FilterParams? filterParams, PageParams pageParams, CancellationToken cancellation)
         => paginator.PaginateAsync(
@@ -72,29 +72,21 @@ public class EventService(
             f.AddCondition(e => e.EndAt < toDate);
         }
 
-        return dbContext.GetEvents(f.Expression);
+        return repository.GetObjects(f.Expression);
     }
 
     async Task<EventOutputData> IEventService.GetEventAsync(Guid id, CancellationToken cancellation)
     {
-        if (await dbContext.GetEventAsync(id, cancellation) is Event e)
+        if (await repository.GetObjectAsync(id, cancellation) is Event e)
             return e.ToOutputData();
 
         throw new EventNotFoundException(id, nameof(id));
     }
 
     async Task<EventOutputData> IEventService.UpdateEventAsync(Guid id, EventInputData data, CancellationToken cancellation)
-    {
-        var e = await dbContext.CreateSyncContext<Booking>().ExecuteActionAsync(async () =>
-        {
-            if (await dbContext.Events.FindAsync(id) is Event @event)
-            {
-                data.Update(@event);
-                return @event;
-            }
-            return null;
-        }, cancellation);
-
+    {        
+        var e = await repository.UpdateObjectAsync(id, e => data.Update(e), cancellation);
+        
         return e is not null
             ? e.ToOutputData()
             : throw new EventNotFoundException(id, nameof(id));
