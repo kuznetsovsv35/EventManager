@@ -6,48 +6,37 @@ using Microsoft.EntityFrameworkCore;
 namespace EventManager.Data;
 
 public class EventRepository(AppDbContext dbContext) : IEventRepository
-{
-    readonly DbSet<Event> _events = dbContext.Set<Event>();
-    
-    IQueryable<Event> IObjectRepository<Event, Guid>.GetObjects(Expression<Func<Event, bool>>? filter)
+{    
+    IQueryable<Event> IEventRepository.GetEvents(Expression<Func<Event, bool>>? filter)
     {
         if (filter is null)
-            return _events.AsNoTracking();
-        return _events.AsNoTracking().Where(filter);
+            return dbContext.Events.AsNoTracking();
+        return dbContext.Events.AsNoTracking().Where(filter);
     }
 
-    Task<Event?> IObjectRepository<Event, Guid>.GetObjectAsync(Guid id, CancellationToken cancellation)
-        => _events.AsNoTracking().FirstOrDefaultAsync(e => e.Id == id, cancellation);
+    Task<Event?> IEventRepository.GetEventAsync(Guid id, CancellationToken cancellation)
+        => dbContext.Events.AsNoTracking().SingleOrDefaultAsync(e => e.Id == id, cancellation);
 
-    async Task<Event> IObjectRepository<Event, Guid>.AddObjectAsync(Event @event, CancellationToken cancellation)
+    async Task<Event> IEventRepository.AddEventAsync(Event @event, CancellationToken cancellation)
     {
-        _events.Add(@event);
+        dbContext.Events.Add(@event);
         await dbContext.SaveChangesAsync(cancellation);
         return @event;
     }
     
-    async Task<Event?> IObjectRepository<Event, Guid>.UpdateObjectAsync(Guid id, Action<Event> updater, CancellationToken cancellation)
+    async Task<Event?> IEventRepository.UpdateEventAsync(Event @event, CancellationToken cancellation)
     {
-        if (await _events.FindAsync(id, cancellation) is Event dest)
+        dbContext.Events.Update(@event);
+        return (await dbContext.SaveChangesAsync(cancellation) > 0) ? @event : null;
+    }
+
+    async Task<Event?> IEventRepository.DeleteEventAsync(Guid id, CancellationToken cancellation)
+    {
+        if (await dbContext.Events.FindAsync(id, cancellation) is Event @event)
         {
-            updater(dest);
-            await dbContext.SaveChangesAsync(cancellation);
-            return dest;
+            dbContext.Events.Remove(@event);
+            return (await dbContext.SaveChangesAsync(cancellation) > 0) ? @event : null;
         }
         return null;
     }
-
-    async Task<Event?> IObjectRepository<Event, Guid>.DeleteObjectAsync(Guid id, CancellationToken cancellation)
-    {
-        if (await _events.FindAsync(id, cancellation) is Event @event)
-        {
-            _events.Remove(@event);
-            await dbContext.SaveChangesAsync(cancellation);
-            return @event;
-        }
-        return null;
-    }
-
-    Task<int> IObjectRepository<Event, Guid>.SaveChangesAsync(CancellationToken cancellation) 
-        => dbContext.SaveChangesAsync(cancellation);
 }

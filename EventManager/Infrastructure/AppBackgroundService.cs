@@ -72,8 +72,8 @@ public class AppBackgroundService(
     async Task ProcessBookingAsync(Guid bookingId, CancellationToken cancellation)
     {
         await using var scope = scopeFactory.CreateAsyncScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
-        var booking = await dbContext.GetBookingAsync(bookingId, cancellation);
+        var bookings = scope.ServiceProvider.GetRequiredService<IBookingRepository>();
+        var booking = await bookings.GetBookingAsync(bookingId, cancellation);
 
         if (booking is not null)
         {         
@@ -89,7 +89,7 @@ public class AppBackgroundService(
                 logger.LogError(ex, "Ошибка обработки брони {Booking} для события {Event}.", booking.Id, booking.EventId);
             }
 
-            await UpdateData(dbContext, booking, cancellation);
+            await bookings.UpdateBookingStatusAsync(booking, cancellation);
 
             switch (booking.Status)
             {
@@ -106,17 +106,6 @@ public class AppBackgroundService(
         else
             logger.LogError("Бронь {Booking} для события в БД не найдена.", bookingId);
     }
-
-    static Task UpdateData(IAppDbContext dbContext, Booking booking, CancellationToken cancellation)
-        => dbContext.CreateSyncContext<Booking>().ExecuteActionAsync(async() =>
-        {
-            if (booking.Status == BookingStatus.Rejected && booking.Event is not null)
-            {
-                booking.Event.ReleaseSeats();
-                dbContext.Events.Update(booking.Event);
-            }
-            dbContext.Bookings.Update(booking);
-        }, cancellation);
 
     Task CustomProcessBooking(Booking booking, CancellationToken cancellation)
     {

@@ -1,5 +1,6 @@
 using EventManager.Application.DataTransfer;
 using EventManager.Application.Interfaces;
+using EventManager.Data;
 using EventManager.Infrastructure;
 using EventManager.Models;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,7 +24,7 @@ public class BookingServiceTest(EventManagerTestContext context) : TestObjectBas
         var serviceProvider = context.CreateServiceProvider();
         await using var scope = serviceProvider.CreateAsyncScope();
         var bookingService = scope.ServiceProvider.GetRequiredService<IBookingService>();
-        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
         var eventId = await context.GetRandomEventId(CancellationToken.None);
 
@@ -145,7 +146,7 @@ public class BookingServiceTest(EventManagerTestContext context) : TestObjectBas
         // Given
         var serviceProvider = context.CreateServiceProvider();
         await using var scope = serviceProvider.CreateAsyncScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var bookingService = scope.ServiceProvider.GetRequiredService<IBookingService>();
 
         var eventId = await context.GetRandomEventId(CancellationToken.None);
@@ -334,7 +335,7 @@ public class BookingServiceTest(EventManagerTestContext context) : TestObjectBas
         // Given
         var serviceProvider = context.CreateServiceProvider();
         await using var scope = serviceProvider.CreateAsyncScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var bookingService = scope.ServiceProvider.GetRequiredService<IBookingService>();
 
         var eventId = await context.GetRandomEventId(CancellationToken.None);

@@ -1,5 +1,6 @@
 using EventManager.Application.Interfaces;
 using EventManager.Application.Services;
+using EventManager.Data;
 using EventManager.Infrastructure;
 using EventManager.Models;
 
@@ -16,6 +17,8 @@ public static class DependencyInjection
         services.AddScoped<IPaginator<Event>, PaginateService<Event>>();
         services.AddScoped<IEventService, EventService>();
         services.AddScoped<IBookingService, BookingService>();
+        services.AddScoped<IEventRepository, EventRepository>();
+        services.AddScoped<IBookingRepository, BookingRepository>();
         services.AddSingleton<IAsyncQueue<Guid>, AsyncQueue<Guid>>();
         services.AddHostedService<AppBackgroundService>();
         return services;

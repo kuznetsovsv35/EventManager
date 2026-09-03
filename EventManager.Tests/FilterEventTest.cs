@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using EventManager.Application.DataTransfer;
 using EventManager.Application.Interfaces;
+using EventManager.Data;
 using EventManager.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -49,7 +50,7 @@ public class FilterEventTest(EventManagerTestContext context) : TestObjectBase, 
         // Given
         await using var scope = context.CreateAsyncScope();
         var filterService = scope.ServiceProvider.GetRequiredService<IFilter<Event>>();
-        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
         const string titleAll = "Event title";
         const string titleNone = "AbcDeF";
@@ -94,7 +95,7 @@ public class FilterEventTest(EventManagerTestContext context) : TestObjectBase, 
         // Given
         await using var scope = context.CreateAsyncScope();
         var filterService = scope.ServiceProvider.GetRequiredService<IFilter<Event>>();
-        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
         Expression<Func<Event, bool>> expr = x => x.Title.Contains(title, StringComparison.OrdinalIgnoreCase);
         var expected = await dbContext
@@ -125,7 +126,7 @@ public class FilterEventTest(EventManagerTestContext context) : TestObjectBase, 
         // Given
         await using var scope = context.CreateAsyncScope();
         var filterService = scope.ServiceProvider.GetRequiredService<IFilter<Event>>();
-        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
         Expression<Func<Event, bool>> expression = x => x.Title.Contains(title, StringComparison.OrdinalIgnoreCase);
         var expected = await dbContext
@@ -162,7 +163,7 @@ public class FilterEventTest(EventManagerTestContext context) : TestObjectBase, 
         // Given
         await using var scope = context.CreateAsyncScope();
         var filterService = scope.ServiceProvider.GetRequiredService<IFilter<Event>>();
-        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
         Expression<Func<Event, bool>> expression = x => x.StartAt >= startAt;
         var expected = await dbContext
@@ -200,7 +201,7 @@ public class FilterEventTest(EventManagerTestContext context) : TestObjectBase, 
         // Given
         await using var scope = context.CreateAsyncScope();
         var filterService = scope.ServiceProvider.GetRequiredService<IFilter<Event>>();
-        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
         endAt = endAt.AddDays(1).Date;
         Expression<Func<Event, bool>> expression = x => x.EndAt < endAt;
@@ -240,7 +241,7 @@ public class FilterEventTest(EventManagerTestContext context) : TestObjectBase, 
         // Given
         await using var scope = context.CreateAsyncScope();
         var filterService = scope.ServiceProvider.GetRequiredService<IFilter<Event>>();
-        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
         endAt = endAt?.AddDays(1).Date;
         var expected = await dbContext

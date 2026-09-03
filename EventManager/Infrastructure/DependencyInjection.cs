@@ -1,4 +1,3 @@
-using EventManager.Application.Interfaces;
 using EventManager.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -33,7 +32,13 @@ public static class DependencyInjection
             }
         });
 
-        services.AddScoped<IAppDbContext>(provider => provider.GetRequiredService<AppDbContext>());
         return services;
+    }
+
+    public static async Task PrepareInfrastructure(this IServiceProvider serviceProvider, CancellationToken cancellation)
+    {
+        await using var scope = serviceProvider.CreateAsyncScope();
+        using var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        await dbContext.Database.MigrateAsync(cancellation);
     }
 }

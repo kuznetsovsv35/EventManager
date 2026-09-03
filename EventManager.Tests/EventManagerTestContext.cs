@@ -1,5 +1,6 @@
 using EventManager.Application.Interfaces;
 using EventManager.Application.Services;
+using EventManager.Data;
 using EventManager.Infrastructure;
 using EventManager.Models;
 using Microsoft.EntityFrameworkCore;
@@ -19,7 +20,7 @@ public class EventManagerTestContext
     public async Task<Guid> GetRandomEventId(CancellationToken cancellation)
     {
         await using var scope = ServiceProvider.CreateAsyncScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         int eventCount = await dbContext.GetEvents().CountAsync<Event>(cancellation);
         var eventIndex = Random.Shared.Next(eventCount);
         return (await dbContext.GetEvents().Skip(eventIndex).FirstAsync(cancellation)).Id;
@@ -32,6 +33,8 @@ public class EventManagerTestContext
             .AddSingleton<IAsyncQueue<Guid>, AsyncQueue<Guid>>()
             .AddSingleton(_ => new TestAppDbContext($"Test_{Guid.NewGuid()}"))
             .AddScoped(provider => provider.GetRequiredService<TestAppDbContext>().CreateNewInstance())
+            .AddScoped<IEventRepository, EventRepository>()
+            .AddScoped<IBookingRepository, BookingRepository>()
             .AddScoped<IFilter<Event>, FilterService<Event>>()
             .AddScoped<IPaginator<Event>, PaginateService<Event>>()
             .AddScoped<IEventService, EventService>()

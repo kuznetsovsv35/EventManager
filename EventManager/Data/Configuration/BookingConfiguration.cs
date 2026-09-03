@@ -20,7 +20,7 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
         builder.HasKey(b => b.Id);
 
         builder.HasOne(b => b.Event)
-            .WithMany(e => e.Bookings)
+            .WithMany()
             .HasForeignKey(b => b.EventId)
             .OnDelete(DeleteBehavior.Cascade);
     }

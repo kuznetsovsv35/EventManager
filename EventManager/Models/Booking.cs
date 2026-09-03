@@ -53,6 +53,8 @@ public class Booking
     /// Конструктор события.
     /// </summary>
     /// <param name="eventId"></param>
+    public Booking(Event @event) : this(@event.Id) => Event = @event;
+ 
     public Booking(Guid eventId)
     {
         Id = Guid.NewGuid();

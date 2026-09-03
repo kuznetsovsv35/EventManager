@@ -19,10 +19,5 @@ public class EventConfiguration : IEntityTypeConfiguration<Event>
         builder.Ignore(e => e.AvailableSeats);
 
         builder.HasKey(e => e.Id);
-        
-        builder.HasMany(e => e.Bookings)
-            .WithOne(b => b.Event)
-            .HasForeignKey(b => b.EventId)
-            .OnDelete(DeleteBehavior.Cascade);
-}
+    }
 }

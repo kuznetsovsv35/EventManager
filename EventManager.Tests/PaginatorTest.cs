@@ -1,5 +1,6 @@
 using EventManager.Application.DataTransfer;
 using EventManager.Application.Interfaces;
+using EventManager.Data;
 using EventManager.Infrastructure;
 using EventManager.Models;
 using Microsoft.EntityFrameworkCore;
@@ -29,7 +30,7 @@ public class PaginatorTest(EventManagerTestContext context) : TestObjectBase, IC
         // Given
         await using var scope = context.CreateAsyncScope();
         var paginator = scope.ServiceProvider.GetRequiredService<IPaginator<Event>>();
-        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         // When
 
         // Then
@@ -56,7 +57,7 @@ public class PaginatorTest(EventManagerTestContext context) : TestObjectBase, IC
     {
         // Given
         await using var scope = context.CreateAsyncScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var paginator = scope.ServiceProvider.GetRequiredService<IPaginator<Event>>();
 
         var expectedTotalCount = await dbContext.GetEvents().CountAsync();

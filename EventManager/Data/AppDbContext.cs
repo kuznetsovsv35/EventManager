@@ -1,4 +1,3 @@
-using System.Collections.Concurrent;
 using System.Linq.Expressions;
 using EventManager.Application.Interfaces;
 using EventManager.Models;
@@ -10,104 +9,92 @@ namespace EventManager.Data;
 /// Контекст хранения данных события.
 /// </summary>
 /// <param name="options"></param>
-public class AppDbContext : DbContext, IAppDbContext
+public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
     #region Общие
-    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
-    {
-        Database.EnsureDeleted();
-        Database.Migrate();
-    }
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
         => modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);
     #endregion
 
     #region  Events
-    IQueryable<Event> IObjectRepository<Event, Guid>.GetObjects(Expression<Func<Event, bool>>? filter)
+    public DbSet<Event> Events => Set<Event>();
+    public IQueryable<Event> GetEvents(Expression<Func<Event, bool>>? filter = null)
     {
-        if (filter is null)
-            return Set<Event>().AsNoTracking();
-        return Set<Event>().AsNoTracking().Where(filter);
+        if (filter == null)
+            return Events.AsNoTracking();
+
+        return Events.AsNoTracking().Where(filter);
     }
-
-    Task<Event?> IObjectRepository<Event, Guid>.GetObjectAsync(Guid id, CancellationToken cancellation)
-        => Set<Event>().AsNoTracking().FirstOrDefaultAsync(e => e.Id == id, cancellation);
-
-    async Task<Event> IObjectRepository<Event, Guid>.AddObjectAsync(Event @event, CancellationToken cancellation)
+    public Task<Event?> GetEventAsync(Guid id, CancellationToken cancellation)
+        => Events.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, cancellation);
+    
+    public Task AddEventAsync(Event @event, CancellationToken cancellation)
     {
-        Set<Event>().Add(@event);
-        await SaveChangesAsync(cancellation);
+        Events.Add(@event);
+        return SaveChangesAsync(cancellation);
+    }
+    public async Task<Event?> DeleteEventAsync(Guid id, CancellationToken cancellation)
+    {
+        Event? @event = await Events.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, cancellation);
+
+        if (@event is not null)
+        {
+            Events.Remove(@event);
+            await SaveChangesAsync(cancellation);
+        }
+
         return @event;
     }
-    
-    async Task<Event?> IObjectRepository<Event, Guid>.UpdateObjectAsync(Guid id, Action<Event> updater, CancellationToken cancellation)
+    public async Task<Event?> UpdateEventAsync(Guid id, Action<Event> updater, CancellationToken cancellation)
     {
-        if (await Set<Event>().FindAsync(id, cancellation) is Event dest)
+        if (await Events.FindAsync(id) is Event dest)
         {
             updater(dest);
             await SaveChangesAsync(cancellation);
             return dest;
-        }
-        return null;
-    }
-
-    async Task<Event?> IObjectRepository<Event, Guid>.DeleteObjectAsync(Guid id, CancellationToken cancellation)
-    {
-        var dbSet = Set<Event>();
-        if (await dbSet.FindAsync(id, cancellation) is Event @event)
-        {
-            dbSet.Remove(@event);
-            await SaveChangesAsync(cancellation);
-            return @event;
         }
         return null;
     }
     #endregion
 
     #region  Bookings
-    IQueryable<Booking> IObjectRepository<Booking, Guid>.GetObjects(Expression<Func<Booking, bool>>? filter)
+    public DbSet<Booking> Bookings => Set<Booking>();
+    public IQueryable<Booking> GetBookings(Expression<Func<Booking, bool>>? filter = null)
     {
         if (filter == null)
-            return Set<Booking>().AsNoTracking();
+            return Bookings.AsNoTracking();
 
-        return Set<Booking>().AsNoTracking().Where(filter);
+        return Bookings.AsNoTracking().Where(filter);
     }
+    public Task<Booking?> GetBookingAsync(Guid id, CancellationToken cancellation)
+        => Bookings.AsNoTracking().Include(b => b.Event).FirstOrDefaultAsync(x => x.Id == id, cancellation);
 
-    Task<Booking?> IObjectRepository<Booking, Guid>.GetObjectAsync(Guid id, CancellationToken cancellation)
-        => Set<Booking>().AsNoTracking().Include(b => b.Event).FirstOrDefaultAsync(x => x.Id == id, cancellation);
-    
-    async Task<Booking> IObjectRepository<Booking, Guid>.AddObjectAsync(Booking booking, CancellationToken cancellation)
+    public Task AddBookingAsync(Booking booking, CancellationToken cancellation)
     {
-        Set<Booking>().Add(booking);
-        await SaveChangesAsync(cancellation);
+        Bookings.Add(booking);
+        return SaveChangesAsync(cancellation);
+    }
+    public async Task<Booking?> DeleteBookingAsync(Guid id, CancellationToken cancellation)
+    {
+        Booking? booking = await Bookings.FindAsync(id, cancellation);
+        if (booking is not null)
+        {
+            Bookings.Remove(booking);
+            await SaveChangesAsync(cancellation);
+        }
         return booking;
     }
-
-    async Task<Booking?> IObjectRepository<Booking, Guid>.UpdateObjectAsync(Guid id, Action<Booking> updater, CancellationToken cancellation)
+    public async Task UpdateBookingAsync(Guid id, Action<Booking> updater, CancellationToken cancellation)
     {
-        if (await Set<Booking>().FindAsync(id, cancellation) is Booking dest)
+        if (await Bookings.FindAsync(id, cancellation) is Booking dest)
         {
             updater(dest);
             await SaveChangesAsync(cancellation);
-            return dest;
         }
-        return null;
-    }
-
-    async Task<Booking?> IObjectRepository<Booking, Guid>.DeleteObjectAsync(Guid id, CancellationToken cancellation)
-    {
-        var dbSet = Set<Booking>();
-        if (await dbSet.FindAsync(id, cancellation) is Booking booking)
-        {
-            dbSet.Remove(booking);
-            await SaveChangesAsync(cancellation);
-            return booking;
-        }
-        return null;
     }
     #endregion
 
+    /*
     #region Инфраструктура синхронизации.
     static readonly ConcurrentDictionary<int, SemaphoreSlim> _locks = new();
 
@@ -166,4 +153,5 @@ public class AppDbContext : DbContext, IAppDbContext
     ISyncDataContext IAppDbContext.CreateSyncContext<T>()
         => new SyncDataContext<T>(this);
     #endregion
+    */
 }

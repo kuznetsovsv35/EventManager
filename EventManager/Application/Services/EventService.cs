@@ -21,13 +21,13 @@ public class EventService(
             throw new ArgumentNullException(nameof(data));
 
         var e = data.ToEvent();
-        await repository.AddObjectAsync(e, cancellation);
+        await repository.AddEventAsync(e, cancellation);
         return e.ToOutputData();
     }
 
     async Task<EventOutputData> IEventService.DeleteEventAsync(Guid id, CancellationToken cancellation)
     {
-        if (await repository.DeleteObjectAsync(id, cancellation) is Event e)
+        if (await repository.DeleteEventAsync(id, cancellation) is Event e)
             return e.ToOutputData();
 
         throw new EventNotFoundException(id, nameof(id));
@@ -35,7 +35,7 @@ public class EventService(
 
     IEnumerable<EventOutputData> IEventService.GetAllEvents()
         => repository
-            .GetObjects()
+            .GetEvents()
             .Select(x => x.ToOutputData())
             .ToList();
 
@@ -72,12 +72,12 @@ public class EventService(
             f.AddCondition(e => e.EndAt < toDate);
         }
 
-        return repository.GetObjects(f.Expression);
+        return repository.GetEvents(f.Expression);
     }
 
     async Task<EventOutputData> IEventService.GetEventAsync(Guid id, CancellationToken cancellation)
     {
-        if (await repository.GetObjectAsync(id, cancellation) is Event e)
+        if (await repository.GetEventAsync(id, cancellation) is Event e)
             return e.ToOutputData();
 
         throw new EventNotFoundException(id, nameof(id));
@@ -85,10 +85,13 @@ public class EventService(
 
     async Task<EventOutputData> IEventService.UpdateEventAsync(Guid id, EventInputData data, CancellationToken cancellation)
     {        
-        var e = await repository.UpdateObjectAsync(id, e => data.Update(e), cancellation);
-        
-        return e is not null
-            ? e.ToOutputData()
-            : throw new EventNotFoundException(id, nameof(id));
+        if (await repository.GetEventAsync(id, cancellation) is Event e)
+        { 
+            data.Update(e);
+            await repository.UpdateEventAsync(e, cancellation);
+            e.ToOutputData();
+        }
+
+        throw new EventNotFoundException(id, nameof(id));
     }
 }
