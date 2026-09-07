@@ -36,6 +36,7 @@ public class EventService(
     IEnumerable<EventOutputData> IEventService.GetAllEvents()
         => repository
             .GetEvents()
+            .AsEnumerable()
             .Select(x => x.ToOutputData())
             .ToList();
 
@@ -89,7 +90,7 @@ public class EventService(
         { 
             data.Update(e);
             await repository.UpdateEventAsync(e, cancellation);
-            e.ToOutputData();
+            return e.ToOutputData();
         }
 
         throw new EventNotFoundException(id, nameof(id));

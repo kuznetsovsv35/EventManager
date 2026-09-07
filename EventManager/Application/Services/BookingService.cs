@@ -22,9 +22,9 @@ public class BookingService(
 
                 if (@event.TryReserveSeats())
                 {
-                    var booking = new Booking(@event);
+                    var booking = new Booking(@eventId);
                     await bookings.AddBooking(booking, cancellation);
-                    //await events.UpdateEventAsync(@event, cancellation);
+                    await events.UpdateEventAsync(@event, cancellation);
                     await bookingQueue.Enqueue(booking.Id, cancellation);
                     return booking.ToInfo();
                 }
