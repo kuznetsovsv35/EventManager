@@ -1,7 +1,6 @@
 using System.Threading.Channels;
 using EventManager.Application.Interfaces;
 using EventManager.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace EventManager.Infrastructure;
 
@@ -22,11 +21,17 @@ public class AppBackgroundService(
     /// <summary>
     /// Размер пакета для параллельной обработки.
     /// </summary>
-    static readonly int ChunkSize = 50;
+    const int ChunkSize = 50;
+    /// <summary>
+    /// Интервал опроса.
+    /// </summary>
+    static readonly TimeSpan PollingInterval = TimeSpan.FromSeconds(5);
 
     readonly ChannelReader<Guid> _triggerReader = triggerChannel.Reader;
 
     BackgroundServiceStatus _status = BackgroundServiceStatus.Stopped;
+
+    int _isProcessing;
 
     public BackgroundServiceStatus Status => _status;
 
@@ -54,9 +59,24 @@ public class AppBackgroundService(
             {
                 try
                 {
-                    await _triggerReader.WaitToReadAsync(stoppingToken).AsTask();
-                    _triggerReader.TryRead(out var _);
-                    await ProcessBookingsAsync(stoppingToken);
+                    var readTask = _triggerReader.WaitToReadAsync(stoppingToken).AsTask();
+                    var delayTask = Task.Delay(PollingInterval, stoppingToken);
+
+                    var completed = await Task.WhenAny(readTask, delayTask);
+
+                    if (completed == readTask && await readTask)
+                    {
+                        while (_triggerReader.TryRead(out var bookingIgd))
+                        {
+                            logger.LogInformation("Получен push-сигнал: Booking ID={EventId}", bookingIgd);
+                            await ProcessBookingsAsync(stoppingToken);
+                        }
+                    }
+                    else
+                    {
+                        logger.LogDebug("Polling-проверка (по таймеру)");
+                        await ProcessBookingsAsync(stoppingToken);
+                    }
                 }
                 catch (OperationCanceledException canceled) when (canceled.CancellationToken.IsCancellationRequested)
                 {
@@ -77,31 +97,29 @@ public class AppBackgroundService(
         }
     }
 
-    int _isProcessing;
     async Task ProcessBookingsAsync(CancellationToken cancellation)
     {
-        // Атомарная проверка: если уже занят — пропускаем
         if (Interlocked.CompareExchange(ref _isProcessing, 1, 0) != 0)
             return;
 
         try
         {
-        await using var scope = scopeFactory.CreateAsyncScope();
-        var bookingRepo = scope.ServiceProvider.GetRequiredService<IBookingRepository>();
-        await foreach (var chunk in bookingRepo.GetPendingBookingsAsync(ChunkSize, cancellation))
-        {
-            await Task.WhenAll(chunk.Select(async booking =>
+            await using var scope = scopeFactory.CreateAsyncScope();
+            var bookingRepo = scope.ServiceProvider.GetRequiredService<IBookingRepository>();
+            await foreach (var chunk in bookingRepo.GetPendingBookingsAsync(ChunkSize, cancellation))
             {
-                await ProcessBookingAsync(booking, cancellation);
-            }));
-        }
+                await Task.WhenAll(chunk.Select(async booking =>
+                {
+                    await ProcessBookingAsync(booking, cancellation);
+                }));
+            }
         }
         finally
         {
             Interlocked.Exchange(ref _isProcessing, 0);
         }
     }
-    
+
     async Task ProcessBookingAsync(Booking booking, CancellationToken cancellation)
     {
         await using var scope = scopeFactory.CreateAsyncScope();
