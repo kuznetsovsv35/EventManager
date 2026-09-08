@@ -46,7 +46,8 @@ public class EventManagerTestContext
                 mock.Setup(x => x.CreateScope()).Returns(provider.CreateScope());
                 return mock.Object;
             })
-            .AddSingleton<IAppBackgroundService, AppBackgroundService>();
+            .AddSingleton<IAppBackgroundService, AppBackgroundService>()
+            .AddSingleton<ISyncContextFactory, SyncContextFactory>();
         ServiceProvider = CreateServiceProvider();
     }
 

@@ -11,6 +11,7 @@ namespace EventManager.Application.Services;
 /// </summary>
 /// <param name="dbContext"></param>
 public class EventService(
+    ISyncContextFactory syncContextFactory,
     IEventRepository repository,
     IFilter<Event> filter,
     IPaginator<Event> paginator) : IEventService
@@ -85,14 +86,21 @@ public class EventService(
     }
 
     async Task<EventOutputData> IEventService.UpdateEventAsync(Guid id, EventInputData data, CancellationToken cancellation)
-    {        
-        if (await repository.GetEventAsync(id, cancellation) is Event e)
-        { 
-            data.Update(e);
-            await repository.UpdateEventAsync(e, cancellation);
-            return e.ToOutputData();
-        }
-
-        throw new EventNotFoundException(id, nameof(id));
+    {
+        var e = await syncContextFactory.CreateContext<Booking>().ExecuteActionAsync(
+            async () =>
+            {
+                if (await repository.GetEventAsync(id, cancellation) is Event e)
+                {
+                    data.Update(e);
+                    await repository.UpdateEventAsync(e, cancellation);
+                    return e;
+                }
+                return null;
+            }, cancellation);
+        
+        return e is not null
+            ? e.ToOutputData()
+            : throw new EventNotFoundException(id, nameof(id));
     }
 }

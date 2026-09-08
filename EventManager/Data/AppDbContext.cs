@@ -1,5 +1,4 @@
 using System.Linq.Expressions;
-using EventManager.Application.Interfaces;
 using EventManager.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -93,65 +92,4 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         }
     }
     #endregion
-
-    /*
-    #region Инфраструктура синхронизации.
-    static readonly ConcurrentDictionary<int, SemaphoreSlim> _locks = new();
-
-    class SyncDataContext<T>(AppDbContext dbContext) : ISyncDataContext
-    {
-        static int _hashCode = typeof(T).GUID.GetHashCode();
-        SemaphoreSlim _lock = _locks.GetOrAdd(_hashCode, (_) => new(1, 1));
-
-        async Task<TResult> ISyncDataContext.ExecuteActionAsync<TResult>(Func<Task<TResult>> action, CancellationToken cancellation)
-        {
-            await _lock.WaitAsync(cancellation);
-            try
-            {
-                var result = await action();
-                await dbContext.SaveChangesAsync(cancellation);
-                return result;
-            }
-            catch
-            {
-                RollbackChanges();
-                throw;
-            }
-            finally
-            {
-                _lock.Release();
-            }
-        }
-
-        async Task ISyncDataContext.ExecuteActionAsync(Func<Task> action, CancellationToken cancellation)
-        {
-            await _lock.WaitAsync(cancellation);
-            try
-            {
-                await action();
-                await dbContext.SaveChangesAsync(cancellation);
-            }
-            catch
-            {
-                //RollbackChanges();
-                throw;
-            }
-            finally
-            {
-                _lock.Release();
-            }
-        }
-
-        void RollbackChanges()
-        {
-            var entries = dbContext.ChangeTracker.Entries().Where(x => x.State != EntityState.Unchanged).ToList();
-            foreach (var entry in entries)
-                entry.State = EntityState.Unchanged;
-        }
-    }
-
-    ISyncDataContext IAppDbContext.CreateSyncContext<T>()
-        => new SyncDataContext<T>(this);
-    #endregion
-    */
 }

@@ -1,3 +1,4 @@
+using EventManager.Application.Interfaces;
 using EventManager.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -32,6 +33,7 @@ public static class DependencyInjection
             }
         });
 
+        services.AddSingleton<ISyncContextFactory, SyncContextFactory>();
         return services;
     }
 

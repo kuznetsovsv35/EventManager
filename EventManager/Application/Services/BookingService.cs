@@ -6,15 +6,14 @@ using EventManager.Models;
 namespace EventManager.Application.Services;
 
 public class BookingService(
+    ISyncContextFactory syncContextFactory,
     IBookingRepository bookings,
     IEventRepository events,
     IAsyncQueue<Guid> bookingQueue) : IBookingService
 {
-    static readonly SemaphoreSlim _lock = new(1, 1);
     public async Task<BookingInfo> CreateBookingAsync(Guid eventId, CancellationToken cancellation)
     {
-        await _lock.WaitAsync(cancellation);
-        try
+        var booking = await syncContextFactory.CreateContext<Booking>().ExecuteActionAsync<Booking>(async() =>
         {
             if (await events.GetEventAsync(eventId, cancellation) is Event @event)
             {
@@ -22,20 +21,18 @@ public class BookingService(
 
                 if (@event.TryReserveSeats())
                 {
-                    var booking = new Booking(@eventId);
+                    var booking = new Booking(eventId);
                     await bookings.AddBooking(booking, cancellation);
                     await events.UpdateEventAsync(@event, cancellation);
-                    await bookingQueue.Enqueue(booking.Id, cancellation);
-                    return booking.ToInfo();
+                    return booking;
                 }
                 throw new NoAvailableSeatsException(eventId);
             }
             throw new EventNotFoundException(eventId, nameof(eventId));
-        }
-        finally
-        {
-            _lock.Release();
-        }
+        }, cancellation);
+        
+        await bookingQueue.Enqueue(booking.Id, cancellation);
+        return booking.ToInfo();
     }
 
     public async Task<BookingInfo> GetBookingByIdAsync(Guid bookingId, CancellationToken cancellation)

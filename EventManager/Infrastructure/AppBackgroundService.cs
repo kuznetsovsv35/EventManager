@@ -6,6 +6,7 @@ namespace EventManager.Infrastructure;
 
 public class AppBackgroundService(
     IServiceScopeFactory scopeFactory,
+    ISyncContextFactory syncContextFactory,
     IAsyncQueue<Guid> bookingQueue,
     ILogger<AppBackgroundService> logger) : BackgroundService, IAppBackgroundService
 {
@@ -98,7 +99,8 @@ public class AppBackgroundService(
             logger.LogError(ex, "Ошибка обработки брони {Booking} для события {Event}.", booking.Id, booking.EventId);
         }
 
-        await bookings.UpdateBookingStatusAsync(booking, cancellation);
+        await syncContextFactory.CreateContext<Booking>().ExecuteActionAsync(async() 
+            => await bookings.UpdateBookingStatusAsync(booking, cancellation), cancellation);
 
         switch (booking.Status)
         {
