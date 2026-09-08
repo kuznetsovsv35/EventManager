@@ -52,16 +52,7 @@ public class AppBackgroundService(
                 try
                 {
                     await bookingQueue.DequeueAll(stoppingToken);
-
-                    await using var scope = scopeFactory.CreateAsyncScope();
-                    var bookingRepo = scope.ServiceProvider.GetRequiredService<IBookingRepository>();
-                    await foreach (var chunk in bookingRepo.GetPendingBookingsAsync(ChunkSize, stoppingToken))
-                    {
-                        await Task.WhenAll(chunk.Select(async booking =>
-                        {
-                            await ProcessBookingAsync(booking, stoppingToken);
-                        }));
-                    }
+                    await ProcessBookingsAsync(stoppingToken);
                 }
                 catch (OperationCanceledException canceled) when (canceled.CancellationToken.IsCancellationRequested)
                 {
@@ -82,6 +73,31 @@ public class AppBackgroundService(
         }
     }
 
+    int _isProcessing;
+    async Task ProcessBookingsAsync(CancellationToken cancellation)
+    {
+        // Атомарная проверка: если уже занят — пропускаем
+        if (Interlocked.CompareExchange(ref _isProcessing, 1, 0) != 0)
+            return;
+
+        try
+        {
+        await using var scope = scopeFactory.CreateAsyncScope();
+        var bookingRepo = scope.ServiceProvider.GetRequiredService<IBookingRepository>();
+        await foreach (var chunk in bookingRepo.GetPendingBookingsAsync(ChunkSize, cancellation))
+        {
+            await Task.WhenAll(chunk.Select(async booking =>
+            {
+                await ProcessBookingAsync(booking, cancellation);
+            }));
+        }
+        }
+        finally
+        {
+            Interlocked.Exchange(ref _isProcessing, 0);
+        }
+    }
+    
     async Task ProcessBookingAsync(Booking booking, CancellationToken cancellation)
     {
         await using var scope = scopeFactory.CreateAsyncScope();
@@ -99,7 +115,7 @@ public class AppBackgroundService(
             logger.LogError(ex, "Ошибка обработки брони {Booking} для события {Event}.", booking.Id, booking.EventId);
         }
 
-        await syncContextFactory.CreateContext<Booking>().ExecuteActionAsync(async() 
+        await syncContextFactory.CreateContext<Booking>().ExecuteActionAsync(async ()
             => await bookings.UpdateBookingStatusAsync(booking, cancellation), cancellation);
 
         switch (booking.Status)
