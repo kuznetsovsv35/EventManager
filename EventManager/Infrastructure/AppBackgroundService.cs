@@ -1,3 +1,4 @@
+using System.Threading.Channels;
 using EventManager.Application.Interfaces;
 using EventManager.Models;
 using Microsoft.EntityFrameworkCore;
@@ -7,7 +8,7 @@ namespace EventManager.Infrastructure;
 public class AppBackgroundService(
     IServiceScopeFactory scopeFactory,
     ISyncContextFactory syncContextFactory,
-    IAsyncQueue<Guid> bookingQueue,
+    Channel<Guid> triggerChannel,
     ILogger<AppBackgroundService> logger) : BackgroundService, IAppBackgroundService
 {
     /// <summary>
@@ -22,6 +23,8 @@ public class AppBackgroundService(
     /// Размер пакета для параллельной обработки.
     /// </summary>
     static readonly int ChunkSize = 50;
+
+    readonly ChannelReader<Guid> _triggerReader = triggerChannel.Reader;
 
     BackgroundServiceStatus _status = BackgroundServiceStatus.Stopped;
 
@@ -51,7 +54,8 @@ public class AppBackgroundService(
             {
                 try
                 {
-                    await bookingQueue.DequeueAll(stoppingToken);
+                    await _triggerReader.WaitToReadAsync(stoppingToken).AsTask();
+                    _triggerReader.TryRead(out var _);
                     await ProcessBookingsAsync(stoppingToken);
                 }
                 catch (OperationCanceledException canceled) when (canceled.CancellationToken.IsCancellationRequested)

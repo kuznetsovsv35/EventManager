@@ -1,3 +1,4 @@
+using System.Threading.Channels;
 using EventManager.Application.DataTransfer;
 using EventManager.Application.Interfaces;
 using EventManager.Infrastructure;
@@ -9,7 +10,7 @@ public class BookingService(
     ISyncContextFactory syncContextFactory,
     IBookingRepository bookings,
     IEventRepository events,
-    IAsyncQueue<Guid> bookingQueue) : IBookingService
+    Channel<Guid> triggerChannel) : IBookingService
 {
     public async Task<BookingInfo> CreateBookingAsync(Guid eventId, CancellationToken cancellation)
     {
@@ -31,7 +32,7 @@ public class BookingService(
             throw new EventNotFoundException(eventId, nameof(eventId));
         }, cancellation);
         
-        await bookingQueue.Enqueue(booking.Id, cancellation);
+        await triggerChannel.Writer.WriteAsync(booking.Id, cancellation).AsTask();
         return booking.ToInfo();
     }
 

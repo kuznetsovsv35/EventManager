@@ -1,3 +1,4 @@
+using System.Threading.Channels;
 using EventManager.Application.Interfaces;
 using EventManager.Application.Services;
 using EventManager.Data;
@@ -19,7 +20,14 @@ public static class DependencyInjection
         services.AddScoped<IBookingService, BookingService>();
         services.AddScoped<IEventRepository, EventRepository>();
         services.AddScoped<IBookingRepository, BookingRepository>();
-        services.AddSingleton<IAsyncQueue<Guid>, AsyncQueue<Guid>>();
+        
+        services.AddSingleton(_ => Channel.CreateBounded<Guid>(new BoundedChannelOptions(1)
+        {
+            FullMode = BoundedChannelFullMode.DropOldest,
+            SingleWriter = false,
+            SingleReader = true
+        }));
+
         services.AddHostedService<AppBackgroundService>();
         return services;
     }

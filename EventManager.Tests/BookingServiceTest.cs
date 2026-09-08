@@ -175,28 +175,6 @@ public class BookingServiceTest(EventManagerTestContext context) : TestObjectBas
     }
 
     /// <summary>
-    /// Тест асинхронной очереди.
-    /// </summary>
-    /// <returns></returns>
-    [Fact]
-    public async Task TestBookingQueue_Success()
-    {
-        // Given
-        var serviceProvider = context.CreateServiceProvider();
-        var queue = serviceProvider.GetRequiredService<IAsyncQueue<Guid>>();
-        var queuedBooking = Guid.NewGuid();
-
-        // When
-        var queueTask = queue.Dequeue(CancellationToken.None);
-        await queue.Enqueue(queuedBooking, CancellationToken.None);
-        var dequeuedBooking = await queueTask;
-
-        // Then
-        Assert.NotEqual(dequeuedBooking, Guid.Empty);
-        Assert.Equal(queuedBooking, dequeuedBooking);
-    }
-
-    /// <summary>
     /// Тест запуска/останова фоновой службы.
     /// </summary>
     /// <returns></returns>

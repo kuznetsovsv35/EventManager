@@ -1,3 +1,4 @@
+using System.Threading.Channels;
 using EventManager.Application.Interfaces;
 using EventManager.Application.Services;
 using EventManager.Data;
@@ -30,7 +31,12 @@ public class EventManagerTestContext
     public EventManagerTestContext()
     {
         _services = new ServiceCollection()
-            .AddSingleton<IAsyncQueue<Guid>, AsyncQueue<Guid>>()
+            .AddSingleton(_ => Channel.CreateBounded<Guid>(new BoundedChannelOptions(1)
+            {
+                FullMode = BoundedChannelFullMode.DropOldest,
+                SingleWriter = false,
+                SingleReader = true
+            }))
             .AddSingleton(_ => new TestAppDbContext($"Test_{Guid.NewGuid()}"))
             .AddScoped(provider => provider.GetRequiredService<TestAppDbContext>().CreateNewInstance())
             .AddScoped<IEventRepository, EventRepository>()
