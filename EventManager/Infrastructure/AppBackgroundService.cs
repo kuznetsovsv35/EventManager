@@ -17,6 +17,10 @@ public class AppBackgroundService(
     /// Пауза восстановления сервиса после исключения.
     /// </summary>
     static readonly TimeSpan RecoveryPause = TimeSpan.FromSeconds(1);
+    /// <summary>
+    /// Размер пакета для параллельной обработки.
+    /// </summary>
+    static readonly int ChunkSize = 50;
 
     BackgroundServiceStatus _status = BackgroundServiceStatus.Stopped;
 
@@ -46,9 +50,17 @@ public class AppBackgroundService(
             {
                 try
                 {
-                    var tasks = (await bookingQueue.DequeueAll(stoppingToken))
-                        .Select(booking => ProcessBookingAsync(booking, stoppingToken));
-                    await Task.WhenAll(tasks); 
+                    await bookingQueue.DequeueAll(stoppingToken);
+
+                    await using var scope = scopeFactory.CreateAsyncScope();
+                    var bookingRepo = scope.ServiceProvider.GetRequiredService<IBookingRepository>();
+                    await foreach (var chunk in bookingRepo.GetPendingBookingsAsync(ChunkSize, stoppingToken))
+                    {
+                        await Task.WhenAll(chunk.Select(async booking =>
+                        {
+                            await ProcessBookingAsync(booking, stoppingToken);
+                        }));
+                    }
                 }
                 catch (OperationCanceledException canceled) when (canceled.CancellationToken.IsCancellationRequested)
                 {
@@ -69,42 +81,36 @@ public class AppBackgroundService(
         }
     }
 
-    async Task ProcessBookingAsync(Guid bookingId, CancellationToken cancellation)
+    async Task ProcessBookingAsync(Booking booking, CancellationToken cancellation)
     {
         await using var scope = scopeFactory.CreateAsyncScope();
         var bookings = scope.ServiceProvider.GetRequiredService<IBookingRepository>();
-        var booking = await bookings.GetBookingAsync(bookingId, cancellation);
 
-        if (booking is not null)
-        {         
-            try
-            {
-                await CustomProcessBooking(booking, cancellation);
-                if (booking is { Event: null })
-                    throw new EventNotFoundException(booking.EventId, nameof(booking.EventId));
-            }
-            catch(Exception ex) when (ex is not OperationCanceledException)
-            {
-                booking.Reject();
-                logger.LogError(ex, "Ошибка обработки брони {Booking} для события {Event}.", booking.Id, booking.EventId);
-            }
-
-            await bookings.UpdateBookingStatusAsync(booking, cancellation);
-
-            switch (booking.Status)
-            {
-                case BookingStatus.Confirmed:
-                    logger.LogInformation("Бронь {Booking} для события {Event} подтверждена.", booking.Id, booking.EventId);
-                    break;
-                case BookingStatus.Rejected:
-                    logger.LogWarning("Бронь {Booking} для события {Event} отклонена.", booking.Id, booking.EventId);
-                    break;
-                default:
-                    throw new InvalidDataException($"Неверный статус брони {booking.Id}.");
-            }
+        try
+        {
+            await CustomProcessBooking(booking, cancellation);
+            if (booking is { Event: null })
+                throw new EventNotFoundException(booking.EventId, nameof(booking.EventId));
         }
-        else
-            logger.LogError("Бронь {Booking} для события в БД не найдена.", bookingId);
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            booking.Reject();
+            logger.LogError(ex, "Ошибка обработки брони {Booking} для события {Event}.", booking.Id, booking.EventId);
+        }
+
+        await bookings.UpdateBookingStatusAsync(booking, cancellation);
+
+        switch (booking.Status)
+        {
+            case BookingStatus.Confirmed:
+                logger.LogInformation("Бронь {Booking} для события {Event} подтверждена.", booking.Id, booking.EventId);
+                break;
+            case BookingStatus.Rejected:
+                logger.LogWarning("Бронь {Booking} для события {Event} отклонена.", booking.Id, booking.EventId);
+                break;
+            default:
+                throw new InvalidDataException($"Неверный статус брони {booking.Id}.");
+        }
     }
 
     Task CustomProcessBooking(Booking booking, CancellationToken cancellation)
