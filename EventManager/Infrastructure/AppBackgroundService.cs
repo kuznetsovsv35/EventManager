@@ -53,34 +53,39 @@ public class AppBackgroundService(
     {
         Interlocked.Exchange(ref _status, BackgroundServiceStatus.Running);
         logger.LogInformation("Старт фонового процесса обработки ...");
+        
         try
         {
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
             while (!stoppingToken.IsCancellationRequested)
             {
+                cts.CancelAfter(PollingInterval);
                 try
                 {
-                    var readTask = _triggerReader.WaitToReadAsync(stoppingToken).AsTask();
-                    var delayTask = Task.Delay(PollingInterval, stoppingToken);
-
-                    var completed = await Task.WhenAny(readTask, delayTask);
-
-                    if (completed == readTask && await readTask)
+                    if (await _triggerReader.WaitToReadAsync(cts.Token))
                     {
-                        while (_triggerReader.TryRead(out var bookingIgd))
+                        while (_triggerReader.TryRead(out var _))
                         {
-                            logger.LogInformation("Получен push-сигнал: Booking ID={EventId}", bookingIgd);
+                            stoppingToken.ThrowIfCancellationRequested();
                             await ProcessBookingsAsync(stoppingToken);
                         }
                     }
                     else
                     {
-                        logger.LogDebug("Polling-проверка (по таймеру)");
-                        await ProcessBookingsAsync(stoppingToken);
+                        break;
                     }
                 }
-                catch (OperationCanceledException canceled) when (canceled.CancellationToken.IsCancellationRequested)
+                catch (OperationCanceledException)
                 {
-                    break;
+                    if (stoppingToken.IsCancellationRequested)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        cts.TryReset();
+                        await ProcessBookingsAsync(stoppingToken);                        
+                    }
                 }
                 catch (Exception ex)
                 {
