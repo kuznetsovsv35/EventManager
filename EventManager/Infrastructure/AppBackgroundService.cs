@@ -28,6 +28,7 @@ public class AppBackgroundService(
     static readonly TimeSpan PollingInterval = TimeSpan.FromSeconds(5);
 
     readonly ChannelReader<Guid> _triggerReader = triggerChannel.Reader;
+    readonly ChannelWriter<Guid> _triggerWriter = triggerChannel.Writer;
 
     BackgroundServiceStatus _status = BackgroundServiceStatus.Stopped;
 
@@ -53,40 +54,19 @@ public class AppBackgroundService(
     {
         Interlocked.Exchange(ref _status, BackgroundServiceStatus.Running);
         logger.LogInformation("Старт фонового процесса обработки ...");
-        
+
+        // Запуск процесса pooling
+        Task timerTask = RunPollingTimer(stoppingToken);
         try
         {
-            using var cts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
             while (!stoppingToken.IsCancellationRequested)
             {
-                cts.CancelAfter(PollingInterval);
                 try
                 {
-                    if (await _triggerReader.WaitToReadAsync(cts.Token))
-                    {
-                        while (_triggerReader.TryRead(out var _))
-                        {
-                            stoppingToken.ThrowIfCancellationRequested();
-                            await ProcessBookingsAsync(stoppingToken);
-                        }
-                    }
-                    else
-                    {
-                        break;
-                    }
+                    // Ожидание push-сигнала
+                    await ProcessTriggerEvent(stoppingToken);
                 }
-                catch (OperationCanceledException)
-                {
-                    if (stoppingToken.IsCancellationRequested)
-                    {
-                        break;
-                    }
-                    else
-                    {
-                        cts.TryReset();
-                        await ProcessBookingsAsync(stoppingToken);                        
-                    }
-                }
+                catch (OperationCanceledException cancelled) when (cancelled.CancellationToken.IsCancellationRequested) { break; }
                 catch (Exception ex)
                 {
                     logger.LogError(ex, "Ошибка обработки.");
@@ -97,15 +77,51 @@ public class AppBackgroundService(
         }
         finally
         {
+            await timerTask;
             Interlocked.Exchange(ref _status, BackgroundServiceStatus.Stopped);
             logger.LogInformation("Завершение фонового процесса обработки...");
         }
     }
 
+    Task RunPollingTimer(CancellationToken cancellation)
+        => Task.Factory.StartNew(async() =>
+        {
+            var timer = new PeriodicTimer(PollingInterval);
+            try
+            {
+                while(!cancellation.IsCancellationRequested)
+                    if (await timer.WaitForNextTickAsync(cancellation))
+                    {
+                        if (Interlocked.CompareExchange(ref _isProcessing, 1, 0) == 0)
+                            await ProcessBookingsAsync(cancellation);
+                    }
+                    else
+                        break;
+
+            }
+            catch (OperationCanceledException cancelled) when (cancelled.CancellationToken.IsCancellationRequested) {}
+            finally
+            {
+                timer.Dispose();
+            }
+        }, TaskCreationOptions.LongRunning);
+
+    async Task ProcessTriggerEvent(CancellationToken cancellation)
+    {
+        if (await _triggerReader.WaitToReadAsync(cancellation))
+        {
+            while (_triggerReader.TryRead(out var _))
+            {
+                cancellation.ThrowIfCancellationRequested();
+                if (Interlocked.CompareExchange(ref _isProcessing, 1, 0) == 0)
+                    await ProcessBookingsAsync(cancellation);
+            }
+        }
+    }
+
     async Task ProcessBookingsAsync(CancellationToken cancellation)
     {
-        if (Interlocked.CompareExchange(ref _isProcessing, 1, 0) != 0)
-            return;
+        Interlocked.Exchange(ref _isProcessing, 1);
 
         try
         {
