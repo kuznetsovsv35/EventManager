@@ -1,10 +1,14 @@
-﻿namespace EventManager.IntegrationTests;
+﻿using EventManager.Data;
 
-public class UnitTest1
+namespace EventManager.IntegrationTests;
+
+public class UnitTest1 : DatabaseTestBase
 {
+    [Trait(Category, Category_Integration)]
     [Fact]
-    public void Test1()
+    public async Task Test1()
     {
-
+        await using var context = CreateDbContext<AppDbContext>();        
+        Assert.True(context.Database.CanConnect());
     }
 }
