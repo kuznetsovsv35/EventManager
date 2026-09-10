@@ -12,7 +12,7 @@ public class DatabaseTestBase : IAsyncLifetime
     static readonly string Password = "postgres";
 
     protected const string Category = "Category";
-    protected const string Category_Integration = "Integration";
+    protected const string Category_Database = "Database";
 
     readonly PostgreSqlContainer _postgres = new PostgreSqlBuilder(PostgresImage)
         .WithDatabase(DatabaseName)
