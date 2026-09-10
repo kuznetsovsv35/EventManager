@@ -23,5 +23,8 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
             .WithMany()
             .HasForeignKey(b => b.EventId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasIndex(b => b.CreatedAt).IsDescending().HasDatabaseName("IX_Bookings_CreatedAt_Desc");
+        builder.HasIndex(b => b.EventId).HasDatabaseName("IX_Bookings_EventId");
     }
 }
