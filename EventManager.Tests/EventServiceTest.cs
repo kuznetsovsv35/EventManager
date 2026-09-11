@@ -109,7 +109,10 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
-        var expected = await dbContext.GetEvents().Select(x => x.ToOutputData()).ToListAsync();
+        var expected = await dbContext
+            .GetEvents()
+            .OrderByDescending(e => e.StartAt)
+            .Select(x => x.ToOutputData()).ToListAsync();
 
         // When
         var actual = eventService.GetAllEvents().ToList();
@@ -311,6 +314,7 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
 
         var expectedAll = await dbContext
             .GetEvents(x => x.Title.Contains(titleAll, StringComparison.OrdinalIgnoreCase))
+            .OrderByDescending(e => e.StartAt)
             .Select(x => x.ToOutputData())
             .ToListAsync();
 
@@ -348,6 +352,7 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
 
         var expected = await dbContext
             .GetEvents(x => x.Title.Contains(title, StringComparison.OrdinalIgnoreCase))
+            .OrderByDescending(e => e.StartAt)
             .Select(x => x.ToOutputData())
             .ToListAsync();
 
@@ -390,6 +395,7 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
 
         var expected = await dbContext
             .GetEvents(x => x.StartAt >= startAt)
+            .OrderByDescending(e => e.StartAt)
             .Select(x => x.ToOutputData())
             .ToListAsync();
 
@@ -434,6 +440,7 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
         var endDate = endAt.AddDays(1).Date;
         var expected = await dbContext
             .GetEvents(x => x.EndAt < endDate)
+            .OrderByDescending(e => e.StartAt)
             .Select(x => x.ToOutputData())
             .ToListAsync();
 
@@ -483,6 +490,7 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
             .GetEvents(x => (string.IsNullOrEmpty(title) || x.Title.ToLower().Contains(title, StringComparison.OrdinalIgnoreCase))
                 && (startAt == null || x.StartAt >= startAt.Value)
                 && (endDate == null || x.EndAt < endDate.Value))
+            .OrderByDescending(e => e.StartAt)
             .Select(x => x.ToOutputData())
             .ToListAsync();
 
@@ -536,9 +544,11 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
         var allValues = eventService
             .GetAllEvents()
             .ToList();
+        
         var expectedTotalCount = allValues.Count;
 
         var expectedValues = allValues
+            .OrderByDescending(e => e.StartAt)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToList();
