@@ -4,7 +4,7 @@ using Testcontainers.PostgreSql;
 
 namespace EventManager.IntegrationTests;
 
-public class DatabaseTestBase : IAsyncLifetime
+public class DatabaseTestBase<T> : IAsyncLifetime where T : DbContext
 {
     static readonly string PostgresImage = "postgres:16-alpine";
     static readonly string DatabaseName = "test-db";
@@ -26,7 +26,7 @@ public class DatabaseTestBase : IAsyncLifetime
     public Task InitializeAsync()
         => _postgres.StartAsync();
 
-    protected T CreateDbContext<T>() where T : DbContext
+    protected T CreateDbContext()
     {
         var options = new DbContextOptionsBuilder<T>()
             .UseNpgsql(_postgres.GetConnectionString())
@@ -37,10 +37,10 @@ public class DatabaseTestBase : IAsyncLifetime
         return context;
     }
 
-    protected async Task ResetDatabase<T>() where T : DbContext
+    protected async Task ResetDatabase()
     {
         NpgsqlConnection.ClearAllPools();
-        await using var context = CreateDbContext<T>();
+        await using var context = CreateDbContext();
         await context.Database.EnsureDeletedAsync();
         await context.Database.EnsureCreatedAsync();
     }

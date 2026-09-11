@@ -1,21 +1,22 @@
-﻿using EventManager.Application.DataTransfer;
+﻿using System.Reflection.Metadata;
+using EventManager.Application.DataTransfer;
 using EventManager.Data;
 using EventManager.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace EventManager.IntegrationTests;
 
-public class SchemaTest : DatabaseTestBase
+public class SchemaTest : DatabaseTestBase<AppDbContext>
 {
     [Trait(Category, Category_Database)]
     [Fact]
     public async Task DatabaseConnect_Success()
     {
         // Given
-        await ResetDatabase<AppDbContext>();
+        await ResetDatabase();
     
         // When
-        await using var context = CreateDbContext<AppDbContext>();        
+        await using var context = CreateDbContext();
     
         // Then
         Assert.True(context.Database.CanConnect());
@@ -26,7 +27,7 @@ public class SchemaTest : DatabaseTestBase
     public async Task InsertEvent_Success()
     {
         // Given
-        await ResetDatabase<AppDbContext>();
+        await ResetDatabase();
 
         Event eventToAdd = new(10)
         {
@@ -38,12 +39,12 @@ public class SchemaTest : DatabaseTestBase
         var infoToAdd = eventToAdd.ToOutputData();
 
         // When
-        await using var work = CreateDbContext<AppDbContext>();
+        await using var work = CreateDbContext();
         work.Events.Add(eventToAdd);
         await work.SaveChangesAsync();
 
         // Then
-        await using var verify = CreateDbContext<AppDbContext>();
+        await using var verify = CreateDbContext();
         var eventAdded = await verify.Events.AsNoTracking().SingleOrDefaultAsync(e => e.Id == eventToAdd.Id);
         var infoAdded = eventAdded?.ToOutputData();
 
@@ -56,7 +57,7 @@ public class SchemaTest : DatabaseTestBase
     public async Task UpdateEvent_Success()
     {
         // Given
-        await ResetDatabase<AppDbContext>();
+        await ResetDatabase();
 
         Event origin = new(10)
         {
@@ -66,23 +67,23 @@ public class SchemaTest : DatabaseTestBase
             EndAt = DateTime.UtcNow.AddHours(1)
         };
         
-        await using var create = CreateDbContext<AppDbContext>();
-        create.Events.Add(origin);
-        await create.SaveChangesAsync();
+        await using var context = CreateDbContext();
+        context.Events.Add(origin);
+        await context.SaveChangesAsync();
 
         // When
-        await using var update = CreateDbContext<AppDbContext>();
-        var modified = await update.Events.AsNoTracking().SingleAsync(e => e.Id == origin.Id);
+        await using var work = CreateDbContext();
+        var modified = await work.Events.AsNoTracking().SingleAsync(e => e.Id == origin.Id);
         modified.Title = "New Title";
         modified.Description = "New Description";
         modified.StartAt = origin.StartAt.AddHours(2);
         modified.EndAt = DateTime.UtcNow.AddHours(2);
-        update.Events.Update(modified);
-        var updateCount = await update.SaveChangesAsync();
+        work.Events.Update(modified);
+        var updateCount = await work.SaveChangesAsync();
         var infoModified = modified.ToOutputData();
     
         // Then
-        await using var verify = CreateDbContext<AppDbContext>();
+        await using var verify = CreateDbContext();
         var updated = await verify.Events.AsNoTracking().SingleOrDefaultAsync(e => e.Id == origin.Id);
         var infoUpdated = updated?.ToOutputData();
 
@@ -96,9 +97,9 @@ public class SchemaTest : DatabaseTestBase
     public async Task DeleteEvent_Success()
     {
         // Given
-        await ResetDatabase<AppDbContext>();
+        await ResetDatabase();
 
-        Event origin = new(10)
+        Event @event = new(10)
         {
             Title = "Event",
             Description = "Description",
@@ -106,24 +107,24 @@ public class SchemaTest : DatabaseTestBase
             EndAt = DateTime.UtcNow.AddHours(1)
         };
         
-        await using var create = CreateDbContext<AppDbContext>();
-        create.Events.Add(origin);
-        await create.SaveChangesAsync();
-        var infoOrigin = origin.ToOutputData();
+        await using var context = CreateDbContext();
+        context.Events.Add(@event);
+        await context.SaveChangesAsync();
+        var info = @event.ToOutputData();
 
         // When
-        await using var delete = CreateDbContext<AppDbContext>();
-        var deleting = await delete.Events.AsNoTracking().SingleAsync(e => e.Id == origin.Id);
-        delete.Events.Remove(deleting);
-        var deleteCount = await delete.SaveChangesAsync();
+        await using var work = CreateDbContext();
+        var deleting = await work.Events.AsNoTracking().SingleAsync(e => e.Id == info.Id);
+        work.Events.Remove(deleting);
+        var deleteCount = await work.SaveChangesAsync();
     
         // Then
-        await using var verify = CreateDbContext<AppDbContext>();
-        var deleted = await verify.Events.AsNoTracking().SingleOrDefaultAsync(e => e.Id == origin.Id);
+        await using var verify = CreateDbContext();
+        var deleted = await verify.Events.AsNoTracking().SingleOrDefaultAsync(e => e.Id == @event.Id);
 
         Assert.Equal(1, deleteCount);
         Assert.Null(deleted);
-        Assert.Equal(infoOrigin, deleting.ToOutputData());
+        Assert.Equal(info, deleting.ToOutputData());
     }
 
     [Trait(Category, Category_Database)]
@@ -131,7 +132,7 @@ public class SchemaTest : DatabaseTestBase
     public async Task InsertBooking_Success()
     {
         // Given
-        await ResetDatabase<AppDbContext>();
+        await ResetDatabase();
 
         Event @event = new(10)
         {
@@ -146,13 +147,13 @@ public class SchemaTest : DatabaseTestBase
         var infoBooking = booking.ToInfo();
     
         // When
-        await using var work = CreateDbContext<AppDbContext>();
+        await using var work = CreateDbContext();
         work.Events.Add(@event);
         work.Bookings.Add(booking);
         await work.SaveChangesAsync();
 
         // Then
-        await using var verify = CreateDbContext<AppDbContext>();
+        await using var verify = CreateDbContext();
         var bookingFound = await verify
             .Bookings
             .AsNoTracking()
@@ -164,11 +165,12 @@ public class SchemaTest : DatabaseTestBase
         Assert.Equal(infoBooking, bookingFound.ToInfo());
     }
 
+    [Trait(Category, Category_Database)]
     [Fact]
     public async Task UpdateBooking_Success()
     {
         // Given
-        await ResetDatabase<AppDbContext>();
+        await ResetDatabase();
 
         Event @event = new(10)
         {
@@ -181,20 +183,20 @@ public class SchemaTest : DatabaseTestBase
 
         var booking = new Booking(@event.Id);
 
-        await using var create = CreateDbContext<AppDbContext>();
-        create.Events.Add(@event);
-        create.Bookings.Add(booking);
-        await create.SaveChangesAsync();
+        await using var context = CreateDbContext();
+        context.Events.Add(@event);
+        context.Bookings.Add(booking);
+        await context.SaveChangesAsync();
 
         // When
-        await using var work = CreateDbContext<AppDbContext>();
+        await using var work = CreateDbContext();
         var updating = await work.Bookings.AsNoTracking().SingleAsync(b => b.Id == booking.Id);
         updating.Confirm();
         work.Bookings.Update(updating);
         var updateCount = await work.SaveChangesAsync();
 
         // Then
-        await using var verify = CreateDbContext<AppDbContext>();
+        await using var verify = CreateDbContext();
         var updated = await verify
             .Bookings
             .AsNoTracking()
