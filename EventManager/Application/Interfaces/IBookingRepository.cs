@@ -13,7 +13,7 @@ public interface IBookingRepository
     /// <param name="booking"></param>
     /// <param name="cancellation"></param>
     /// <returns></returns>
-    Task AddBooking(Booking booking, CancellationToken cancellation);
+    Task AddBookingAsync(Booking booking, CancellationToken cancellation);
     /// <summary>
     /// Возвращает бронь по идентификатору.
     /// </summary>

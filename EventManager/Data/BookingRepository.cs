@@ -10,7 +10,7 @@ namespace EventManager.Data;
 /// <param name="dbContext"></param>
 public class BookingRepository(AppDbContext dbContext) : IBookingRepository
 {
-    async Task IBookingRepository.AddBooking(Booking booking, CancellationToken cancellation)
+    async Task IBookingRepository.AddBookingAsync(Booking booking, CancellationToken cancellation)
     {
         dbContext.Bookings.Add(booking);
         await dbContext.SaveChangesAsync(cancellation);

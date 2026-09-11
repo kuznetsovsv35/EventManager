@@ -10,8 +10,9 @@ public class EventRepository(AppDbContext dbContext) : IEventRepository
     IQueryable<Event> IEventRepository.GetEvents(Expression<Func<Event, bool>>? filter)
     {
         if (filter is null)
-            return dbContext.Events.AsNoTracking();
-        return dbContext.Events.AsNoTracking().Where(filter);
+            return dbContext.Events.AsNoTracking().OrderByDescending(e => e.StartAt);
+     
+        return dbContext.Events.AsNoTracking().Where(filter).OrderByDescending(e => e.StartAt);
     }
 
     Task<Event?> IEventRepository.GetEventAsync(Guid id, CancellationToken cancellation)
