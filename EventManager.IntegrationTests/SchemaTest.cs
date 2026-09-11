@@ -3,6 +3,8 @@ using EventManager.Application.DataTransfer;
 using EventManager.Data;
 using EventManager.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Npgsql;
 
 namespace EventManager.IntegrationTests;
 
@@ -208,4 +210,91 @@ public class SchemaTest : DatabaseTestBase<AppDbContext>
         Assert.Equal(updating.ToInfo(), updated.ToInfo());
         Assert.Equal(infoEvent, updated.Event.ToOutputData());
     }
+
+    [Trait(Category, Category_Database)]
+    [Fact]
+    public async Task EventsPrimaryKeyTest()
+    {
+        // Given
+        await ResetDatabase();
+        await using var context = CreateDbContext();
+        var db = context.Database;
+        var id = Guid.NewGuid();
+        var title = "Simple event";
+        var startAt = DateTime.UtcNow;
+        var endAt = startAt.AddHours(10);
+        var totalSeats = 10;
+    
+        // When
+        await db.ExecuteSqlInterpolatedAsync($@"
+            INSERT INTO ""Events""(""Id"", ""Title"", ""StartAt"", ""EndAt"", ""TotalSeats"") 
+            VALUES({id}, {title}, {startAt}, {endAt}, {totalSeats})
+        ");
+
+        // Then
+        var ex = await Assert.ThrowsAnyAsync<PostgresException>(
+            async () => await db.ExecuteSqlInterpolatedAsync($@"
+                INSERT INTO ""Events""(""Id"", ""Title"", ""StartAt"", ""EndAt"", ""TotalSeats"") 
+                VALUES({id}, {title}, {startAt}, {endAt}, {totalSeats})
+            "));
+        
+        Assert.Equal(PostgresErrorCodes.UniqueViolation, ex.SqlState);
+    }
+
+    [Trait(Category, Category_Database)]
+    [Fact]
+    public async Task BookingsPrimaryKeyTest()
+    {
+        // Given
+        await ResetDatabase();
+        await using var context = CreateDbContext();
+        var db = context.Database;
+        var eventId = Guid.NewGuid();
+        var title = "Simple event";
+        var startAt = DateTime.UtcNow;
+        var endAt = startAt.AddHours(10);
+        var totalSeats = 10;
+        var bookingId = Guid.NewGuid();
+        var status = BookingStatus.Pending;
+        var createdAt = DateTime.UtcNow;
+        await db.ExecuteSqlInterpolatedAsync($@"
+            INSERT INTO ""Events""(""Id"", ""Title"", ""StartAt"", ""EndAt"", ""TotalSeats"") 
+            VALUES({eventId}, {title}, {startAt}, {endAt}, {totalSeats})
+        ");
+
+        // When
+        await db.ExecuteSqlInterpolatedAsync($@"
+            INSERT INTO ""Bookings""(""Id"", ""EventId"", ""Status"", ""CreatedAt"")
+            VALUES({bookingId}, {eventId}, {status}, {createdAt})
+        ");
+
+        // Then
+        var ex = await Assert.ThrowsAnyAsync<PostgresException>(
+            async () => await db.ExecuteSqlInterpolatedAsync($@"
+                INSERT INTO ""Bookings""(""Id"", ""EventId"", ""Status"", ""CreatedAt"")
+                VALUES({bookingId}, {eventId}, {status}, {createdAt})
+            "));
+        Assert.Equal(PostgresErrorCodes.UniqueViolation, ex.SqlState);
+    }
+
+    /*
+    SELECT "Id",
+       "Title",
+       "Description",
+       "StartAt",
+       "EndAt",
+       "TotalSeats",
+       "ReservedCount"
+FROM public."Events"
+LIMIT 1000;
+    23505
+
+    SELECT "Id",
+       "EventId",
+       "Status",
+       "CreatedAt",
+       "ProcessedAt"
+FROM public."Bookings"
+LIMIT 1000;
+    */
 }
