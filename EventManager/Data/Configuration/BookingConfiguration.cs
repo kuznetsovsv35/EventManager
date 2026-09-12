@@ -16,6 +16,7 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
             Enum.GetNames<BookingStatus>().Max(name => name.Length)
         );
         builder.Property(b => b.CreatedAt).IsRequired();
+        builder.Property( b => b.ProcessedAt);
 
         builder.HasKey(b => b.Id);
 

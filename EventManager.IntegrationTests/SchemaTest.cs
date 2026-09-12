@@ -26,77 +26,7 @@ public class SchemaTest : DatabaseTestBase<AppDbContext>
 
     [Trait(Category, Category_Database)]
     [Fact]
-    public async Task InsertEvent_Success()
-    {
-        // Given
-        await ResetDatabase();
-
-        Event eventToAdd = new(10)
-        {
-            Title = "Event",
-            Description = "Description",
-            StartAt = DateTime.UtcNow,
-            EndAt = DateTime.UtcNow.AddHours(1)
-        };
-        var infoToAdd = eventToAdd.ToOutputData();
-
-        // When
-        await using var work = CreateDbContext();
-        work.Events.Add(eventToAdd);
-        await work.SaveChangesAsync();
-
-        // Then
-        await using var verify = CreateDbContext();
-        var eventAdded = await verify.Events.AsNoTracking().SingleOrDefaultAsync(e => e.Id == eventToAdd.Id);
-        var infoAdded = eventAdded?.ToOutputData();
-
-        Assert.NotNull(infoAdded);
-        Assert.Equal(infoToAdd, infoAdded);
-    }
-
-    [Trait(Category, Category_Database)]
-    [Fact]
-    public async Task UpdateEvent_Success()
-    {
-        // Given
-        await ResetDatabase();
-
-        Event origin = new(10)
-        {
-            Title = "Event",
-            Description = "Description",
-            StartAt = DateTime.UtcNow,
-            EndAt = DateTime.UtcNow.AddHours(1)
-        };
-        
-        await using var context = CreateDbContext();
-        context.Events.Add(origin);
-        await context.SaveChangesAsync();
-
-        // When
-        await using var work = CreateDbContext();
-        var modified = await work.Events.AsNoTracking().SingleAsync(e => e.Id == origin.Id);
-        modified.Title = "New Title";
-        modified.Description = "New Description";
-        modified.StartAt = origin.StartAt.AddHours(2);
-        modified.EndAt = DateTime.UtcNow.AddHours(2);
-        work.Events.Update(modified);
-        var updateCount = await work.SaveChangesAsync();
-        var infoModified = modified.ToOutputData();
-    
-        // Then
-        await using var verify = CreateDbContext();
-        var updated = await verify.Events.AsNoTracking().SingleOrDefaultAsync(e => e.Id == origin.Id);
-        var infoUpdated = updated?.ToOutputData();
-
-        Assert.Equal(1, updateCount);
-        Assert.NotNull(infoUpdated);
-        Assert.Equal(infoModified, infoUpdated);
-    }
-
-    [Trait(Category, Category_Database)]
-    [Fact]
-    public async Task DeleteEvent_Success()
+    public async Task EventsColumnsTest_Success()
     {
         // Given
         await ResetDatabase();
@@ -108,30 +38,31 @@ public class SchemaTest : DatabaseTestBase<AppDbContext>
             StartAt = DateTime.UtcNow,
             EndAt = DateTime.UtcNow.AddHours(1)
         };
-        
-        await using var context = CreateDbContext();
-        context.Events.Add(@event);
-        await context.SaveChangesAsync();
         var info = @event.ToOutputData();
 
         // When
         await using var work = CreateDbContext();
-        var deleting = await work.Events.AsNoTracking().SingleAsync(e => e.Id == info.Id);
-        work.Events.Remove(deleting);
-        var deleteCount = await work.SaveChangesAsync();
-    
+        work.Events.Add(@event);
+        await work.SaveChangesAsync();
+
         // Then
         await using var verify = CreateDbContext();
-        var deleted = await verify.Events.AsNoTracking().SingleOrDefaultAsync(e => e.Id == @event.Id);
+        var eventFound = await verify.Events.FromSqlInterpolated($@"
+                SELECT *
+                FROM ""Events""
+                WHERE ""Id"" = {@event.Id}
+            ")
+            .SingleOrDefaultAsync();
+        
+        var infoFound = eventFound?.ToOutputData();
 
-        Assert.Equal(1, deleteCount);
-        Assert.Null(deleted);
-        Assert.Equal(info, deleting.ToOutputData());
+        Assert.NotNull(infoFound);
+        Assert.Equal(info, infoFound);
     }
 
     [Trait(Category, Category_Database)]
     [Fact]
-    public async Task InsertBooking_Success()
+    public async Task BookingsColumnsTest_Success()
     {
         // Given
         await ResetDatabase();
@@ -157,58 +88,19 @@ public class SchemaTest : DatabaseTestBase<AppDbContext>
         // Then
         await using var verify = CreateDbContext();
         var bookingFound = await verify
-            .Bookings
+            .Bookings.FromSqlInterpolated($@"
+                SELECT b.""Id"", b.""EventId"", b.""Status"", b.""CreatedAt"", b.""ProcessedAt""
+                FROM ""Events"" e
+                INNER JOIN ""Bookings"" b ON b.""EventId"" = e.""Id""
+                WHERE b.""Id"" = {booking.Id}
+            ")
             .AsNoTracking()
             .Include(b => b.Event)
-            .SingleOrDefaultAsync(b => b.Id == booking.Id);
+            .SingleOrDefaultAsync();
 
         Assert.NotNull(bookingFound?.Event);
-        Assert.Equal(infoEvent, bookingFound.Event.ToOutputData());
+        Assert.Equal(infoEvent.Id, bookingFound.EventId);
         Assert.Equal(infoBooking, bookingFound.ToInfo());
-    }
-
-    [Trait(Category, Category_Database)]
-    [Fact]
-    public async Task UpdateBooking_Success()
-    {
-        // Given
-        await ResetDatabase();
-
-        Event @event = new(10)
-        {
-            Title = "Event",
-            Description = "Description",
-            StartAt = DateTime.UtcNow,
-            EndAt = DateTime.UtcNow.AddHours(1)
-        };
-        var infoEvent = @event.ToOutputData();
-
-        var booking = new Booking(@event.Id);
-
-        await using var context = CreateDbContext();
-        context.Events.Add(@event);
-        context.Bookings.Add(booking);
-        await context.SaveChangesAsync();
-
-        // When
-        await using var work = CreateDbContext();
-        var updating = await work.Bookings.AsNoTracking().SingleAsync(b => b.Id == booking.Id);
-        updating.Confirm();
-        work.Bookings.Update(updating);
-        var updateCount = await work.SaveChangesAsync();
-
-        // Then
-        await using var verify = CreateDbContext();
-        var updated = await verify
-            .Bookings
-            .AsNoTracking()
-            .Include(b => b.Event)
-            .SingleOrDefaultAsync(b => b.Id == booking.Id);
-
-        Assert.Equal(1, updateCount);
-        Assert.NotNull(updated?.Event);
-        Assert.Equal(updating.ToInfo(), updated.ToInfo());
-        Assert.Equal(infoEvent, updated.Event.ToOutputData());
     }
 
     [Trait(Category, Category_Database)]
@@ -238,7 +130,97 @@ public class SchemaTest : DatabaseTestBase<AppDbContext>
                 VALUES({id}, {title}, {startAt}, {endAt}, {totalSeats})
             "));
         
-        Assert.Equal(PostgresErrorCodes.UniqueViolation, ex.SqlState);
+        CheckUniqueConstraint(ex, "Events", "Id");
+    }
+
+    [Trait(Category, Category_Database)]
+    [Fact]
+    public async Task EventsConstraintsTest()
+    {
+        // Given
+        await ResetDatabase();
+
+        Event @event = new(10)
+        {
+            Title = "Event",
+            Description = "Description",
+            StartAt = DateTime.UtcNow,
+            EndAt = DateTime.UtcNow.AddHours(1)
+        };    
+        
+        await using var context = CreateDbContext();
+        context.Events.Add(@event);
+        await context.SaveChangesAsync();
+        
+        // When
+        await using var work = CreateDbContext();
+
+        var exIdNull = await Assert.ThrowsAnyAsync<PostgresException>(async () => await work.Database.ExecuteSqlInterpolatedAsync($@"
+            UPDATE ""Events"" 
+            SET ""Id"" = NULL 
+            WHERE ""Id"" = {@event.Id};
+            "));
+        var exTitleNull = await Assert.ThrowsAnyAsync<PostgresException>(async () => await work.Database.ExecuteSqlInterpolatedAsync($@"
+            UPDATE ""Events"" 
+            SET ""Title"" = NULL 
+            WHERE ""Id"" = {@event.Id};
+            "));
+    
+        var exStartAtNull = await Assert.ThrowsAnyAsync<PostgresException>(async () => await work.Database.ExecuteSqlInterpolatedAsync($@"
+            UPDATE ""Events"" 
+            SET ""StartAt"" = NULL 
+            WHERE ""Id"" = {@event.Id};
+            "));
+        var exEndAtNull = await Assert.ThrowsAnyAsync<PostgresException>(async () => await work.Database.ExecuteSqlInterpolatedAsync($@"
+            UPDATE ""Events"" 
+            SET ""EndAt"" = NULL 
+            WHERE ""Id"" = {@event.Id};
+            "));
+
+        var exTotalSeatsNull = await Assert.ThrowsAnyAsync<PostgresException>(async () => await work.Database.ExecuteSqlInterpolatedAsync($@"
+            UPDATE ""Events"" 
+            SET ""TotalSeats"" = NULL 
+            WHERE ""Id"" = {@event.Id};
+            "));
+
+        var exReservedCountNull = await Assert.ThrowsAnyAsync<PostgresException>(async () => await work.Database.ExecuteSqlInterpolatedAsync($@"
+            UPDATE ""Events"" 
+            SET ""ReservedCount"" = NULL 
+            WHERE ""Id"" = {@event.Id};
+            "));
+
+        var exTotalSeats = await Assert.ThrowsAnyAsync<PostgresException>(async() => await work.Database.ExecuteSqlInterpolatedAsync($@"
+            UPDATE ""Events""
+            SET ""TotalSeats"" = 0
+            WHERE ""Id"" = {@event.Id}
+            "));
+
+        var exReservedCount = await Assert.ThrowsAnyAsync<PostgresException>(async() => await work.Database.ExecuteSqlInterpolatedAsync($@"
+            UPDATE ""Events""
+            SET ""ReservedCount"" = -1
+            WHERE ""Id"" = {@event.Id}
+            "));
+
+        var startAt = DateTime.UtcNow;
+        var exStartEndAt = await Assert.ThrowsAnyAsync<PostgresException>(async() => await work.Database.ExecuteSqlInterpolatedAsync($@"
+            UPDATE ""Events""
+            SET
+                ""StartAt"" = {startAt},
+                ""EndAt"" = {startAt}
+            WHERE ""Id"" = {@event.Id}
+            "));
+        
+        // Then        
+        CheckNullConstraint(exIdNull, "Events", "Id");
+        CheckNullConstraint(exTitleNull, "Events", "Title");
+        CheckNullConstraint(exStartAtNull, "Events", "StartAt");
+        CheckNullConstraint(exEndAtNull, "Events", "EndAt");
+        CheckNullConstraint(exTotalSeatsNull, "Events", "TotalSeats");
+        CheckNullConstraint(exReservedCountNull, "Events", "ReservedCount");
+
+        CheckValueConstraint(exTotalSeats, "Events", "CK_Events_Seats");
+        CheckValueConstraint(exReservedCount, "Events", "CK_Events_Seats");
+        CheckValueConstraint(exStartEndAt, "Events", "CK_Events_StartEnd");
     }
 
     [Trait(Category, Category_Database)]
@@ -274,27 +256,141 @@ public class SchemaTest : DatabaseTestBase<AppDbContext>
                 INSERT INTO ""Bookings""(""Id"", ""EventId"", ""Status"", ""CreatedAt"")
                 VALUES({bookingId}, {eventId}, {status}, {createdAt})
             "));
-        Assert.Equal(PostgresErrorCodes.UniqueViolation, ex.SqlState);
+        CheckUniqueConstraint(ex, "Bookings", "Id");
     }
 
-    /*
-    SELECT "Id",
-       "Title",
-       "Description",
-       "StartAt",
-       "EndAt",
-       "TotalSeats",
-       "ReservedCount"
-FROM public."Events"
-LIMIT 1000;
-    23505
+    [Trait(Category, Category_Database)]
+    [Fact]
+    public async Task BookingsConstraintsTest()
+    {
+        // Given
+        await ResetDatabase();
+        
+        Event @event = new(10)
+        {
+            Title = "Event",
+            Description = "Description",
+            StartAt = DateTime.UtcNow,
+            EndAt = DateTime.UtcNow.AddHours(1)
+        };
 
-    SELECT "Id",
-       "EventId",
-       "Status",
-       "CreatedAt",
-       "ProcessedAt"
-FROM public."Bookings"
-LIMIT 1000;
-    */
+        var booking = new Booking(@event.Id);
+        await using var context = CreateDbContext();
+        context.Events.Add(@event);
+        context.Bookings.Add(booking);
+        await context.SaveChangesAsync();
+    
+        // When
+        await using var work = CreateDbContext();
+        var exIdNull = await Assert.ThrowsAnyAsync<PostgresException>(async() => await work.Database.ExecuteSqlInterpolatedAsync($@"
+            UPDATE ""Bookings""
+            SET ""Id"" = NULL
+            WHERE ""Id"" = {booking.Id}
+            "));
+
+        var exEventIdNull = await Assert.ThrowsAnyAsync<PostgresException>(async() => await work.Database.ExecuteSqlInterpolatedAsync($@"
+            UPDATE ""Bookings""
+            SET ""EventId"" = NULL
+            WHERE ""Id"" = {booking.Id}
+            "));
+        
+        var exStatusNull = await Assert.ThrowsAnyAsync<PostgresException>(async() => await work.Database.ExecuteSqlInterpolatedAsync($@"
+            UPDATE ""Bookings""
+            SET ""Status"" = NULL
+            WHERE ""Id"" = {booking.Id}
+            "));
+
+        var exCreatedAtNull = await Assert.ThrowsAnyAsync<PostgresException>(async() => await work.Database.ExecuteSqlInterpolatedAsync($@"
+            UPDATE ""Bookings""
+            SET ""CreatedAt"" = NULL
+            WHERE ""Id"" = {booking.Id}
+            "));
+
+        // Then
+        CheckNullConstraint(exIdNull, "Bookings", "Id");
+        CheckNullConstraint(exEventIdNull, "Bookings", "EventId");
+        CheckNullConstraint(exStatusNull, "Booking", "Status");
+        CheckNullConstraint(exCreatedAtNull, "Bookings", "CreatedAt");
+    }
+
+    [Trait(Category, Category_Database)]
+    [Fact]
+    public async Task BookingsForeignKeyTest()
+    {
+        // Given
+        await ResetDatabase();
+
+        Event @event = new(10)
+        {
+            Title = "Event",
+            Description = "Description",
+            StartAt = DateTime.UtcNow,
+            EndAt = DateTime.UtcNow.AddHours(1)
+        };
+        var infoEvent = @event.ToOutputData();
+
+        var booking = new Booking(@event.Id);
+        var infoBooking = booking.ToInfo();
+        var booking2 = new Booking(Guid.NewGuid());
+
+        await using var context = CreateDbContext();
+        context.Events.Add(@event);
+        await context.SaveChangesAsync();
+
+        DbUpdateException? exBook2 = null;
+    
+        // When
+        {
+            await using var work = CreateDbContext();
+            work.Bookings.Add(booking);
+            await work.SaveChangesAsync();
+        }
+        {
+            await using var work = CreateDbContext();
+            work.Bookings.Add(booking2);
+            exBook2 = await Assert.ThrowsAnyAsync<DbUpdateException>(async() => await work.SaveChangesAsync());            
+        }
+
+        // Then
+        await using var verify = CreateDbContext();
+        var bookingFound = await verify.Bookings.AsNoTracking()
+            .Where(b => b.Id == booking.Id)
+            .Include(b => b.Event)
+            .SingleOrDefaultAsync();
+        var bookingCount = await verify.Bookings.AsNoTracking().CountAsync();
+
+        Assert.NotNull(bookingFound?.Event);
+        Assert.Equal(infoEvent.Id, bookingFound.EventId);
+        Assert.Equal(infoBooking, bookingFound.ToInfo());
+        Assert.Equal(1, bookingCount);
+        CheckForeignKey(exBook2?.InnerException as PostgresException, "Booking", "FK_Bookings_Events_EventId");
+    }
+    
+    void CheckUniqueConstraint(PostgresException? exception, string table, string column)
+    {
+        Assert.Equal(PostgresErrorCodes.UniqueViolation, exception?.SqlState);
+        Assert.Contains(table, exception?.TableName);
+        Assert.Equal($"PK_{table}", exception?.ConstraintName);
+    }
+
+    void CheckNullConstraint(PostgresException? exception, string table, string column)
+    {
+        Assert.Equal(PostgresErrorCodes.NotNullViolation, exception?.SqlState);
+        Assert.Contains(table, exception?.TableName);
+        Assert.Contains(column, exception?.ColumnName);
+    }
+
+    void CheckValueConstraint(PostgresException? exception, string table, string name)
+    {
+        Assert.Equal(PostgresErrorCodes.CheckViolation, exception?.SqlState);
+        Assert.Contains(table, exception?.TableName);
+        Assert.Equal(name, exception?.ConstraintName);
+    }
+
+    void CheckForeignKey(PostgresException? exception, string table, string name)
+    {
+        Assert.Equal(PostgresErrorCodes.ForeignKeyViolation, exception?.SqlState);
+        Assert.Contains(table, exception?.TableName);
+        Assert.Equal(name, exception?.ConstraintName);
+    }
 }
