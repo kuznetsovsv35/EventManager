@@ -108,7 +108,7 @@
    # Запуск тестов логики работы с DTO
    dotnet test --filter "Category=DTO"
    # или
-   ./test-dto
+   ./test-dto.sh
 
    # Запуск тестов управления местами
    dotnet test --filter "Category=Seats"
