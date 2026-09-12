@@ -7,7 +7,7 @@ namespace EventManager.IntegrationTests;
 
 public class EventRepositoryTest : DatabaseTestBase<AppDbContext>
 {
-    [Trait(Category, Category_Database)]
+    [Trait(Category, Category_Repositories)]
     [Fact]
     public async Task AddNewEvent_Success()
     {
@@ -37,7 +37,7 @@ public class EventRepositoryTest : DatabaseTestBase<AppDbContext>
         Assert.Equal(info, eventAdded.ToOutputData());
     }
 
-    [Trait(Category, Category_Database)]
+    [Trait(Category, Category_Repositories)]
     [Fact]
     public async Task UpdateEvent_Success()
     {
@@ -77,7 +77,7 @@ public class EventRepositoryTest : DatabaseTestBase<AppDbContext>
         Assert.Equal(infoModified, infoUpdated);
     }
 
-    [Trait(Category, Category_Database)]
+    [Trait(Category, Category_Repositories)]
     [Fact]
     public async Task DeleteEvent_Success()
     {
@@ -100,8 +100,8 @@ public class EventRepositoryTest : DatabaseTestBase<AppDbContext>
         // When
         await using var workContext = CreateDbContext();
         IEventRepository workRepository = new EventRepository(workContext);
-        var deleting = (await workRepository.GetEventAsync(@event.Id, CancellationToken.None))!;
-        var deleted = workRepository.DeleteEventAsync(deleting.Id, CancellationToken.None);
+        var deleting = await workRepository.GetEventAsync(@event.Id, CancellationToken.None)!;
+        var deleted = await workRepository.DeleteEventAsync(@event.Id, CancellationToken.None);
     
         // Then
         await using var verifyContext = CreateDbContext();
@@ -109,6 +109,6 @@ public class EventRepositoryTest : DatabaseTestBase<AppDbContext>
         var found = await verifyRepository.GetEventAsync(@event.Id, CancellationToken.None);
 
         Assert.Null(found);
-        Assert.Equal(info, deleting.ToOutputData());
+        Assert.Equal(info, deleting?.ToOutputData());
     }
 }

@@ -7,7 +7,7 @@ namespace EventManager.IntegrationTests;
 
 public class BookingRepositoryTest : DatabaseTestBase<AppDbContext>
 {
-    [Trait(Category, Category_Database)]
+    [Trait(Category, Category_Repositories)]
     [Fact]
     public async Task AddBooking_Success()
     {
@@ -45,7 +45,7 @@ public class BookingRepositoryTest : DatabaseTestBase<AppDbContext>
         Assert.Equal(infoBooking, bookingFound.ToInfo());
     }
     
-    [Trait(Category, Category_Database)]
+    [Trait(Category, Category_Repositories)]
     [Fact]
     public async Task UpdateBooking_Success()
     {
