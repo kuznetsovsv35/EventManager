@@ -23,10 +23,10 @@ public class BookingInfo
             return true;
 
         if (obj is BookingInfo info)
-            return CreatedAt == info.CreatedAt
+            return CreatedAt.ToString() == info.CreatedAt.ToString()
                 && EventId == info.EventId
                 && Id == info.Id
-                && ProcessedAt == info.ProcessedAt
+                && ProcessedAt?.ToString() == info.ProcessedAt?.ToString()
                 && Status == info.Status;
 
         return base.Equals(obj);

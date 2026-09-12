@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using EventManager.Application.DataTransfer;
 using EventManager.Application.Interfaces;
+using EventManager.Data;
 using EventManager.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -22,7 +23,7 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
     {
         // Given
         await using var scope = context.CreateAsyncScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
         var title = "Simple event";
@@ -85,7 +86,7 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
     {
         // Given
         await using var scope = context.CreateAsyncScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
         // When
@@ -105,13 +106,16 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
     {
         // Given
         await using var scope = context.CreateAsyncScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
-        var expected = await dbContext.GetEvents().Select(x => x.ToOutputData()).ToListAsync();
+        var expected = await dbContext
+            .GetEvents()
+            .OrderByDescending(e => e.StartAt)
+            .Select(x => x.ToOutputData()).ToListAsync();
 
         // When
-        var actual = await eventService.GetAllEvents().ToListAsync();
+        var actual = eventService.GetAllEvents().ToList();
 
         // Then
         Assert.Equal(expected, actual);
@@ -126,7 +130,7 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
     {
         // Given
         await using var scope = context.CreateAsyncScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
         var requestedId = await context.GetRandomEventId(CancellationToken.None);
@@ -171,7 +175,7 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
     {
         // Given
         await using var scope = context.CreateAsyncScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
         var requestedId = await context.GetRandomEventId(CancellationToken.None);
@@ -232,7 +236,7 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
     {
         // Given
         await using var scope = context.CreateAsyncScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
         var requestedId = await context.GetRandomEventId(CancellationToken.None);
@@ -252,7 +256,7 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
     {
         // Given
         await using var scope = context.CreateAsyncScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
         var requestedId = await context.GetRandomEventId(CancellationToken.None);
@@ -277,7 +281,7 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
     {
         // Given
         await using var scope = context.CreateAsyncScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
         var requestedId = Guid.NewGuid();
@@ -302,7 +306,7 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
     {
         // Given
         await using var scope = context.CreateAsyncScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
         const string titleAll = "Event title";  // all event expected
@@ -310,6 +314,7 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
 
         var expectedAll = await dbContext
             .GetEvents(x => x.Title.Contains(titleAll, StringComparison.OrdinalIgnoreCase))
+            .OrderByDescending(e => e.StartAt)
             .Select(x => x.ToOutputData())
             .ToListAsync();
 
@@ -342,11 +347,12 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
     {
         // Given
         await using var scope = context.CreateAsyncScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
         var expected = await dbContext
             .GetEvents(x => x.Title.Contains(title, StringComparison.OrdinalIgnoreCase))
+            .OrderByDescending(e => e.StartAt)
             .Select(x => x.ToOutputData())
             .ToListAsync();
 
@@ -384,11 +390,12 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
     {
         // Given
         await using var scope = context.CreateAsyncScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
         var expected = await dbContext
             .GetEvents(x => x.StartAt >= startAt)
+            .OrderByDescending(e => e.StartAt)
             .Select(x => x.ToOutputData())
             .ToListAsync();
 
@@ -427,12 +434,13 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
     {
         // Given
         await using var scope = context.CreateAsyncScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
         var endDate = endAt.AddDays(1).Date;
         var expected = await dbContext
             .GetEvents(x => x.EndAt < endDate)
+            .OrderByDescending(e => e.StartAt)
             .Select(x => x.ToOutputData())
             .ToListAsync();
 
@@ -473,7 +481,7 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
     {
         // Given
         await using var scope = context.CreateAsyncScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
         var endDate = endAt?.AddDays(1).Date;
@@ -482,6 +490,7 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
             .GetEvents(x => (string.IsNullOrEmpty(title) || x.Title.ToLower().Contains(title, StringComparison.OrdinalIgnoreCase))
                 && (startAt == null || x.StartAt >= startAt.Value)
                 && (endDate == null || x.EndAt < endDate.Value))
+            .OrderByDescending(e => e.StartAt)
             .Select(x => x.ToOutputData())
             .ToListAsync();
 
@@ -529,15 +538,17 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
     {
         // Given
         await using var scope = context.CreateAsyncScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<IAppDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
-        var allValues = await eventService
+        var allValues = eventService
             .GetAllEvents()
-            .ToListAsync();
+            .ToList();
+        
         var expectedTotalCount = allValues.Count;
 
         var expectedValues = allValues
+            .OrderByDescending(e => e.StartAt)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToList();

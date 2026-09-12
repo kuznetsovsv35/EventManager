@@ -16,12 +16,16 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
             Enum.GetNames<BookingStatus>().Max(name => name.Length)
         );
         builder.Property(b => b.CreatedAt).IsRequired();
+        builder.Property( b => b.ProcessedAt);
 
         builder.HasKey(b => b.Id);
 
         builder.HasOne(b => b.Event)
-            .WithMany(e => e.Bookings)
+            .WithMany()
             .HasForeignKey(b => b.EventId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.HasIndex(b => b.CreatedAt).IsDescending().HasDatabaseName("IX_Bookings_CreatedAt_Desc");
+        builder.HasIndex(b => b.EventId).HasDatabaseName("IX_Bookings_EventId");
     }
 }
