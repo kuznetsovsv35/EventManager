@@ -3,18 +3,17 @@ using EventManager.Models;
 
 namespace EventManager.IntegrationTests;
 
-public class DataTest : DatabaseTestBase<AppDbContext>
+public class DataTest(TestContainerWrapper<AppDbContext> testContainer) : DatabaseTestBase(testContainer), IAsyncLifetime
 {
     protected const string Category_Filters = "Filters";
     protected const string Category_Paginator = "Paginator";
     
-    public override async Task InitializeAsync()
+    public async Task InitializeAsync()
     {
-        DatabaseName = "data-test-db";
-        await base.InitializeAsync();
         await ResetDatabase();
         await LoadTestData();
     }
+    public Task DisposeAsync() => Task.CompletedTask;
 
     public const int EventCount = 30;
     const int EventDuration = 45;

@@ -5,7 +5,7 @@ using EventManager.Models;
 
 namespace EventManager.IntegrationTests;
 
-public class EventRepositoryTest : DatabaseTestBase<AppDbContext>
+public class EventRepositoryTest(TestContainerWrapper<AppDbContext> testContainer) : DatabaseTestBase(testContainer)
 {
     [Trait(Category, Category_Repositories)]
     [Fact]

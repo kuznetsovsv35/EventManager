@@ -1,12 +1,13 @@
 using EventManager.Application.DataTransfer;
 using EventManager.Application.Interfaces;
 using EventManager.Application.Services;
+using EventManager.Data;
 using EventManager.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace EventManager.IntegrationTests;
 
-public class PaginatorTest : DataTest
+public class PaginatorTest(TestContainerWrapper<AppDbContext> testContainer) : DataTest(testContainer)
 {
     /// <summary>
     /// Тест разбивки на страницы.

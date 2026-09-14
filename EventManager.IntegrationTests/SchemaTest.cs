@@ -1,14 +1,12 @@
-﻿using System.Reflection.Metadata;
-using EventManager.Application.DataTransfer;
+﻿using EventManager.Application.DataTransfer;
 using EventManager.Data;
 using EventManager.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Npgsql;
 
 namespace EventManager.IntegrationTests;
 
-public class SchemaTest : DatabaseTestBase<AppDbContext>
+public class SchemaTest(TestContainerWrapper<AppDbContext> testContainer) : DatabaseTestBase(testContainer)
 {
     [Trait(Category, Category_Database)]
     [Fact]
@@ -108,7 +106,7 @@ public class SchemaTest : DatabaseTestBase<AppDbContext>
     public async Task EventsPrimaryKeyTest()
     {
         // Given
-        await ResetDatabase();
+        await ResetDatabase();        
         await using var context = CreateDbContext();
         var db = context.Database;
         var id = Guid.NewGuid();
@@ -275,6 +273,7 @@ public class SchemaTest : DatabaseTestBase<AppDbContext>
         };
 
         var booking = new Booking(@event.Id);
+        
         await using var context = CreateDbContext();
         context.Events.Add(@event);
         context.Bookings.Add(booking);

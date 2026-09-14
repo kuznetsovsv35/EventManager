@@ -2,12 +2,13 @@ using System.Linq.Expressions;
 using EventManager.Application.DataTransfer;
 using EventManager.Application.Interfaces;
 using EventManager.Application.Services;
+using EventManager.Data;
 using EventManager.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace EventManager.IntegrationTests;
 
-public class FilterEventTest : DataTest
+public class FilterEventTest(TestContainerWrapper<AppDbContext> testContainer) : DataTest(testContainer)
 {
     [Trait(Category, Category_Filters)]
     [Fact]
