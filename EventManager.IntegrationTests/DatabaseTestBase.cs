@@ -5,7 +5,7 @@ using Testcontainers.PostgreSql;
 
 namespace EventManager.IntegrationTests;
 
-public class DatabaseTestBase(TestContainerWrapper<AppDbContext> testContainer) : IClassFixture<TestContainerWrapper<AppDbContext>>
+public abstract class DatabaseTestBase(TestContainerWrapper<AppDbContext> testContainer) : IClassFixture<TestContainerWrapper<AppDbContext>>
 {
     protected const string Category = "Category";
     protected const string Category_Database = "Database";

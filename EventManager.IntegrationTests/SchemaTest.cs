@@ -6,6 +6,7 @@ using Npgsql;
 
 namespace EventManager.IntegrationTests;
 
+[Collection(nameof(TestContainersCollection))]
 public class SchemaTest(TestContainerWrapper<AppDbContext> testContainer) : DatabaseTestBase(testContainer)
 {
     [Trait(Category, Category_Database)]

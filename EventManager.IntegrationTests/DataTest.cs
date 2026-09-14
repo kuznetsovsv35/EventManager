@@ -3,7 +3,7 @@ using EventManager.Models;
 
 namespace EventManager.IntegrationTests;
 
-public class DataTest(TestContainerWrapper<AppDbContext> testContainer) : DatabaseTestBase(testContainer), IAsyncLifetime
+public abstract class DataTest(TestContainerWrapper<AppDbContext> testContainer) : DatabaseTestBase(testContainer), IAsyncLifetime
 {
     protected const string Category_Filters = "Filters";
     protected const string Category_Paginator = "Paginator";
