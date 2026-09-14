@@ -3,6 +3,7 @@ using EventManager.Application.Interfaces;
 using EventManager.Data;
 using EventManager.Infrastructure;
 using EventManager.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace EventManager.Tests;
@@ -30,7 +31,10 @@ public class BookingServiceTest(EventManagerTestContext context) : TestObjectBas
 
         // When
         var bookingInfo = await bookingService.CreateBookingAsync(eventId, CancellationToken.None);
-        var booking = await dbContext.GetBookingAsync(bookingInfo.Id, CancellationToken.None);
+        var booking = await dbContext
+            .Bookings
+            .AsNoTracking()
+            .SingleAsync(b => b.Id == bookingInfo.Id, CancellationToken.None);
 
         // Then
         Assert.Equal(eventId, bookingInfo.EventId);
@@ -161,7 +165,8 @@ public class BookingServiceTest(EventManagerTestContext context) : TestObjectBas
 
         // When
         var bookingCreated = booking.ToInfo();
-        await dbContext.AddBookingAsync(booking, CancellationToken.None);
+        dbContext.Bookings.Add(booking);
+        await dbContext.SaveChangesAsync();
         var bookingFound = await bookingService.GetBookingByIdAsync(booking.Id, CancellationToken.None);
 
         // Then
@@ -337,9 +342,17 @@ public class BookingServiceTest(EventManagerTestContext context) : TestObjectBas
         var eventId = await context.GetRandomEventId(CancellationToken.None);
 
         // When
-        var deletingEvent = await dbContext.GetEventAsync(eventId, CancellationToken.None);
-        await dbContext.DeleteEventAsync(eventId, CancellationToken.None);
-        var deletedEvent = await dbContext.GetEventAsync(eventId, CancellationToken.None);
+        var deletingEvent = await dbContext
+            .Events
+            .AsNoTracking()
+            .SingleAsync(e => e.Id == eventId);
+        dbContext.Events.Remove(deletingEvent);
+        await dbContext.SaveChangesAsync();
+        
+        var deletedEvent = await dbContext
+            .Events
+            .AsNoTracking()
+            .SingleOrDefaultAsync(e => e.Id == eventId);
 
         // Then
         Assert.Equal(eventId, deletingEvent?.Id);

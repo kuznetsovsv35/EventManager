@@ -30,7 +30,7 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
         var startAt = new DateTime(2026, 6, 28, 10, 0, 00);
         var endAt = new DateTime(2026, 6, 28, 10, 30, 00);
         var description = "Some event";
-        var expectedCount = await dbContext.GetEvents().CountAsync() + 1;
+        var expectedCount = await dbContext.Events.AsNoTracking().CountAsync() + 1;
 
         EventInputData inData = new()
         {
@@ -45,7 +45,7 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
         var outData = await eventService.CreateEventAsync(inData, CancellationToken.None);
 
         // Then
-        var actualCount = await dbContext.GetEvents().CountAsync();
+        var actualCount = await dbContext.Events.AsNoTracking().CountAsync();
         Assert.Equal(expectedCount, actualCount);
         Assert.Equal(inData, outData);
     }
@@ -110,7 +110,8 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
         var expected = await dbContext
-            .GetEvents()
+            .Events
+            .AsNoTracking()
             .OrderByDescending(e => e.StartAt)
             .Select(x => x.ToOutputData()).ToListAsync();
 
@@ -135,7 +136,9 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
 
         var requestedId = await context.GetRandomEventId(CancellationToken.None);
         var @event = (await dbContext
-            .GetEvents(x => x.Id == requestedId)
+            .Events
+            .AsNoTracking()
+            .Where(x => x.Id == requestedId)
             .SingleAsync(CancellationToken.None)).ToOutputData();
 
         // When
@@ -260,14 +263,22 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
         var requestedId = await context.GetRandomEventId(CancellationToken.None);
-        var requestedEvent = await dbContext.GetEvents(x => x.Id == requestedId).SingleAsync(CancellationToken.None);
+        var requestedEvent = await dbContext
+            .Events
+            .AsNoTracking()
+            .Where(x => x.Id == requestedId)
+            .SingleAsync(CancellationToken.None);
         var expectedEvent = requestedEvent.ToOutputData();
 
         // When
         var deletedEvent = await eventService.DeleteEventAsync(requestedId, CancellationToken.None);
 
         // Then
-        var foundEvent = await dbContext.GetEvents(e => e.Id == requestedId).SingleOrDefaultAsync(CancellationToken.None);
+        var foundEvent = await dbContext
+            .Events
+            .AsNoTracking()
+            .Where(e => e.Id == requestedId)
+            .SingleOrDefaultAsync(CancellationToken.None);
         Assert.Equal(expectedEvent, deletedEvent);
         Assert.Null(foundEvent);
     }
@@ -313,7 +324,9 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
         const string titleNone = "AbcDeF";      // No events
 
         var expectedAll = await dbContext
-            .GetEvents(x => x.Title.Contains(titleAll, StringComparison.OrdinalIgnoreCase))
+            .Events
+            .AsNoTracking()
+            .Where(x => x.Title.Contains(titleAll, StringComparison.OrdinalIgnoreCase))
             .OrderByDescending(e => e.StartAt)
             .Select(x => x.ToOutputData())
             .ToListAsync();
@@ -351,7 +364,9 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
         var expected = await dbContext
-            .GetEvents(x => x.Title.Contains(title, StringComparison.OrdinalIgnoreCase))
+            .Events
+            .AsNoTracking()
+            .Where(x => x.Title.Contains(title, StringComparison.OrdinalIgnoreCase))
             .OrderByDescending(e => e.StartAt)
             .Select(x => x.ToOutputData())
             .ToListAsync();
@@ -394,7 +409,9 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
         var expected = await dbContext
-            .GetEvents(x => x.StartAt >= startAt)
+            .Events
+            .AsNoTracking()
+            .Where(x => x.StartAt >= startAt)
             .OrderByDescending(e => e.StartAt)
             .Select(x => x.ToOutputData())
             .ToListAsync();
@@ -439,7 +456,9 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
 
         var endDate = endAt.AddDays(1).Date;
         var expected = await dbContext
-            .GetEvents(x => x.EndAt < endDate)
+            .Events
+            .AsNoTracking()
+            .Where(x => x.EndAt < endDate)
             .OrderByDescending(e => e.StartAt)
             .Select(x => x.ToOutputData())
             .ToListAsync();
@@ -487,7 +506,9 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
         var endDate = endAt?.AddDays(1).Date;
 
         var expected = await dbContext
-            .GetEvents(x => (string.IsNullOrEmpty(title) || x.Title.ToLower().Contains(title, StringComparison.OrdinalIgnoreCase))
+            .Events
+            .AsNoTracking()
+            .Where(x => (string.IsNullOrEmpty(title) || x.Title.ToLower().Contains(title, StringComparison.OrdinalIgnoreCase))
                 && (startAt == null || x.StartAt >= startAt.Value)
                 && (endDate == null || x.EndAt < endDate.Value))
             .OrderByDescending(e => e.StartAt)

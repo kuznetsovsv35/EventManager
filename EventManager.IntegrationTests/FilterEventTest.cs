@@ -26,7 +26,8 @@ public class FilterEventTest(TestContainerWrapper<AppDbContext> testContainer) :
         Expression<Func<Event, bool>> exprTitleNone = x => EF.Functions.ILike(x.Title, titleNone);      // No events        
 
         var expectedAll = await dbContext
-            .GetEvents(exprTitleAll)
+            .Events.AsNoTracking()
+            .Where(exprTitleAll)
             .Select(x => x.ToOutputData())
             .ToListAsync();
 
@@ -65,7 +66,9 @@ public class FilterEventTest(TestContainerWrapper<AppDbContext> testContainer) :
 
         Expression<Func<Event, bool>> expr = x => EF.Functions.ILike(x.Title, title);
         var expected = await dbContext
-            .GetEvents(expr)
+            .Events
+            .AsNoTracking()
+            .Where(expr)
             .Select(x => x.ToOutputData())
             .ToListAsync();
 
@@ -96,7 +99,9 @@ public class FilterEventTest(TestContainerWrapper<AppDbContext> testContainer) :
 
         Expression<Func<Event, bool>> expression = x => EF.Functions.ILike(x.Title, title);
         var expected = await dbContext
-            .GetEvents(expression)
+            .Events
+            .AsNoTracking()
+            .Where(expression)
             .Select(x => x.ToOutputData())
             .ToListAsync();
 
@@ -133,7 +138,9 @@ public class FilterEventTest(TestContainerWrapper<AppDbContext> testContainer) :
 
         Expression<Func<Event, bool>> expression = x => x.StartAt >= startAt;
         var expected = await dbContext
-            .GetEvents(expression)
+            .Events
+            .AsNoTracking()
+            .Where(expression)
             .OrderByDescending(e => e.StartAt)
             .Select(x => x.ToOutputData())
             .ToListAsync();
@@ -173,7 +180,8 @@ public class FilterEventTest(TestContainerWrapper<AppDbContext> testContainer) :
         endAt = endAt.AddDays(1).Date;
         Expression<Func<Event, bool>> expression = x => x.EndAt < endAt;
         var expected = await dbContext
-            .GetEvents(expression)
+            .Events.AsNoTracking()
+            .Where(expression)
             .OrderByDescending(e => e.StartAt)
             .Select(x => x.ToOutputData())
             .ToListAsync();
@@ -213,7 +221,9 @@ public class FilterEventTest(TestContainerWrapper<AppDbContext> testContainer) :
 
         endAt = endAt?.AddDays(1).Date;
         var expected = await dbContext
-            .GetEvents(
+            .Events
+            .AsNoTracking()
+            .Where(
                 x => (string.IsNullOrEmpty(title) || EF.Functions.ILike(x.Title, title))
                 && (startAt == null || x.StartAt >= startAt.Value)
                 && (endAt == null || x.EndAt < endAt.Value))

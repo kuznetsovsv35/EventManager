@@ -59,7 +59,9 @@ public class FilterEventTest(EventManagerTestContext context) : TestObjectBase, 
         Expression<Func<Event, bool>> exprTitleNone = x => x.Title.Contains(titleNone, StringComparison.OrdinalIgnoreCase);      // No events        
 
         var expectedAll = await dbContext
-            .GetEvents(exprTitleAll)
+            .Events
+            .AsNoTracking()
+            .Where(exprTitleAll)
             .Select(x => x.ToOutputData())
             .ToListAsync();
 
@@ -67,7 +69,7 @@ public class FilterEventTest(EventManagerTestContext context) : TestObjectBase, 
         var actualAll = await filterService
             .Reset()
             .AddCondition(exprTitleAll)
-            .ApplyFilter(dbContext.GetEvents())
+            .ApplyFilter(dbContext.Events.AsNoTracking())
             .Select(x => x.ToOutputData())
             .ToListAsync();
 
@@ -75,7 +77,7 @@ public class FilterEventTest(EventManagerTestContext context) : TestObjectBase, 
         var actualNone = await filterService
             .Reset()
             .AddCondition(exprTitleNone)
-            .ApplyFilter(dbContext.GetEvents())
+            .ApplyFilter(dbContext.Events.AsNoTracking())
             .Select(x => x.ToOutputData())
             .ToListAsync();
 
@@ -99,14 +101,16 @@ public class FilterEventTest(EventManagerTestContext context) : TestObjectBase, 
 
         Expression<Func<Event, bool>> expr = x => x.Title.Contains(title, StringComparison.OrdinalIgnoreCase);
         var expected = await dbContext
-            .GetEvents(expr)
+            .Events
+            .AsNoTracking()
+            .Where(expr)
             .Select(x => x.ToOutputData())
             .ToListAsync();
 
         // When        
         var actual = await filterService.Reset()
             .AddCondition(expr)
-            .ApplyFilter(dbContext.GetEvents())
+            .ApplyFilter(dbContext.Events.AsNoTracking())
             .Select(x => x.ToOutputData())
             .ToListAsync();
 
@@ -130,14 +134,16 @@ public class FilterEventTest(EventManagerTestContext context) : TestObjectBase, 
 
         Expression<Func<Event, bool>> expression = x => x.Title.Contains(title, StringComparison.OrdinalIgnoreCase);
         var expected = await dbContext
-            .GetEvents(expression)
+            .Events
+            .AsNoTracking()
+            .Where(expression)
             .Select(x => x.ToOutputData())
             .ToListAsync();
 
         // When
         var actual = await filterService.Reset()
             .AddCondition(expression)
-            .ApplyFilter(dbContext.GetEvents())
+            .ApplyFilter(dbContext.Events.AsNoTracking())
             .Select(x => x.ToOutputData())
             .ToListAsync();
 
@@ -167,14 +173,16 @@ public class FilterEventTest(EventManagerTestContext context) : TestObjectBase, 
 
         Expression<Func<Event, bool>> expression = x => x.StartAt >= startAt;
         var expected = await dbContext
-            .GetEvents(expression)
+            .Events
+            .AsNoTracking()
+            .Where(expression)
             .Select(x => x.ToOutputData())
             .ToListAsync();
 
         // When
         var actual = await filterService.Reset()
             .AddCondition(expression)
-            .ApplyFilter(dbContext.GetEvents())
+            .ApplyFilter(dbContext.Events.AsNoTracking())
             .Select(x => x.ToOutputData())
             .ToListAsync();
 
@@ -206,14 +214,16 @@ public class FilterEventTest(EventManagerTestContext context) : TestObjectBase, 
         endAt = endAt.AddDays(1).Date;
         Expression<Func<Event, bool>> expression = x => x.EndAt < endAt;
         var expected = await dbContext
-            .GetEvents(expression)
+            .Events
+            .AsNoTracking()
+            .Where(expression)
             .Select(x => x.ToOutputData())
             .ToListAsync();
 
         // When
         var actual = await filterService.Reset()
             .AddCondition(expression)
-            .ApplyFilter(dbContext.GetEvents())
+            .ApplyFilter(dbContext.Events.AsNoTracking())
             .Select(x => x.ToOutputData())
             .ToListAsync();
 
@@ -245,7 +255,9 @@ public class FilterEventTest(EventManagerTestContext context) : TestObjectBase, 
 
         endAt = endAt?.AddDays(1).Date;
         var expected = await dbContext
-            .GetEvents(
+            .Events
+            .AsNoTracking()
+            .Where(
                 x => (string.IsNullOrEmpty(title) || x.Title.Contains(title, StringComparison.OrdinalIgnoreCase))
                 && (startAt == null || x.StartAt >= startAt.Value)
                 && (endAt == null || x.EndAt < endAt.Value))
@@ -269,7 +281,7 @@ public class FilterEventTest(EventManagerTestContext context) : TestObjectBase, 
             filter.AddCondition(exprEndAt);
 
         var actual = await filter
-            .ApplyFilter(dbContext.GetEvents())
+            .ApplyFilter(dbContext.Events.AsNoTracking())
             .Select(x => x.ToOutputData())
             .ToListAsync();
 

@@ -22,9 +22,9 @@ public class EventManagerTestContext
     {
         await using var scope = ServiceProvider.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        int eventCount = await dbContext.GetEvents().CountAsync<Event>(cancellation);
+        int eventCount = await dbContext.Events.AsNoTracking().CountAsync<Event>(cancellation);
         var eventIndex = Random.Shared.Next(eventCount);
-        return (await dbContext.GetEvents().Skip(eventIndex).FirstAsync(cancellation)).Id;
+        return (await dbContext.Events.AsNoTracking().Skip(eventIndex).FirstAsync(cancellation)).Id;
     }
     readonly IServiceCollection _services;
 

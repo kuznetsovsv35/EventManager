@@ -35,7 +35,7 @@ public class PaginatorTest(EventManagerTestContext context) : TestObjectBase, IC
 
         // Then
         await Assert.ThrowsAnyAsync<PaginatorParamException>(async ()
-            => await paginator.PaginateAsync(dbContext.GetEvents(), page, pageSize, x => x, CancellationToken.None));
+            => await paginator.PaginateAsync(dbContext.Events.AsNoTracking(), page, pageSize, x => x, CancellationToken.None));
     }
 
     /// <summary>
@@ -60,9 +60,10 @@ public class PaginatorTest(EventManagerTestContext context) : TestObjectBase, IC
         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var paginator = scope.ServiceProvider.GetRequiredService<IPaginator<Event>>();
 
-        var expectedTotalCount = await dbContext.GetEvents().CountAsync();
+        var expectedTotalCount = await dbContext.Events.AsNoTracking().CountAsync();
         var expectedValues = await dbContext
-            .GetEvents()
+            .Events
+            .AsNoTracking()
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .Select(x => x.ToOutputData())
@@ -70,7 +71,9 @@ public class PaginatorTest(EventManagerTestContext context) : TestObjectBase, IC
 
         // When
         var pageResult = await paginator.PaginateAsync(
-            dbContext.GetEvents(),
+            dbContext
+            .Events
+            .AsNoTracking(),
             page, pageSize, x => x.ToOutputData(),
             CancellationToken.None);
 
