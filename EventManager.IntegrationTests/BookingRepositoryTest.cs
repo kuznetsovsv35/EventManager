@@ -85,4 +85,44 @@ public class BookingRepositoryTest(TestContainerWrapper<AppDbContext> testContai
         Assert.Equal(updating.ToInfo(), updated.ToInfo());
         Assert.Equal(infoEvent, updated.Event.ToOutputData());
     }
+
+    [Trait(Category, Category_Repositories)]
+    [Fact]
+    public async Task GetPendingBookings_Success()
+    {
+        // Given
+        await ResetDatabase();
+
+        Event @event = new(10)
+        {
+            Title = "Event",
+            Description = "Description",
+            StartAt = DateTime.UtcNow,
+            EndAt = DateTime.UtcNow.AddHours(1)
+        };
+
+        var bookingPending = new Booking(@event.Id);
+        var bookingConfirmed = new Booking(@event.Id);
+        var infoPending = bookingPending.ToInfo();
+
+        await using var context = CreateDbContext();
+        context.Events.Add(@event);
+        await context.SaveChangesAsync();
+
+        // When
+        await using var workContext = CreateDbContext();
+        IBookingRepository workRepository = new BookingRepository(workContext);
+        await workRepository.AddBookingAsync(bookingPending, CancellationToken.None);
+        await workRepository.AddBookingAsync(bookingConfirmed, CancellationToken.None);
+        bookingConfirmed.Confirm();
+        await workRepository.UpdateBookingStatusAsync(bookingConfirmed, CancellationToken.None);
+
+        // Then
+        await using var verifyContext = CreateDbContext();
+        IBookingRepository verifyRepository = new BookingRepository(verifyContext);
+        var bookingFound = (await verifyRepository.GetPendingBookingsAsync(1, CancellationToken.None).SingleAsync()).SingleOrDefault();
+
+        Assert.NotNull(bookingFound);
+        Assert.Equal(infoPending, bookingFound?.ToInfo());
+    }
 }

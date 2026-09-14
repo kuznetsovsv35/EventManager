@@ -17,6 +17,7 @@ public class FilterEventTest(TestContainerWrapper<AppDbContext> testContainer) :
         // Given
         await using var dbContext = CreateDbContext();
         IFilter<Event> filterService = new FilterService<Event>();
+        IEventRepository eventRepository = new EventRepository(dbContext);
 
         const string titleAll = "Event title";
         const string titleNone = "AbcDeF";
@@ -33,14 +34,14 @@ public class FilterEventTest(TestContainerWrapper<AppDbContext> testContainer) :
         var actualAll = await filterService
             .Reset()
             .AddCondition(exprTitleAll)
-            .ApplyFilter(dbContext.GetEvents())
+            .ApplyFilter(eventRepository.GetEvents())
             .Select(x => x.ToOutputData())
             .ToListAsync();
 
         var actualNone = await filterService
             .Reset()
             .AddCondition(exprTitleNone)
-            .ApplyFilter(dbContext.GetEvents())
+            .ApplyFilter(eventRepository.GetEvents())
             .Select(x => x.ToOutputData())
             .ToListAsync();
 
@@ -60,6 +61,7 @@ public class FilterEventTest(TestContainerWrapper<AppDbContext> testContainer) :
         // Given
         await using var dbContext = CreateDbContext();
         IFilter<Event> filterService = new FilterService<Event>();
+        IEventRepository eventRepository = new EventRepository(dbContext);
 
         Expression<Func<Event, bool>> expr = x => EF.Functions.ILike(x.Title, title);
         var expected = await dbContext
@@ -70,7 +72,7 @@ public class FilterEventTest(TestContainerWrapper<AppDbContext> testContainer) :
         // When        
         var actual = await filterService.Reset()
             .AddCondition(expr)
-            .ApplyFilter(dbContext.GetEvents())
+            .ApplyFilter(eventRepository.GetEvents())
             .Select(x => x.ToOutputData())
             .ToListAsync();
 
@@ -90,6 +92,7 @@ public class FilterEventTest(TestContainerWrapper<AppDbContext> testContainer) :
         // Given
         await using var dbContext = CreateDbContext();
         IFilter<Event> filterService = new FilterService<Event>();
+        IEventRepository eventRepository = new EventRepository(dbContext);
 
         Expression<Func<Event, bool>> expression = x => EF.Functions.ILike(x.Title, title);
         var expected = await dbContext
@@ -100,7 +103,7 @@ public class FilterEventTest(TestContainerWrapper<AppDbContext> testContainer) :
         // When
         var actual = await filterService.Reset()
             .AddCondition(expression)
-            .ApplyFilter(dbContext.GetEvents())
+            .ApplyFilter(eventRepository.GetEvents())
             .Select(x => x.ToOutputData())
             .ToListAsync();
 
@@ -126,17 +129,19 @@ public class FilterEventTest(TestContainerWrapper<AppDbContext> testContainer) :
         // Given
         await using var dbContext = CreateDbContext();
         IFilter<Event> filterService = new FilterService<Event>();
+        IEventRepository eventRepository = new EventRepository(dbContext);
 
         Expression<Func<Event, bool>> expression = x => x.StartAt >= startAt;
         var expected = await dbContext
             .GetEvents(expression)
+            .OrderByDescending(e => e.StartAt)
             .Select(x => x.ToOutputData())
             .ToListAsync();
 
         // When
         var actual = await filterService.Reset()
             .AddCondition(expression)
-            .ApplyFilter(dbContext.GetEvents())
+            .ApplyFilter(eventRepository.GetEvents())
             .Select(x => x.ToOutputData())
             .ToListAsync();
 
@@ -163,18 +168,20 @@ public class FilterEventTest(TestContainerWrapper<AppDbContext> testContainer) :
         // Given
         await using var dbContext = CreateDbContext();
         IFilter<Event> filterService = new FilterService<Event>();
+        IEventRepository eventRepository = new EventRepository(dbContext);
 
         endAt = endAt.AddDays(1).Date;
         Expression<Func<Event, bool>> expression = x => x.EndAt < endAt;
         var expected = await dbContext
             .GetEvents(expression)
+            .OrderByDescending(e => e.StartAt)
             .Select(x => x.ToOutputData())
             .ToListAsync();
 
         // When
         var actual = await filterService.Reset()
             .AddCondition(expression)
-            .ApplyFilter(dbContext.GetEvents())
+            .ApplyFilter(eventRepository.GetEvents())
             .Select(x => x.ToOutputData())
             .ToListAsync();
 
@@ -202,6 +209,7 @@ public class FilterEventTest(TestContainerWrapper<AppDbContext> testContainer) :
         // Given
         await using var dbContext = CreateDbContext();
         IFilter<Event> filterService = new FilterService<Event>();
+        IEventRepository eventRepository = new EventRepository(dbContext);
 
         endAt = endAt?.AddDays(1).Date;
         var expected = await dbContext
@@ -209,6 +217,7 @@ public class FilterEventTest(TestContainerWrapper<AppDbContext> testContainer) :
                 x => (string.IsNullOrEmpty(title) || EF.Functions.ILike(x.Title, title))
                 && (startAt == null || x.StartAt >= startAt.Value)
                 && (endAt == null || x.EndAt < endAt.Value))
+            .OrderByDescending(e => e.StartAt)
             .Select(x => x.ToOutputData())
             .ToListAsync();
 
@@ -229,7 +238,7 @@ public class FilterEventTest(TestContainerWrapper<AppDbContext> testContainer) :
             filter.AddCondition(exprEndAt);
 
         var actual = await filter
-            .ApplyFilter(dbContext.GetEvents())
+            .ApplyFilter(eventRepository.GetEvents())
             .Select(x => x.ToOutputData())
             .ToListAsync();
 
