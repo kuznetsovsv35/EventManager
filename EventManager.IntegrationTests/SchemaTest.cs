@@ -2,6 +2,7 @@
 using EventManager.Data;
 using EventManager.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql;
 
 namespace EventManager.IntegrationTests;
@@ -9,6 +10,40 @@ namespace EventManager.IntegrationTests;
 [Collection(nameof(TestContainersCollection))]
 public class SchemaTest(TestContainerWrapper<AppDbContext> testContainer) : DatabaseTestBase(testContainer)
 {
+    [Fact]
+    public async Task MigrationTest()
+    {
+        // Given
+        await ResetDatabase();
+        await using var context = CreateDbContext();
+        const string migrationId = $@"""{nameof(EFMigration.MigrationId)}""";
+        const string productVersion = $@"""{nameof(EFMigration.ProductVersion)}""";
+        const string tableName = $@"""__EFMigrationsHistory""";
+    
+        // When
+        var expectedMigrations = typeof(AppDbContext).Assembly
+            .GetTypes()
+            .Where(t => typeof(Migration).IsAssignableFrom(t))
+            .Select(t => t.Name)
+            .Order()
+            .ToList();
+
+        var query = context.Database
+            .SqlQueryRaw<EFMigration>($@"
+                SELECT {migrationId}, {productVersion} 
+                FROM {tableName}
+                ORDER BY {migrationId}
+                ");
+
+        var actualMigrations = await query
+            .AsAsyncEnumerable()
+            .Select(m => m.MigrationId.Split('_').Last())            
+            .ToListAsync();
+    
+        // Then
+        Assert.Equal(expectedMigrations, actualMigrations);
+    }
+
     [Trait(Category, Category_Database)]
     [Fact]
     public async Task DatabaseConnect_Success()
