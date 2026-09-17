@@ -38,4 +38,5 @@ app.UseHttpsRedirection();
 app.MapControllers();
 
 // Запускаем приложение.
+await app.Services.PrepareInfrastructure(CancellationToken.None);
 await app.RunAsync();

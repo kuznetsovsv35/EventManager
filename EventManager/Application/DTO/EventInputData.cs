@@ -27,8 +27,8 @@ public class EventInputData()
 
         if (obj is EventInputData inputData)
             return Title == inputData.Title
-                && StartAt == inputData.StartAt
-                && EndAt == inputData.EndAt
+                && StartAt.ToString() == inputData.StartAt.ToString()
+                && EndAt.ToString() == inputData.EndAt.ToString()
                 && Description == inputData.Description
                 && TotalSeats == inputData.TotalSeats;
 

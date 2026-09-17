@@ -3,7 +3,7 @@ namespace EventManager.Application.Interfaces;
 /// <summary>
 /// Интерфейс объекта синхронизации.
 /// </summary>
-public interface ISyncDataContext
+public interface ISyncContext
 {
     /// <summary>
     /// Атомарно выполнить действие (с результатом).

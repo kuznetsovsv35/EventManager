@@ -23,8 +23,6 @@ public class Event
 
     public int AvailableSeats => TotalSeats - ReservedCount;
 
-    public List<Booking> Bookings { get; set; } = null!;
-
     /// <summary>
     /// Попытка забронировать места.
     /// </summary>

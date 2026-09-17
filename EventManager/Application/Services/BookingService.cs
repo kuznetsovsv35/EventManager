@@ -1,3 +1,4 @@
+using System.Threading.Channels;
 using EventManager.Application.DataTransfer;
 using EventManager.Application.Interfaces;
 using EventManager.Infrastructure;
@@ -5,34 +6,39 @@ using EventManager.Models;
 
 namespace EventManager.Application.Services;
 
-public class BookingService(IAppDbContext dbContext, IAsyncQueue<Booking> bookingQueue) : IBookingService
+public class BookingService(
+    ISyncContextFactory syncContextFactory,
+    IBookingRepository bookings,
+    IEventRepository events,
+    Channel<Guid> triggerChannel) : IBookingService
 {
     public async Task<BookingInfo> CreateBookingAsync(Guid eventId, CancellationToken cancellation)
     {
-        var booking = await dbContext.CreateSyncContext<Booking>().ExecuteActionAsync(async () =>
+        var booking = await syncContextFactory.CreateContext<Booking>().ExecuteActionAsync<Booking>(async() =>
         {
-            if (await dbContext.Events.FindAsync(eventId, cancellation) is Event @event)
+            if (await events.GetEventAsync(eventId, cancellation) is Event @event)
             {
                 cancellation.ThrowIfCancellationRequested();
 
                 if (@event.TryReserveSeats())
                 {
                     var booking = new Booking(eventId);
-                    dbContext.Bookings.Add(booking);
+                    await bookings.AddBookingAsync(booking, cancellation);
+                    await events.UpdateEventAsync(@event, cancellation);
                     return booking;
                 }
                 throw new NoAvailableSeatsException(eventId);
             }
             throw new EventNotFoundException(eventId, nameof(eventId));
         }, cancellation);
-
-        await bookingQueue.Enqueue(booking, cancellation);
+        
+        await triggerChannel.Writer.WriteAsync(booking.Id, cancellation).AsTask();
         return booking.ToInfo();
     }
 
     public async Task<BookingInfo> GetBookingByIdAsync(Guid bookingId, CancellationToken cancellation)
     {
-        if (await dbContext.GetBookingAsync(bookingId, cancellation) is Booking booking)
+        if (await bookings.GetBookingAsync(bookingId, cancellation) is Booking booking)
             return booking.ToInfo();
 
         throw new BookingNotFoundException(bookingId, nameof(bookingId));

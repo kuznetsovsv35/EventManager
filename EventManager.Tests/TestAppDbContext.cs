@@ -34,7 +34,7 @@ class TestAppDbContext : AppDbContext
         Database.EnsureCreated();
     }
 
-    internal IAppDbContext CreateNewInstance()
+    internal AppDbContext CreateNewInstance()
         => new AppDbContext(
             new DbContextOptionsBuilder<AppDbContext>()
             .UseInMemoryDatabase(DatabaseName)

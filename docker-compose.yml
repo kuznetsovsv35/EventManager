@@ -55,6 +55,14 @@ services:
       timeout: 5s
       retries: 10
 
+
+  # ─────────────────────────── Adminer ───────────────────────────
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+
   # ─────────────────────────── Базы данных (по одной на сервис) ───────────────────────────
   #users-db:
   #  image: postgres:16
