@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace EventManager.Application.DataTransfer;
+namespace EventManager.Application.DataTransferObjects;
 
 public class PageParams
 {

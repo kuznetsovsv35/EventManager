@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-using EventManager.Application.DataTransfer;
+using EventManager.Application.DataTransferObjects;
 using EventManager.Application.Interfaces;
 using EventManager.Data;
 using EventManager.Domain.Exceptions;

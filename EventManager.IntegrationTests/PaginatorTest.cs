@@ -1,4 +1,4 @@
-using EventManager.Application.DataTransfer;
+using EventManager.Application.DataTransferObjects;
 using EventManager.Application.Interfaces;
 using EventManager.Application.Services;
 using EventManager.Data;

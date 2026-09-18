@@ -1,4 +1,4 @@
-using EventManager.Application.DataTransfer;
+using EventManager.Application.DataTransferObjects;
 
 namespace EventManager.Application.Interfaces;
 

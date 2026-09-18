@@ -1,6 +1,6 @@
 using EventManager.Domain.ValueObjects;
 
-namespace EventManager.Application.DataTransfer;
+namespace EventManager.Application.DataTransferObjects;
 
 /// <summary>
 /// Информации бронирования.

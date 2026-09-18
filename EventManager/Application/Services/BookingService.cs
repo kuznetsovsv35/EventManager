@@ -1,5 +1,5 @@
 using System.Threading.Channels;
-using EventManager.Application.DataTransfer;
+using EventManager.Application.DataTransferObjects;
 using EventManager.Application.Interfaces;
 using EventManager.Domain.Exceptions;
 using EventManager.Domain.ValueObjects;

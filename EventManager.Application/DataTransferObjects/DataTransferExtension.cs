@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using EventManager.Domain.ValueObjects;
 
-namespace EventManager.Application.DataTransfer;
+namespace EventManager.Application.DataTransferObjects;
 
 public static class DataTransferExtension
 {

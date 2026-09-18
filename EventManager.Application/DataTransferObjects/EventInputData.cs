@@ -1,4 +1,4 @@
-namespace EventManager.Application.DataTransfer;
+namespace EventManager.Application.DataTransferObjects;
 
 /// <summary>
 /// Входные данные запроса создания и обновления события.

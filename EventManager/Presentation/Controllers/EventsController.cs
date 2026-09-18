@@ -1,4 +1,4 @@
-using EventManager.Application.DataTransfer;
+using EventManager.Application.DataTransferObjects;
 using EventManager.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 

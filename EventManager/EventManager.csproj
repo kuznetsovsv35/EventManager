@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EventManager.Domain\EventManager.Domain.csproj" />
+    <ProjectReference Include="..\EventManager.Application\EventManager.Application.csproj" />
   </ItemGroup>
 
 </Project>

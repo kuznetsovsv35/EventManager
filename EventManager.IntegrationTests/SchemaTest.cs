@@ -1,4 +1,4 @@
-﻿using EventManager.Application.DataTransfer;
+﻿using EventManager.Application.DataTransferObjects;
 using EventManager.Data;
 using EventManager.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
