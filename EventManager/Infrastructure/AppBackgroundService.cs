@@ -1,5 +1,6 @@
 using System.Threading.Channels;
 using EventManager.Application.Interfaces;
+using EventManager.Application.Services;
 using EventManager.Application.DataAccess;
 using EventManager.Domain.ValueObjects;
 using EventManager.Domain.Exceptions;
@@ -10,7 +11,7 @@ public class AppBackgroundService(
     IServiceScopeFactory scopeFactory,
     ISyncContextFactory syncContextFactory,
     Channel<Guid> triggerChannel,
-    ILogger<AppBackgroundService> logger) : BackgroundService, IAppBackgroundService
+    ILogger<AppBackgroundService> logger) : BackgroundService, IHostedService, IAppBackgroundService
 {
     /// <summary>
     /// Имитация обработки брони.

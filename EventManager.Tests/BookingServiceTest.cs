@@ -1,10 +1,13 @@
 using EventManager.Application.DataTransferObjects;
+using EventManager.Application.Services;
 using EventManager.Application.Interfaces;
 using EventManager.Data;
 using EventManager.Domain.Exceptions;
 using EventManager.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using EventManager.Infrastructure;
 
 namespace EventManager.Tests;
 
@@ -189,7 +192,7 @@ public class BookingServiceTest(EventManagerTestContext context) : TestObjectBas
     {
         // Given
         var serviceProvider = context.CreateServiceProvider();
-        var service = serviceProvider.GetRequiredService<IAppBackgroundService>();
+        var service  =  serviceProvider.GetRequiredService<AppBackgroundService>();
 
         // When
         var statusBeforeStart = service.Status;
@@ -225,7 +228,7 @@ public class BookingServiceTest(EventManagerTestContext context) : TestObjectBas
         var serviceProvider = context.CreateServiceProvider();
         await using var scope = serviceProvider.CreateAsyncScope();
         var bookingService = scope.ServiceProvider.GetRequiredService<IBookingService>();
-        var backService = serviceProvider.GetRequiredService<IAppBackgroundService>();
+        var backService = serviceProvider.GetRequiredService<AppBackgroundService>();
 
         var eventId = await context.GetRandomEventId(CancellationToken.None);
 
@@ -391,7 +394,7 @@ public class BookingServiceTest(EventManagerTestContext context) : TestObjectBas
         await using var scope = serviceProvider.CreateAsyncScope();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
         var bookingService = scope.ServiceProvider.GetRequiredService<IBookingService>();
-        var backService = serviceProvider.GetRequiredService<IAppBackgroundService>();
+        var backService = serviceProvider.GetRequiredService<AppBackgroundService>();
         backService.ProcessBooking += (sender, booking) => booking.Reject();
 
         var eventId = await context.GetRandomEventId(CancellationToken.None);

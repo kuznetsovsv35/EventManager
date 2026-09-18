@@ -1,6 +1,6 @@
 using EventManager.Domain.ValueObjects;
 
-namespace EventManager.Application.Interfaces;
+namespace EventManager.Application.Services;
 
 public enum BackgroundServiceStatus
 {
@@ -10,7 +10,7 @@ public enum BackgroundServiceStatus
     Stopping,
 }
 
-public interface IAppBackgroundService : IHostedService
+public interface IAppBackgroundService
 {
     BackgroundServiceStatus Status { get; }
 
