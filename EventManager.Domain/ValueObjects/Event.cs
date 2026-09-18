@@ -1,27 +1,49 @@
-using System.Security.Cryptography;
-
-namespace EventManager.Models;
+namespace EventManager.Domain.ValueObjects;
 
 /// <summary>
 /// Модель данных события.
 /// </summary>
 public class Event
 {
+    /// <summary>
+    /// Идентификатор события.
+    /// </summary>
     public Guid Id { get; private set; }
 
+    /// <summary>
+    /// Заголовок описания события.
+    /// </summary>
     public required string Title { get; set; }
 
+    /// <summary>
+    /// Дополнительное описание события.
+    /// </summary>
     public string? Description { get; set; }
 
+    /// <summary>
+    /// Дата/время начала события.
+    /// </summary>
     public required DateTime StartAt { get; set; }
 
+    /// <summary>
+    /// Дата/время окончания события.
+    /// </summary>
     public required DateTime EndAt { get; set; }
 
+    /// <summary>
+    /// Общее число мест на событие
+    /// </summary>
     public int TotalSeats { get; private set; }
 
-    public int ReservedCount { get; private set; }
+    /// <summary>
+    /// Число зарезервированных мест.
+    /// </summary>
+    public int ReservedSeats { get; private set; }
 
-    public int AvailableSeats => TotalSeats - ReservedCount;
+    /// <summary>
+    /// Число доступных мест.
+    /// </summary>
+    public int AvailableSeats => TotalSeats - ReservedSeats;
 
     /// <summary>
     /// Попытка забронировать места.
@@ -33,7 +55,7 @@ public class Event
         if (AvailableSeats < count)
             return false;
 
-        ReservedCount += count;
+        ReservedSeats += count;
         return true;
     }
 
@@ -41,13 +63,13 @@ public class Event
     /// Освободить места.
     /// </summary>
     /// <param name="count"></param>
-    public void ReleaseSeats(int count = 1) => ReservedCount -= Math.Min(ReservedCount, count);
+    public void ReleaseSeats(int count = 1) => ReservedSeats -= Math.Min(ReservedSeats, count);
 
     /// <summary>
     /// Обновить общее количество мест.
     /// </summary>
     /// <param name="totalSeats"></param>
-    public void UpdateTotalSeats(int totalSeats) => TotalSeats = Math.Max(totalSeats, ReservedCount);
+    public void UpdateTotalSeats(int totalSeats) => TotalSeats = Math.Max(totalSeats, ReservedSeats);
 
     /// <summary>
     /// Приватный конструктор без параметров.

@@ -3,7 +3,7 @@ using EventManager.Application.Interfaces;
 using EventManager.Application.Services;
 using EventManager.Data;
 using EventManager.Infrastructure;
-using EventManager.Models;
+using EventManager.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

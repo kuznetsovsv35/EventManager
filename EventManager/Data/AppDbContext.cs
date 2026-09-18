@@ -1,4 +1,4 @@
-using EventManager.Models;
+using EventManager.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 
 namespace EventManager.Data;

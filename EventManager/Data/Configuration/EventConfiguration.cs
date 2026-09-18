@@ -1,4 +1,4 @@
-using EventManager.Models;
+using EventManager.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -19,7 +19,7 @@ public class EventConfiguration : IEntityTypeConfiguration<Event>
         builder.Property(e => e.StartAt).IsRequired();
         builder.Property(e => e.EndAt).IsRequired();
         builder.Property(e => e.TotalSeats).IsRequired();
-        builder.Property(e => e.ReservedCount).IsRequired().HasDefaultValue(0);
+        builder.Property(e => e.ReservedSeats).IsRequired().HasDefaultValue(0);
         builder.Ignore(e => e.AvailableSeats);
         
         builder.HasKey(e => e.Id);

@@ -1,5 +1,5 @@
 using EventManager.Data;
-using EventManager.Models;
+using EventManager.Domain.ValueObjects;
 
 namespace EventManager.IntegrationTests;
 

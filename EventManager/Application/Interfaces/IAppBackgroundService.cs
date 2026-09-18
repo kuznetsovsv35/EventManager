@@ -1,4 +1,4 @@
-using EventManager.Models;
+using EventManager.Domain.ValueObjects;
 
 namespace EventManager.Application.Interfaces;
 

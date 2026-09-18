@@ -2,7 +2,7 @@ using EventManager.Application.DataTransfer;
 using EventManager.Application.Interfaces;
 using EventManager.Application.Services;
 using EventManager.Data;
-using EventManager.Models;
+using EventManager.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 
 namespace EventManager.IntegrationTests;

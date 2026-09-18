@@ -1,8 +1,8 @@
 using System.Threading.Channels;
 using EventManager.Application.DataTransfer;
 using EventManager.Application.Interfaces;
-using EventManager.Infrastructure;
-using EventManager.Models;
+using EventManager.Domain.Exceptions;
+using EventManager.Domain.ValueObjects;
 
 namespace EventManager.Application.Services;
 

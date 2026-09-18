@@ -1,5 +1,5 @@
 using System.Linq.Expressions;
-using EventManager.Models;
+using EventManager.Domain.ValueObjects;
 
 namespace EventManager.Application.Interfaces;
 

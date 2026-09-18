@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-using EventManager.Models;
+using EventManager.Domain.ValueObjects;
 
 namespace EventManager.Application.DataTransfer;
 

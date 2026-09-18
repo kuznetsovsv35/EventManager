@@ -3,7 +3,7 @@ using EventManager.Application.Interfaces;
 using EventManager.Application.Services;
 using EventManager.Data;
 using EventManager.Infrastructure;
-using EventManager.Models;
+using EventManager.Domain.ValueObjects;
 
 namespace EventManager.Application;
 

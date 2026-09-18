@@ -1,6 +1,7 @@
 using System.Threading.Channels;
 using EventManager.Application.Interfaces;
-using EventManager.Models;
+using EventManager.Domain.ValueObjects;
+using EventManager.Domain.Exceptions;
 
 namespace EventManager.Infrastructure;
 

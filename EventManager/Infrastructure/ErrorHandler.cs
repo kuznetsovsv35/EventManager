@@ -2,6 +2,7 @@ using System.Net.Mime;
 using HttpContent = Microsoft.AspNetCore.Http.HttpContext;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
+using EventManager.Domain.Exceptions;
 
 namespace EventManager.Infrastructure;
 

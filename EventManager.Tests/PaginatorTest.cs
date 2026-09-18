@@ -2,7 +2,7 @@ using EventManager.Application.DataTransfer;
 using EventManager.Application.Interfaces;
 using EventManager.Data;
 using EventManager.Infrastructure;
-using EventManager.Models;
+using EventManager.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 

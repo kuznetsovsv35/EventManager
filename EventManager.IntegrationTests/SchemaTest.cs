@@ -1,6 +1,6 @@
 ﻿using EventManager.Application.DataTransfer;
 using EventManager.Data;
-using EventManager.Models;
+using EventManager.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql;
