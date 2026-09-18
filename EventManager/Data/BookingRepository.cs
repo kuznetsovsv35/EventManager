@@ -1,7 +1,8 @@
 using System.Runtime.CompilerServices;
-using EventManager.Application.Interfaces;
 using EventManager.Domain.ValueObjects;
+using EventManager.Application.DataAccess;
 using Microsoft.EntityFrameworkCore;
+
 
 namespace EventManager.Data;
 /// <summary>

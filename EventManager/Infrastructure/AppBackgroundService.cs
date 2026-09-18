@@ -1,5 +1,6 @@
 using System.Threading.Channels;
 using EventManager.Application.Interfaces;
+using EventManager.Application.DataAccess;
 using EventManager.Domain.ValueObjects;
 using EventManager.Domain.Exceptions;
 

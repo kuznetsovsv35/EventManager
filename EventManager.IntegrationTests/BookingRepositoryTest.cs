@@ -1,5 +1,5 @@
 using EventManager.Application.DataTransferObjects;
-using EventManager.Application.Interfaces;
+using EventManager.Application.DataAccess;
 using EventManager.Data;
 using EventManager.Domain.ValueObjects;
 

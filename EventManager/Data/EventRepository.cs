@@ -1,5 +1,5 @@
 using System.Linq.Expressions;
-using EventManager.Application.Interfaces;
+using EventManager.Application.DataAccess;
 using EventManager.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 
