@@ -1,17 +1,17 @@
 using System.Threading.Channels;
 using EventManager.Application.Interfaces;
-using EventManager.Application.Services;
 using EventManager.Application.DataAccess;
 using EventManager.Domain.ValueObjects;
 using EventManager.Domain.Exceptions;
+using EventManager.Infrastructure.Services;
 
-namespace EventManager.Infrastructure;
+namespace EventManager.Infrastructure.Services;
 
 public class AppBackgroundService(
     IServiceScopeFactory scopeFactory,
     ISyncContextFactory syncContextFactory,
     Channel<Guid> triggerChannel,
-    ILogger<AppBackgroundService> logger) : BackgroundService, IHostedService, IAppBackgroundService
+    ILogger<AppBackgroundService> logger) : BackgroundService, IAppBackgroundService
 {
     /// <summary>
     /// Имитация обработки брони.
@@ -41,21 +41,23 @@ public class AppBackgroundService(
 
     public event EventHandler<Booking>? ProcessBooking;
 
+    public event EventHandler<BackgroundServiceStatus>? StatusChanged;
+
     public override Task StartAsync(CancellationToken cancellation)
     {
-        Interlocked.CompareExchange(ref _status, BackgroundServiceStatus.Starting, BackgroundServiceStatus.Stopped);
+        UpdateStatus(BackgroundServiceStatus.Stopped, BackgroundServiceStatus.Starting);
         return base.StartAsync(cancellation);
     }
 
     public override Task StopAsync(CancellationToken cancellation)
     {
-        Interlocked.CompareExchange(ref _status, BackgroundServiceStatus.Stopping, BackgroundServiceStatus.Running);
+        UpdateStatus(BackgroundServiceStatus.Running, BackgroundServiceStatus.Stopping);
         return base.StopAsync(cancellation);
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        Interlocked.Exchange(ref _status, BackgroundServiceStatus.Running);
+        UpdateStatus(BackgroundServiceStatus.Starting, BackgroundServiceStatus.Running);
         logger.LogInformation("Старт фонового процесса обработки ...");
 
         // Запуск процесса pooling
@@ -81,7 +83,7 @@ public class AppBackgroundService(
         finally
         {
             await timerTask;
-            Interlocked.Exchange(ref _status, BackgroundServiceStatus.Stopped);
+            UpdateStatus(BackgroundServiceStatus.Stopping, BackgroundServiceStatus.Stopped);
             logger.LogInformation("Завершение фонового процесса обработки...");
         }
     }
@@ -184,4 +186,12 @@ public class AppBackgroundService(
             booking.Confirm();
         return Task.Delay(ProcessingDelay, cancellation);
     }
+
+    void UpdateStatus(BackgroundServiceStatus requiredStatus, BackgroundServiceStatus newStatus)
+    {
+        if (Interlocked.CompareExchange(ref _status, newStatus, requiredStatus) == requiredStatus)
+            OnStatusChanged(newStatus);
+    }
+
+    void OnStatusChanged(BackgroundServiceStatus status) => StatusChanged?.Invoke(this, status);
 }

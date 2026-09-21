@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="../EventManager.Infrastructure/EventManager.Infrastructure.csproj" />
     <ProjectReference Include="..\EventManager\EventManager.csproj" />
   </ItemGroup>
 

@@ -1,6 +1,7 @@
 using EventManager.Domain.ValueObjects;
+using Microsoft.Extensions.Hosting;
 
-namespace EventManager.Application.Services;
+namespace EventManager.Infrastructure.Services;
 
 public enum BackgroundServiceStatus
 {
@@ -10,9 +11,9 @@ public enum BackgroundServiceStatus
     Stopping,
 }
 
-public interface IAppBackgroundService
+public interface IAppBackgroundService : IHostedService
 {
     BackgroundServiceStatus Status { get; }
-
     event EventHandler<Booking> ProcessBooking;
+    event EventHandler<BackgroundServiceStatus> StatusChanged;
 }

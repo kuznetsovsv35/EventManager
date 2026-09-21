@@ -1,5 +1,5 @@
 using EventManager.Application;
-using EventManager.Infrastructure;
+using EventManager.Infrastructure.Services;
 using EventManager.Presentation;
 
 var builder = WebApplication.CreateBuilder(args);

@@ -2,7 +2,7 @@ using EventManager.Application.Interfaces;
 using EventManager.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace EventManager.Infrastructure;
+namespace EventManager.Infrastructure.Services;
 
 /// <summary>
 /// Внедрение зависимости инфраструктуры приложения.

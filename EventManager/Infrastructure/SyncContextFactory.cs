@@ -1,6 +1,6 @@
 using EventManager.Application.Interfaces;
 
-namespace EventManager.Infrastructure;
+namespace EventManager.Infrastructure.Services;
 
 public class SyncContextFactory : ISyncContextFactory
 {
