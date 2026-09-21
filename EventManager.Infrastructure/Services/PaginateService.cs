@@ -1,9 +1,9 @@
 using EventManager.Application.DataTransferObjects;
 using EventManager.Application.Interfaces;
-using EventManager.Infrastructure;
+using EventManager.Application.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
-namespace EventManager.Application.Services;
+namespace EventManager.Infrastructure.Services;
 
 public class PaginateService<T> : IPaginator<T>
 {

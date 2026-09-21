@@ -1,9 +1,10 @@
-using System.Threading.Channels;
-using EventManager.Application.DataTransferObjects;
-using EventManager.Application.DataAccess;
-using EventManager.Application.Interfaces;
-using EventManager.Domain.Exceptions;
+using EventManager.Common.Interfaces;
 using EventManager.Domain.ValueObjects;
+using EventManager.Domain.Exceptions;
+using EventManager.Application.Interfaces;
+using EventManager.Application.DataAccess;
+using EventManager.Application.DataTransferObjects;
+using System.Threading.Channels;
 
 namespace EventManager.Application.Services;
 

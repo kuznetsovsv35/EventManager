@@ -3,6 +3,7 @@ using HttpContent = Microsoft.AspNetCore.Http.HttpContext;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using EventManager.Domain.Exceptions;
+using EventManager.Application.Exceptions;
 
 namespace EventManager.Infrastructure;
 

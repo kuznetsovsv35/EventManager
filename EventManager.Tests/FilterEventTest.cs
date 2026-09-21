@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
+using EventManager.Common.Interfaces;
 using EventManager.Application.DataTransferObjects;
-using EventManager.Application.Interfaces;
 using EventManager.Data;
 using EventManager.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;

@@ -1,9 +1,8 @@
-using System.Threading.Channels;
-using EventManager.Application.Interfaces;
 using EventManager.Application.DataAccess;
 using EventManager.Domain.ValueObjects;
 using EventManager.Domain.Exceptions;
-using EventManager.Infrastructure.Services;
+using EventManager.Common.Interfaces;
+using System.Threading.Channels;
 
 namespace EventManager.Infrastructure.Services;
 

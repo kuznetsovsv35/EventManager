@@ -1,4 +1,4 @@
-namespace EventManager.Application.Interfaces;
+namespace EventManager.Common.Interfaces;
 
 /// <summary>
 /// Фабрика контекста синхронизации

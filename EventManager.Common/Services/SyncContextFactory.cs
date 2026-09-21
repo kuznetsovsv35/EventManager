@@ -1,6 +1,6 @@
-using EventManager.Application.Interfaces;
+using EventManager.Common.Interfaces;
 
-namespace EventManager.Infrastructure.Services;
+namespace EventManager.Common.Services;
 
 public class SyncContextFactory : ISyncContextFactory
 {

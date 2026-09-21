@@ -1,8 +1,8 @@
 using System.Linq.Expressions;
-using EventManager.Application.Interfaces;
-using EventManager.Infrastructure;
+using EventManager.Common.Interfaces;
+using EventManager.Common.Private;
 
-namespace EventManager.Application.Services;
+namespace EventManager.Common.Services;
 
 public class FilterService<T> : IFilter<T>
 {

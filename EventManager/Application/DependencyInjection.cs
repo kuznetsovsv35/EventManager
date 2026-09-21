@@ -5,6 +5,8 @@ using EventManager.Application.Services;
 using EventManager.Data;
 using EventManager.Infrastructure.Services;
 using EventManager.Domain.ValueObjects;
+using EventManager.Common.Interfaces;
+using EventManager.Common.Services;
 
 namespace EventManager.Application;
 

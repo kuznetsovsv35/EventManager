@@ -1,9 +1,9 @@
-using EventManager.Application.DataTransferObjects;
+using EventManager.Common.Interfaces;
 using EventManager.Application.DataAccess;
 using EventManager.Application.Interfaces;
-using EventManager.Domain.Exceptions;
+using EventManager.Application.DataTransferObjects;
 using EventManager.Domain.ValueObjects;
-using Microsoft.EntityFrameworkCore;
+using EventManager.Domain.Exceptions;
 
 namespace EventManager.Application.Services;
 
@@ -48,10 +48,10 @@ public class EventService(
             pageParams.CurrentPage, pageParams.PageSize,
             e => e.ToOutputData(), cancellation);
 
-    IAsyncEnumerable<EventOutputData> IEventService.GetEvents(FilterParams? filterParams)
+    IEnumerable<EventOutputData> IEventService.GetEvents(FilterParams? filterParams)
         => FilterEvents(filterParams)
             .Select(e => e.ToOutputData())
-            .AsAsyncEnumerable();
+            .AsEnumerable();
 
     IQueryable<Event> FilterEvents(FilterParams? filterParams)
     {

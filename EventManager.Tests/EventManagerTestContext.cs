@@ -1,4 +1,6 @@
 using System.Threading.Channels;
+using EventManager.Common.Interfaces;
+using EventManager.Common.Services;
 using EventManager.Application.Interfaces;
 using EventManager.Application.Services;
 using EventManager.Application.DataAccess;

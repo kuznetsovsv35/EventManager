@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
 
-namespace EventManager.Infrastructure;
+namespace EventManager.Common.Private;
 
 public static class ExpressionBuilder
 {

@@ -332,12 +332,13 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
             .ToListAsync();
 
         // When
-        var actualAll = await eventService
+        var actualAll = eventService
             .GetEvents(new() { Title = titleAll })
-            .ToListAsync();
-        var actualNone = await eventService
+            .ToList();
+
+        var actualNone = eventService
             .GetEvents(new() { Title = titleNone })
-            .ToListAsync();
+            .ToList();
 
         // Then
         Assert.Equal(expectedAll, actualAll);
@@ -371,9 +372,9 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
             .Select(x => x.ToOutputData())
             .ToListAsync();
 
-        var actual = await eventService
+        var actual = eventService
             .GetEvents(new() { Title = title })
-            .ToListAsync();
+            .ToList();
 
         Assert.All(actual, item => Assert.Contains(title, item.Title, StringComparison.OrdinalIgnoreCase));
         Assert.Equal(expected, actual);
@@ -417,9 +418,9 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
             .ToListAsync();
 
         // When
-        var actual = await eventService
+        var actual = eventService
             .GetEvents(new() { From = startAt })
-            .ToListAsync();
+            .ToList();
 
         // Then
         Assert.Equal(expected, actual);
@@ -464,9 +465,9 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
             .ToListAsync();
 
         // When
-        var actual = await eventService
+        var actual = eventService
             .GetEvents(new() { To = endAt })
-            .ToListAsync();
+            .ToList();
 
         // Then
         Assert.Equal(expected, actual);
@@ -516,9 +517,9 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
             .ToListAsync();
 
         // When
-        var actual = await eventService
+        var actual = eventService
             .GetEvents(new() { Title = title, From = startAt, To = endAt })
-            .ToListAsync();
+            .ToList();
 
         // Then
         Assert.Equal(expected, actual);

@@ -1,5 +1,6 @@
-using EventManager.Application.Interfaces;
 using EventManager.Data;
+using EventManager.Common.Interfaces;
+using EventManager.Common.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace EventManager.Infrastructure.Services;

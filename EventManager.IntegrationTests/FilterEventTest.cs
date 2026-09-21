@@ -1,8 +1,8 @@
 using System.Linq.Expressions;
 using EventManager.Application.DataTransferObjects;
-using EventManager.Application.Interfaces;
-using EventManager.Application.Services;
 using EventManager.Application.DataAccess;
+using EventManager.Common.Interfaces;
+using EventManager.Common.Services;
 using EventManager.Data;
 using EventManager.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;

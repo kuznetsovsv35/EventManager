@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
 
-namespace EventManager.Application.Interfaces;
+namespace EventManager.Common.Interfaces;
 
 public interface IFilter<T>
 {

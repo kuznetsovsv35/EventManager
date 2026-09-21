@@ -26,7 +26,7 @@ public interface IEventService
     /// </summary>
     /// <param name="filterParams">Параметры фильтра.</param>
     /// <returns></returns>
-    IAsyncEnumerable<EventOutputData> GetEvents(FilterParams? filterParams);
+    IEnumerable<EventOutputData> GetEvents(FilterParams? filterParams);
 
     /// <summary>
     /// Получить событие по идентификатору.

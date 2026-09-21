@@ -1,4 +1,4 @@
-namespace EventManager.Infrastructure;
+namespace EventManager.Application.Exceptions;
 
 public class PaginatorParamException : ArgumentException
 {
