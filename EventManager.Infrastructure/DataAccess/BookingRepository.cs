@@ -1,10 +1,11 @@
 using System.Runtime.CompilerServices;
 using EventManager.Domain.ValueObjects;
+using EventManager.Database;
 using EventManager.Application.DataAccess;
 using Microsoft.EntityFrameworkCore;
 
 
-namespace EventManager.Data;
+namespace EventManager.Infrastructure.DataAccess;
 /// <summary>
 /// Реализация интерфейса репозитория броней.
 /// </summary>

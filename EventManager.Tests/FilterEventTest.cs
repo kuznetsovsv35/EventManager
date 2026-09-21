@@ -1,8 +1,8 @@
 using System.Linq.Expressions;
 using EventManager.Common.Interfaces;
 using EventManager.Application.DataTransferObjects;
-using EventManager.Data;
 using EventManager.Domain.ValueObjects;
+using EventManager.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 

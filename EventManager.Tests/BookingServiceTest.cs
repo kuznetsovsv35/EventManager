@@ -1,12 +1,11 @@
 using EventManager.Application.DataTransferObjects;
 using EventManager.Application.Interfaces;
-using EventManager.Data;
 using EventManager.Domain.Exceptions;
 using EventManager.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using EventManager.Infrastructure;
 using EventManager.Infrastructure.Services;
+using EventManager.Database;
 
 namespace EventManager.Tests;
 

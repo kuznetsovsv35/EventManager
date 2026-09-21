@@ -1,4 +1,4 @@
-using EventManager.Data;
+using EventManager.Database;
 
 namespace EventManager.IntegrationTests;
 

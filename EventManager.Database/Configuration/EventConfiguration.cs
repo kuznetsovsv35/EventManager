@@ -2,7 +2,7 @@ using EventManager.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace EventManager.Data.Configuration;
+namespace EventManager.Database.Configuration;
 
 public class EventConfiguration : IEntityTypeConfiguration<Event>
 {

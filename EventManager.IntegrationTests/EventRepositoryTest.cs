@@ -1,7 +1,8 @@
 using EventManager.Application.DataTransferObjects;
 using EventManager.Application.DataAccess;
-using EventManager.Data;
+using EventManager.Database;
 using EventManager.Domain.ValueObjects;
+using EventManager.Infrastructure.DataAccess;
 
 namespace EventManager.IntegrationTests;
 

@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../EventManager.Application/EventManager.Application.csproj" />
+    <ProjectReference Include="../EventManager.Database/EventManager.Database.csproj" />
     <ProjectReference Include="../EventManager.Domain/EventManager.Domain.csproj" />
   </ItemGroup>
 

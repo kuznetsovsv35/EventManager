@@ -1,7 +1,4 @@
-using EventManager.Data;
-using Microsoft.EntityFrameworkCore;
-using Npgsql;
-using Testcontainers.PostgreSql;
+using EventManager.Database;
 
 namespace EventManager.IntegrationTests;
 

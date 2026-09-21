@@ -3,8 +3,9 @@ using EventManager.Application.DataTransferObjects;
 using EventManager.Application.DataAccess;
 using EventManager.Common.Interfaces;
 using EventManager.Common.Services;
-using EventManager.Data;
 using EventManager.Domain.ValueObjects;
+using EventManager.Infrastructure.DataAccess;
+using EventManager.Database;
 using Microsoft.EntityFrameworkCore;
 
 namespace EventManager.IntegrationTests;

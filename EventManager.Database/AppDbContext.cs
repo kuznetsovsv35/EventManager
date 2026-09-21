@@ -1,7 +1,7 @@
 using EventManager.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 
-namespace EventManager.Data;
+namespace EventManager.Database;
 
 /// <summary>
 /// Контекст хранения данных события.

@@ -2,7 +2,7 @@ using EventManager.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace EventManager.Data.Configuration;
+namespace EventManager.Database.Configuration;
 
 public class BookingConfiguration : IEntityTypeConfiguration<Booking>
 {
@@ -25,7 +25,7 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
             .HasForeignKey(b => b.EventId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        builder.HasIndex(b => b.CreatedAt).IsDescending().HasDatabaseName("IX_Bookings_CreatedAt_Desc");
+        builder.HasIndex(b => b.CreatedAt).HasDatabaseName("IX_Bookings_CreatedAt");
         builder.HasIndex(b => b.EventId).HasDatabaseName("IX_Bookings_EventId");
     }
 }

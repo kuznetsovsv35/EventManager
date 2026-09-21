@@ -1,8 +1,8 @@
 ﻿using EventManager.Application.DataTransferObjects;
-using EventManager.Data;
 using EventManager.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
+using EventManager.Database;
 using Npgsql;
 
 namespace EventManager.IntegrationTests;

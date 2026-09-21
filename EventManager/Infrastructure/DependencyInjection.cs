@@ -1,4 +1,4 @@
-using EventManager.Data;
+using EventManager.Database;
 using EventManager.Common.Interfaces;
 using EventManager.Common.Services;
 using Microsoft.EntityFrameworkCore;

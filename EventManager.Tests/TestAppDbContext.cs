@@ -1,5 +1,5 @@
 using System.Data;
-using EventManager.Data;
+using EventManager.Database;
 using EventManager.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 
