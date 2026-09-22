@@ -7,8 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.2.3" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.12">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
@@ -16,11 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../EventManager.Common/EventManager.Common.csproj" />
-    <ProjectReference Include="../EventManager.Database/EventManager.Database.csproj" />
     <ProjectReference Include="../EventManager.Infrastructure/EventManager.Infrastructure.csproj" />
-    <ProjectReference Include="../EventManager.Domain\EventManager.Domain.csproj" />
-    <ProjectReference Include="../EventManager.Application\EventManager.Application.csproj" />
     <ProjectReference Include="../EventManager.Presentation/EventManager.Presentation.csproj" />
   </ItemGroup>
 

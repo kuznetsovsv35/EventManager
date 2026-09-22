@@ -1,9 +1,9 @@
+using Microsoft.EntityFrameworkCore;
+using EventManager.Domain.ValueObjects;
 using EventManager.Application.DataTransferObjects;
 using EventManager.Application.Interfaces;
-using EventManager.Infrastructure.Services;
-using EventManager.Domain.ValueObjects;
 using EventManager.Database;
-using Microsoft.EntityFrameworkCore;
+using EventManager.Infrastructure.Services;
 
 namespace EventManager.IntegrationTests;
 

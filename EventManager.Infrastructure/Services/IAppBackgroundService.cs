@@ -1,5 +1,5 @@
-using EventManager.Domain.ValueObjects;
 using Microsoft.Extensions.Hosting;
+using EventManager.Domain.ValueObjects;
 
 namespace EventManager.Infrastructure.Services;
 

@@ -1,20 +1,14 @@
-using EventManager.Database;
-using EventManager.Common.Interfaces;
-using EventManager.Common.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Builder;
-using EventManager.Infrastructure.Middleware;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Hosting;
 using EventManager.Domain.ValueObjects;
+using EventManager.Common.Interfaces;
+using EventManager.Common.Services;
 using EventManager.Application.Interfaces;
-using EventManager.Infrastructure.Services;
 using EventManager.Application.Services;
-using EventManager.Infrastructure.DataAccess;
-using EventManager.Application.DataAccess;
-using System.Threading.Channels;
+using EventManager.Infrastructure.Services;
+using EventManager.Infrastructure.Repositories;
+using EventManager.Database;
 
 namespace EventManager.Infrastructure;
 
@@ -37,28 +31,16 @@ public static class DependencyInjection
 
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, 
         IConfiguration configuration,
-        IWebHostEnvironment environment)
+        bool isDevelopment)
     {
         services.AddDatabase(
             configuration.GetConnectionString("Default")!, 
-            environment.IsDevelopment());
+            isDevelopment);
         
         services.AddSingleton<ISyncContextFactory, SyncContextFactory>();
-
-        services.AddSingleton(_ => Channel.CreateBounded<Guid>(new BoundedChannelOptions(1)
-        {
-            FullMode = BoundedChannelFullMode.DropOldest,
-            SingleWriter = false,
-            SingleReader = true
-        }));
+        services.AddSingleton<IBookingServiceNotifier, BookingServiceNotifier>();
         
         return services;
-    }
-
-    public static IApplicationBuilder UseErrorHandler(this IApplicationBuilder builder)
-    {
-        builder.UseMiddleware<ErrorHandler>();
-        return builder;
     }
 
     public static Task PrepareInfrastructure(this IServiceProvider serviceProvider, CancellationToken cancellation)

@@ -1,18 +1,17 @@
-using EventManager.Application.DataAccess;
-using EventManager.Domain.ValueObjects;
-using EventManager.Domain.Exceptions;
-using EventManager.Common.Interfaces;
-using System.Threading.Channels;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using EventManager.Domain.ValueObjects;
+using EventManager.Domain.Exceptions;
+using EventManager.Common.Interfaces;
+using EventManager.Application.Interfaces;
 
 namespace EventManager.Infrastructure.Services;
 
 public class AppBackgroundService(
     IServiceScopeFactory scopeFactory,
     ISyncContextFactory syncContextFactory,
-    Channel<Guid> triggerChannel,
+    IBookingServiceNotifier notifier,
     ILogger<AppBackgroundService> logger) : BackgroundService, IAppBackgroundService
 {
     /// <summary>
@@ -31,9 +30,6 @@ public class AppBackgroundService(
     /// Интервал опроса.
     /// </summary>
     static readonly TimeSpan PollingInterval = TimeSpan.FromSeconds(5);
-
-    readonly ChannelReader<Guid> _triggerReader = triggerChannel.Reader;
-    readonly ChannelWriter<Guid> _triggerWriter = triggerChannel.Writer;
 
     BackgroundServiceStatus _status = BackgroundServiceStatus.Stopped;
 
@@ -115,15 +111,12 @@ public class AppBackgroundService(
 
     async Task ProcessTriggerEvent(CancellationToken cancellation)
     {
-        if (await _triggerReader.WaitToReadAsync(cancellation))
-        {
-            while (_triggerReader.TryRead(out var _))
-            {
-                cancellation.ThrowIfCancellationRequested();
-                if (Interlocked.CompareExchange(ref _isProcessing, 1, 0) == 0)
-                    await ProcessBookingsAsync(cancellation);
-            }
-        }
+        if (await notifier.WaitBookingCreationAsync(cancellation) is null)
+            return;
+        
+        cancellation.ThrowIfCancellationRequested();
+        if (Interlocked.CompareExchange(ref _isProcessing, 1, 0) == 0)
+            await ProcessBookingsAsync(cancellation);
     }
 
     async Task ProcessBookingsAsync(CancellationToken cancellation)

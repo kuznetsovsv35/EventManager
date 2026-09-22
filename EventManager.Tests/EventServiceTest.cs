@@ -1,10 +1,10 @@
 using System.ComponentModel.DataAnnotations;
-using EventManager.Application.DataTransferObjects;
-using EventManager.Application.Interfaces;
-using EventManager.Domain.Exceptions;
-using EventManager.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using EventManager.Domain.Exceptions;
+using EventManager.Application.DataTransferObjects;
+using EventManager.Application.Interfaces;
+using EventManager.Database;
 
 namespace EventManager.Tests;
 

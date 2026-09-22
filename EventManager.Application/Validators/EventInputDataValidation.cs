@@ -1,7 +1,8 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
+using EventManager.Application.DataTransferObjects;
 
-namespace EventManager.Application.DataTransferObjects;
+namespace EventManager.Application.Validators;
 
 /// <summary>
 /// Атрибут валидации входных данных.

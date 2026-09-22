@@ -1,9 +1,8 @@
-using EventManager.Common.Interfaces;
-using EventManager.Application.DataAccess;
-using EventManager.Application.Interfaces;
-using EventManager.Application.DataTransferObjects;
 using EventManager.Domain.ValueObjects;
 using EventManager.Domain.Exceptions;
+using EventManager.Common.Interfaces;
+using EventManager.Application.Interfaces;
+using EventManager.Application.DataTransferObjects;
 
 namespace EventManager.Application.Services;
 

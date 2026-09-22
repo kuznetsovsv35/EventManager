@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using EventManager.Domain.ValueObjects;
+using EventManager.Application.Validators;
 
 namespace EventManager.Application.DataTransferObjects;
 

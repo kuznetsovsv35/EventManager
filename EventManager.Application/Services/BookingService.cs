@@ -1,10 +1,8 @@
-using EventManager.Common.Interfaces;
 using EventManager.Domain.ValueObjects;
 using EventManager.Domain.Exceptions;
+using EventManager.Common.Interfaces;
 using EventManager.Application.Interfaces;
-using EventManager.Application.DataAccess;
 using EventManager.Application.DataTransferObjects;
-using System.Threading.Channels;
 
 namespace EventManager.Application.Services;
 
@@ -12,7 +10,7 @@ public class BookingService(
     ISyncContextFactory syncContextFactory,
     IBookingRepository bookings,
     IEventRepository events,
-    Channel<Guid> triggerChannel) : IBookingService
+    IBookingServiceNotifier notifier) : IBookingService
 {
     public async Task<BookingInfo> CreateBookingAsync(Guid eventId, CancellationToken cancellation)
     {
@@ -34,7 +32,7 @@ public class BookingService(
             throw new EventNotFoundException(eventId, nameof(eventId));
         }, cancellation);
         
-        await triggerChannel.Writer.WriteAsync(booking.Id, cancellation).AsTask();
+        await notifier.BookingCreatedAsync(booking.Id, cancellation);
         return booking.ToInfo();
     }
 

@@ -1,9 +1,9 @@
-using EventManager.Application.DataTransferObjects;
-using EventManager.Application.Interfaces;
-using EventManager.Domain.Exceptions;
-using EventManager.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using EventManager.Domain.Exceptions;
+using EventManager.Domain.ValueObjects;
+using EventManager.Application.DataTransferObjects;
+using EventManager.Application.Interfaces;
 using EventManager.Infrastructure.Services;
 using EventManager.Database;
 

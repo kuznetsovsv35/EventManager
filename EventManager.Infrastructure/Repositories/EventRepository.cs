@@ -1,10 +1,10 @@
 using System.Linq.Expressions;
-using EventManager.Application.DataAccess;
-using EventManager.Domain.ValueObjects;
-using EventManager.Database;
 using Microsoft.EntityFrameworkCore;
+using EventManager.Domain.ValueObjects;
+using EventManager.Application.Interfaces;
+using EventManager.Database;
 
-namespace EventManager.Infrastructure.DataAccess;
+namespace EventManager.Infrastructure.Repositories;
 
 public class EventRepository(AppDbContext dbContext) : IEventRepository
 {    

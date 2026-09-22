@@ -13,7 +13,9 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
+    <!--
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.3" />
+    -->
     <PackageReference Include="Testcontainers.PostgreSql" Version="4.15.0" />
     <PackageReference Include="xunit" Version="2.9.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="4.0.0">
@@ -23,7 +25,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../EventManager/EventManager.csproj" />
+    <ProjectReference Include="../EventManager.Application/EventManager.Application.csproj" />
+    <ProjectReference Include="../EventManager.Database/EventManager.Database.csproj" />
+    <ProjectReference Include="../EventManager.Domain/EventManager.Domain.csproj" />
+    <ProjectReference Include="../EventManager.Infrastructure/EventManager.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>

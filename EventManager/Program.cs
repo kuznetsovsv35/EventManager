@@ -6,7 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Добавляем функциональность приложения.
 builder.Services.AddApplication();
 // Добавляем инфраструктуру.
-builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
+builder.Services.AddInfrastructure(builder.Configuration, builder.Environment.IsDevelopment());
 // Добавляем представления.
 builder.Services.AddPresentation();
 // Включаем проверку построения.

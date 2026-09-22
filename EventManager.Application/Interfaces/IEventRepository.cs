@@ -1,7 +1,7 @@
 using System.Linq.Expressions;
 using EventManager.Domain.ValueObjects;
 
-namespace EventManager.Application.DataAccess;
+namespace EventManager.Application.Interfaces;
 
 /// <summary>
 /// Интерфейс репозитория событий.

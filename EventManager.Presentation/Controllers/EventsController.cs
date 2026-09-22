@@ -1,7 +1,7 @@
-using EventManager.Application.DataTransferObjects;
-using EventManager.Application.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using EventManager.Application.DataTransferObjects;
+using EventManager.Application.Interfaces;
 
 namespace EventManager.Presentation.Controllers;
 

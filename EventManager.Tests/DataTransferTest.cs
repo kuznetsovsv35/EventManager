@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
-using EventManager.Application.DataTransferObjects;
 using EventManager.Domain.ValueObjects;
+using EventManager.Application.DataTransferObjects;
 
 namespace EventManager.Tests;
 

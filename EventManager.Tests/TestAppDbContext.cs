@@ -1,7 +1,7 @@
 using System.Data;
-using EventManager.Database;
-using EventManager.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
+using EventManager.Domain.ValueObjects;
+using EventManager.Database;
 
 namespace EventManager.Tests;
 

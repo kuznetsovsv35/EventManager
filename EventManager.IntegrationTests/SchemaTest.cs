@@ -1,7 +1,7 @@
-﻿using EventManager.Application.DataTransferObjects;
-using EventManager.Domain.ValueObjects;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
+using EventManager.Domain.ValueObjects;
+using EventManager.Application.DataTransferObjects;
 using EventManager.Database;
 using Npgsql;
 

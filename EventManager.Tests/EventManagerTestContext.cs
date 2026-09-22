@@ -1,17 +1,15 @@
-using System.Threading.Channels;
-using EventManager.Common.Interfaces;
-using EventManager.Common.Services;
-using EventManager.Application.Interfaces;
-using EventManager.Application.Services;
-using EventManager.Application.DataAccess;
-using EventManager.Infrastructure.Services;
-using EventManager.Infrastructure.DataAccess;
-using EventManager.Domain.ValueObjects;
-using EventManager.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
+using EventManager.Domain.ValueObjects;
+using EventManager.Common.Interfaces;
+using EventManager.Common.Services;
+using EventManager.Application.Interfaces;
+using EventManager.Application.Services;
+using EventManager.Infrastructure.Services;
+using EventManager.Infrastructure.Repositories;
+using EventManager.Database;
 
 namespace EventManager.Tests;
 
@@ -35,12 +33,7 @@ public class EventManagerTestContext
     public EventManagerTestContext()
     {
         _services = new ServiceCollection()
-            .AddSingleton(_ => Channel.CreateBounded<Guid>(new BoundedChannelOptions(1)
-            {
-                FullMode = BoundedChannelFullMode.DropOldest,
-                SingleWriter = false,
-                SingleReader = true
-            }))
+            .AddSingleton<IBookingServiceNotifier, BookingServiceNotifier>()
             .AddSingleton(_ => new TestAppDbContext($"Test_{Guid.NewGuid()}"))
             .AddScoped(provider => provider.GetRequiredService<TestAppDbContext>().CreateNewInstance())
             .AddScoped<IEventRepository, EventRepository>()

@@ -1,12 +1,12 @@
 using System.Linq.Expressions;
-using EventManager.Application.DataTransferObjects;
-using EventManager.Application.DataAccess;
+using Microsoft.EntityFrameworkCore;
+using EventManager.Domain.ValueObjects;
 using EventManager.Common.Interfaces;
 using EventManager.Common.Services;
-using EventManager.Domain.ValueObjects;
-using EventManager.Infrastructure.DataAccess;
+using EventManager.Application.DataTransferObjects;
+using EventManager.Application.Interfaces;
+using EventManager.Infrastructure.Repositories;
 using EventManager.Database;
-using Microsoft.EntityFrameworkCore;
 
 namespace EventManager.IntegrationTests;
 

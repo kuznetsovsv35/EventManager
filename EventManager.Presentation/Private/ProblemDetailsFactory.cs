@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace EventManager.Infrastructure.Private;
+namespace EventManager.Presentation.Private;
 
 public class ProblemDetailsBuilder<T>(T problem) where T : ProblemDetails
 {

@@ -2,12 +2,12 @@ using System.Net.Mime;
 using HttpContent = Microsoft.AspNetCore.Http.HttpContext;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
-using EventManager.Domain.Exceptions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using EventManager.Infrastructure.Private;
+using EventManager.Domain.Exceptions;
+using EventManager.Presentation.Private;
 
-namespace EventManager.Infrastructure.Middleware;
+namespace EventManager.Presentation.Middleware;
 
 public class ErrorHandler(RequestDelegate next, ILogger<ErrorHandler> logger)
 {

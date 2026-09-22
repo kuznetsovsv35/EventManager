@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using EventManager.Presentation.Middleware;
 
 namespace EventManager.Presentation;
 
@@ -13,5 +15,10 @@ public static class DependencyInjection
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
         return services;
+    }
+    public static IApplicationBuilder UseErrorHandler(this IApplicationBuilder builder)
+    {
+        builder.UseMiddleware<ErrorHandler>();
+        return builder;
     }
 }

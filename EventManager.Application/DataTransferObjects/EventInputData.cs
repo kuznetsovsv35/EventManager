@@ -1,3 +1,5 @@
+using EventManager.Application.Validators;
+
 namespace EventManager.Application.DataTransferObjects;
 
 /// <summary>
