@@ -10,8 +10,8 @@ public class EventConfiguration : IEntityTypeConfiguration<Event>
     {
         builder.ToTable("Events", t =>
         {
-            t.HasCheckConstraint("CK_Events_Seats", "\"TotalSeats\" > 0 and \"ReservedCount\" >= 0");
-            t.HasCheckConstraint("CK_Events_StartEnd", "\"StartAt\" < \"EndAt\"");
+            t.HasCheckConstraint("CK_Events_Seats", @$"""{nameof(Event.TotalSeats)}"" > 0 and ""{nameof(Event.ReservedSeats)}"" >= 0");
+            t.HasCheckConstraint("CK_Events_StartEnd", @$"""{nameof(Event.StartAt)}"" < ""{nameof(Event.EndAt)}""");
         });
  
         builder.Property(e => e.Id).IsRequired().ValueGeneratedNever();

@@ -219,7 +219,7 @@ public class SchemaTest(TestContainerWrapper<AppDbContext> testContainer) : Data
 
         var exReservedCountNull = await Assert.ThrowsAnyAsync<PostgresException>(async () => await work.Database.ExecuteSqlInterpolatedAsync($@"
             UPDATE ""Events"" 
-            SET ""ReservedCount"" = NULL 
+            SET ""ReservedSeats"" = NULL 
             WHERE ""Id"" = {@event.Id};
             "));
 
@@ -231,7 +231,7 @@ public class SchemaTest(TestContainerWrapper<AppDbContext> testContainer) : Data
 
         var exReservedCount = await Assert.ThrowsAnyAsync<PostgresException>(async() => await work.Database.ExecuteSqlInterpolatedAsync($@"
             UPDATE ""Events""
-            SET ""ReservedCount"" = -1
+            SET ""ReservedSeats"" = -1
             WHERE ""Id"" = {@event.Id}
             "));
 
@@ -250,7 +250,7 @@ public class SchemaTest(TestContainerWrapper<AppDbContext> testContainer) : Data
         CheckNullConstraint(exStartAtNull, "Events", "StartAt");
         CheckNullConstraint(exEndAtNull, "Events", "EndAt");
         CheckNullConstraint(exTotalSeatsNull, "Events", "TotalSeats");
-        CheckNullConstraint(exReservedCountNull, "Events", "ReservedCount");
+        CheckNullConstraint(exReservedCountNull, "Events", "ReservedSeats");
 
         CheckValueConstraint(exTotalSeats, "Events", "CK_Events_Seats");
         CheckValueConstraint(exReservedCount, "Events", "CK_Events_Seats");

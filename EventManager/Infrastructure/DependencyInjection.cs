@@ -20,14 +20,14 @@ public static class DependencyInjection
         IConfiguration configuration,
         IWebHostEnvironment environment)
     {
+        services.AddDatabase(
+            configuration.GetConnectionString("Default")!, 
+            environment.IsDevelopment());
+        
         services.AddSingleton<ISyncContextFactory, SyncContextFactory>();
         return services;
     }
 
-    public static async Task PrepareInfrastructure(this IServiceProvider serviceProvider, CancellationToken cancellation)
-    {
-        await using var scope = serviceProvider.CreateAsyncScope();
-        using var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        await dbContext.Database.MigrateAsync(cancellation);
-    }
+    public static Task PrepareInfrastructure(this IServiceProvider serviceProvider, CancellationToken cancellation)
+        => serviceProvider.PrepareDatabase(cancellation);
 }
