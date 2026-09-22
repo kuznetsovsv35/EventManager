@@ -156,7 +156,7 @@
 
    # Обновление БД.
    ```bash
-   dotnet ef database update --project EventManager
+   dotnet ef database update -p EventManager.Database -s EventManager
    ```
 
    Примечание: поскольку миграция уже создана и хранится в проектном репозитории, после клонирования нужно только обновить БД.
