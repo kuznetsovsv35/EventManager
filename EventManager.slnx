@@ -6,5 +6,6 @@
   <Project Path="EventManager.Database/EventManager.Database.csproj" />
   <Project Path="EventManager.Infrastructure/EventManager.Infrastructure.csproj" />
   <Project Path="EventManager.IntegrationTests/EventManager.IntegrationTests.csproj" />
+  <Project Path="EventManager.Presentation/EventManager.Presentation.csproj" />
   <Project Path="EventManager.Tests/EventManager.Tests.csproj" />
 </Solution>

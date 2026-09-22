@@ -11,6 +11,10 @@ builder.Services.AddApplication();
 // Добавляем представления.
 builder.Services.AddPresentation();
 
+        builder.Services.AddControllers();
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen();
+
 // Включаем проверку построения.
 if (builder.Environment.IsDevelopment())
 {
