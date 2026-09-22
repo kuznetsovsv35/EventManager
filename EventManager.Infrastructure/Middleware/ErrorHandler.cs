@@ -3,9 +3,11 @@ using HttpContent = Microsoft.AspNetCore.Http.HttpContext;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using EventManager.Domain.Exceptions;
-using EventManager.Application.Exceptions;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
+using EventManager.Infrastructure.Private;
 
-namespace EventManager.Infrastructure;
+namespace EventManager.Infrastructure.Middleware;
 
 public class ErrorHandler(RequestDelegate next, ILogger<ErrorHandler> logger)
 {

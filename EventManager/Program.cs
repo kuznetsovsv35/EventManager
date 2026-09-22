@@ -1,20 +1,14 @@
-using EventManager.Application;
-using EventManager.Infrastructure.Services;
+using EventManager.Infrastructure;
 using EventManager.Presentation;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Добавляем инфраструктуру.
-builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
 // Добавляем функциональность приложения.
 builder.Services.AddApplication();
+// Добавляем инфраструктуру.
+builder.Services.AddInfrastructure(builder.Configuration, builder.Environment);
 // Добавляем представления.
 builder.Services.AddPresentation();
-
-        builder.Services.AddControllers();
-        builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
-
 // Включаем проверку построения.
 if (builder.Environment.IsDevelopment())
 {

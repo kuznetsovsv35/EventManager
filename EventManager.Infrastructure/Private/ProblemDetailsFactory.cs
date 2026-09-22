@@ -1,7 +1,8 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace EventManager.Infrastructure;
+namespace EventManager.Infrastructure.Private;
 
 public class ProblemDetailsBuilder<T>(T problem) where T : ProblemDetails
 {

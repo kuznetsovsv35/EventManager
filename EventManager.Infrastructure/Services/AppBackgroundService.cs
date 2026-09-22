@@ -3,6 +3,9 @@ using EventManager.Domain.ValueObjects;
 using EventManager.Domain.Exceptions;
 using EventManager.Common.Interfaces;
 using System.Threading.Channels;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace EventManager.Infrastructure.Services;
 
