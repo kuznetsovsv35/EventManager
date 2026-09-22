@@ -1,7 +1,7 @@
 using EventManager.Common.Interfaces;
 using System.Collections.Concurrent;
 
-namespace EventManager.Common.Services;
+namespace EventManager.Common.Private;
 
 class SyncDataContext<T> : ISyncContext
 {

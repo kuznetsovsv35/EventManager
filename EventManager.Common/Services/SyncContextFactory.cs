@@ -1,4 +1,5 @@
 using EventManager.Common.Interfaces;
+using EventManager.Common.Private;
 
 namespace EventManager.Common.Services;
 

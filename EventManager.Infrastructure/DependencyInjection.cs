@@ -30,23 +30,9 @@ public static class DependencyInjection
         services.AddScoped<IEventService, EventService>();
         services.AddScoped<IBookingService, BookingService>();
         services.AddScoped<IEventRepository, EventRepository>();
-        services.AddScoped<IBookingRepository, BookingRepository>();
-        
-        services.AddSingleton(_ => Channel.CreateBounded<Guid>(new BoundedChannelOptions(1)
-        {
-            FullMode = BoundedChannelFullMode.DropOldest,
-            SingleWriter = false,
-            SingleReader = true
-        }));
-
+        services.AddScoped<IBookingRepository, BookingRepository>();        
         services.AddHostedService<AppBackgroundService>();
         return services;
-    }
-
-    public static IApplicationBuilder UseErrorHandler(this IApplicationBuilder builder)
-    {
-        builder.UseMiddleware<ErrorHandler>();
-        return builder;
     }
 
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, 
@@ -58,7 +44,21 @@ public static class DependencyInjection
             environment.IsDevelopment());
         
         services.AddSingleton<ISyncContextFactory, SyncContextFactory>();
+
+        services.AddSingleton(_ => Channel.CreateBounded<Guid>(new BoundedChannelOptions(1)
+        {
+            FullMode = BoundedChannelFullMode.DropOldest,
+            SingleWriter = false,
+            SingleReader = true
+        }));
+        
         return services;
+    }
+
+    public static IApplicationBuilder UseErrorHandler(this IApplicationBuilder builder)
+    {
+        builder.UseMiddleware<ErrorHandler>();
+        return builder;
     }
 
     public static Task PrepareInfrastructure(this IServiceProvider serviceProvider, CancellationToken cancellation)
