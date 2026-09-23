@@ -110,7 +110,7 @@ public class DataTransferTest : TestObjectBase
     public async Task Booking_Info_Success(Booking booking)
     {
         // Given
-        var expectedStatus = Random.Shared.Next(0, 1) % 2 == 0
+        var expectedStatus = Random.Shared.Next(0, 2) % 2 == 0
             ? BookingStatus.Confirmed
             : BookingStatus.Rejected;
 
