@@ -1,27 +1,30 @@
+using EventManager.Database;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 
-namespace EventManager.Database;
+namespace EventManager.DependencyInjection;
 
-public static class DependencyInjection
+public static partial class DependencyInjection
 {
-    public static IServiceCollection AddDatabase(this IServiceCollection services, string connectionString, bool isDevelopment)
+    public static IServiceCollection ConfigureDatabase(
+        this IServiceCollection services, 
+        IConfiguration configuration,
+        IWebHostEnvironment environment)
     {
-        if (connectionString is null || connectionString == string.Empty)
-            throw new ArgumentException("Нет строки подключения к БД", nameof(connectionString));
+        var connectionString = configuration.GetConnectionString("Default")
+            ?? throw new InvalidOperationException("Нет строки подключения к БД");
         
         services.AddDbContext<AppDbContext>(builder =>
         {
             builder.UseNpgsql(connectionString);
             
-            if (isDevelopment)
+            if (environment.IsDevelopment())
             {
                 builder.LogTo(Console.WriteLine);
                 builder.EnableDetailedErrors();
             }
         });
         return services;
-    }
+    }   
 
     public static async Task PrepareDatabase(this IServiceProvider serviceProvider, CancellationToken cancellation)
     {        

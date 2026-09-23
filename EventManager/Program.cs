@@ -1,14 +1,16 @@
-using EventManager.Infrastructure;
-using EventManager.Presentation;
+using EventManager.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Добавляем функциональность приложения.
-builder.Services.AddApplication();
+builder.Services.ConfigureApplication();
+
 // Добавляем инфраструктуру.
-builder.Services.AddInfrastructure(builder.Configuration, builder.Environment.IsDevelopment());
+builder.Services.ConfigureInfrastructure(builder.Configuration, builder.Environment);
+
 // Добавляем представления.
-builder.Services.AddPresentation();
+builder.Services.ConfigurePresentation();
+
 // Включаем проверку построения.
 if (builder.Environment.IsDevelopment())
 {
@@ -21,20 +23,10 @@ if (builder.Environment.IsDevelopment())
 
 // Строим приложение.
 var app = builder.Build();
-// Обработчик ошибок
-app.UseErrorHandler();
 
-// В разработке работа с API в веб-интерфейсе.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-app.UseHttpsRedirection();
-// Контролеры.
-app.MapControllers();
+// Запускаем Presentation
+app.RunPresentation();
 
 // Запускаем приложение.
-await app.Services.PrepareInfrastructure(CancellationToken.None);
+await app.Services.RunInfrastructure(CancellationToken.None);
 await app.RunAsync();
