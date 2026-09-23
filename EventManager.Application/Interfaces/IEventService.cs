@@ -8,12 +8,6 @@ namespace EventManager.Application.Interfaces;
 public interface IEventService
 {
     /// <summary>
-    /// Получить все события.
-    /// </summary>
-    /// <returns>Список событий.</returns>
-    IEnumerable<EventOutputData> GetAllEvents();
-
-    /// <summary>
     /// Возвращает отфильтрованный набор с разбивкой по страницам.
     /// </summary>
     /// <param name="filterParams">Параметры фильтра.</param>

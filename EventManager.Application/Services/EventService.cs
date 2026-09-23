@@ -34,13 +34,6 @@ public class EventService(
         throw new EventNotFoundException(id, nameof(id));
     }
 
-    IEnumerable<EventOutputData> IEventService.GetAllEvents()
-        => repository
-            .GetEvents()
-            .AsEnumerable()
-            .Select(x => x.ToOutputData())
-            .ToList();
-
     Task<PaginateResult<EventOutputData>> IEventService.GetEvents(FilterParams? filterParams, PageParams pageParams, CancellationToken cancellation)
         => paginator.PaginateAsync(
             FilterEvents(filterParams),

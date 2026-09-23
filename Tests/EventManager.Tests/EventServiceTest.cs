@@ -116,7 +116,7 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
             .Select(x => x.ToOutputData()).ToListAsync();
 
         // When
-        var actual = eventService.GetAllEvents().ToList();
+        var actual = eventService.GetEvents(null).ToList();
 
         // Then
         Assert.Equal(expected, actual);
@@ -564,7 +564,7 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
         var allValues = eventService
-            .GetAllEvents()
+            .GetEvents(null)
             .ToList();
 
         var expectedTotalCount = allValues.Count;

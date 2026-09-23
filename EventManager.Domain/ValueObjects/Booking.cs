@@ -92,7 +92,7 @@ public class Booking
     /// <returns></returns>
     bool TryChangeStatus(BookingStatus status)
     {
-        if (Status == BookingStatus.Pending || status == BookingStatus.Rejected)
+        if (Status == BookingStatus.Pending)
         {
             Status = status;
             ProcessedAt = DateTime.UtcNow;
