@@ -190,7 +190,7 @@ public class BookingServiceTest(EventManagerTestContext context) : TestObjectBas
     {
         // Given
         var serviceProvider = context.CreateServiceProvider();
-        var service  =  serviceProvider.GetRequiredService<IAppBackgroundService>();
+        var service = serviceProvider.GetRequiredService<IAppBackgroundService>();
 
         // When
         var statusBeforeStart = service.Status;
@@ -349,7 +349,7 @@ public class BookingServiceTest(EventManagerTestContext context) : TestObjectBas
             .SingleAsync(e => e.Id == eventId);
         dbContext.Events.Remove(deletingEvent);
         await dbContext.SaveChangesAsync();
-        
+
         var deletedEvent = await dbContext
             .Events
             .AsNoTracking()

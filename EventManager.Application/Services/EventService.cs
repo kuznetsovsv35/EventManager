@@ -98,7 +98,7 @@ public class EventService(
                 }
                 return null;
             }, cancellation);
-        
+
         return e is not null
             ? e.ToOutputData()
             : throw new EventNotFoundException(id, nameof(id));

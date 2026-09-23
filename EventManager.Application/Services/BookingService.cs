@@ -14,7 +14,7 @@ public class BookingService(
 {
     public async Task<BookingInfo> CreateBookingAsync(Guid eventId, CancellationToken cancellation)
     {
-        var booking = await syncContextFactory.CreateContext<Booking>().ExecuteActionAsync<Booking>(async() =>
+        var booking = await syncContextFactory.CreateContext<Booking>().ExecuteActionAsync<Booking>(async () =>
         {
             if (await events.GetEventAsync(eventId, cancellation) is Event @event)
             {
@@ -31,7 +31,7 @@ public class BookingService(
             }
             throw new EventNotFoundException(eventId, nameof(eventId));
         }, cancellation);
-        
+
         await notifier.BookingCreatedAsync(booking.Id, cancellation);
         return booking.ToInfo();
     }

@@ -19,7 +19,7 @@ public class SchemaTest(TestContainerWrapper<AppDbContext> testContainer) : Data
         const string migrationId = $@"""{nameof(EFMigration.MigrationId)}""";
         const string productVersion = $@"""{nameof(EFMigration.ProductVersion)}""";
         const string tableName = $@"""__EFMigrationsHistory""";
-    
+
         // When
         var expectedMigrations = typeof(AppDbContext).Assembly
             .GetTypes()
@@ -37,9 +37,9 @@ public class SchemaTest(TestContainerWrapper<AppDbContext> testContainer) : Data
 
         var actualMigrations = await query
             .AsAsyncEnumerable()
-            .Select(m => m.MigrationId.Split('_').Last())            
+            .Select(m => m.MigrationId.Split('_').Last())
             .ToListAsync();
-    
+
         // Then
         Assert.Equal(expectedMigrations, actualMigrations);
     }
@@ -50,10 +50,10 @@ public class SchemaTest(TestContainerWrapper<AppDbContext> testContainer) : Data
     {
         // Given
         await ResetDatabase();
-    
+
         // When
         await using var context = CreateDbContext();
-    
+
         // Then
         Assert.True(context.Database.CanConnect());
     }
@@ -87,7 +87,7 @@ public class SchemaTest(TestContainerWrapper<AppDbContext> testContainer) : Data
                 WHERE ""Id"" = {@event.Id}
             ")
             .SingleOrDefaultAsync();
-        
+
         var infoFound = eventFound?.ToOutputData();
 
         Assert.NotNull(infoFound);
@@ -112,7 +112,7 @@ public class SchemaTest(TestContainerWrapper<AppDbContext> testContainer) : Data
 
         var booking = new Booking(@event.Id);
         var infoBooking = booking.ToInfo();
-    
+
         // When
         await using var work = CreateDbContext();
         work.Events.Add(@event);
@@ -142,7 +142,7 @@ public class SchemaTest(TestContainerWrapper<AppDbContext> testContainer) : Data
     public async Task EventsPrimaryKeyTest()
     {
         // Given
-        await ResetDatabase();        
+        await ResetDatabase();
         await using var context = CreateDbContext();
         var db = context.Database;
         var id = Guid.NewGuid();
@@ -150,7 +150,7 @@ public class SchemaTest(TestContainerWrapper<AppDbContext> testContainer) : Data
         var startAt = DateTime.UtcNow;
         var endAt = startAt.AddHours(10);
         var totalSeats = 10;
-    
+
         // When
         await db.ExecuteSqlInterpolatedAsync($@"
             INSERT INTO ""Events""(""Id"", ""Title"", ""StartAt"", ""EndAt"", ""TotalSeats"") 
@@ -163,7 +163,7 @@ public class SchemaTest(TestContainerWrapper<AppDbContext> testContainer) : Data
                 INSERT INTO ""Events""(""Id"", ""Title"", ""StartAt"", ""EndAt"", ""TotalSeats"") 
                 VALUES({id}, {title}, {startAt}, {endAt}, {totalSeats})
             "));
-        
+
         CheckUniqueConstraint(ex, "Events", "Id");
     }
 
@@ -180,12 +180,12 @@ public class SchemaTest(TestContainerWrapper<AppDbContext> testContainer) : Data
             Description = "Description",
             StartAt = DateTime.UtcNow,
             EndAt = DateTime.UtcNow.AddHours(1)
-        };    
-        
+        };
+
         await using var context = CreateDbContext();
         context.Events.Add(@event);
         await context.SaveChangesAsync();
-        
+
         // When
         await using var work = CreateDbContext();
 
@@ -199,7 +199,7 @@ public class SchemaTest(TestContainerWrapper<AppDbContext> testContainer) : Data
             SET ""Title"" = NULL 
             WHERE ""Id"" = {@event.Id};
             "));
-    
+
         var exStartAtNull = await Assert.ThrowsAnyAsync<PostgresException>(async () => await work.Database.ExecuteSqlInterpolatedAsync($@"
             UPDATE ""Events"" 
             SET ""StartAt"" = NULL 
@@ -223,27 +223,27 @@ public class SchemaTest(TestContainerWrapper<AppDbContext> testContainer) : Data
             WHERE ""Id"" = {@event.Id};
             "));
 
-        var exTotalSeats = await Assert.ThrowsAnyAsync<PostgresException>(async() => await work.Database.ExecuteSqlInterpolatedAsync($@"
+        var exTotalSeats = await Assert.ThrowsAnyAsync<PostgresException>(async () => await work.Database.ExecuteSqlInterpolatedAsync($@"
             UPDATE ""Events""
             SET ""TotalSeats"" = 0
             WHERE ""Id"" = {@event.Id}
             "));
 
-        var exReservedCount = await Assert.ThrowsAnyAsync<PostgresException>(async() => await work.Database.ExecuteSqlInterpolatedAsync($@"
+        var exReservedCount = await Assert.ThrowsAnyAsync<PostgresException>(async () => await work.Database.ExecuteSqlInterpolatedAsync($@"
             UPDATE ""Events""
             SET ""ReservedSeats"" = -1
             WHERE ""Id"" = {@event.Id}
             "));
 
         var startAt = DateTime.UtcNow;
-        var exStartEndAt = await Assert.ThrowsAnyAsync<PostgresException>(async() => await work.Database.ExecuteSqlInterpolatedAsync($@"
+        var exStartEndAt = await Assert.ThrowsAnyAsync<PostgresException>(async () => await work.Database.ExecuteSqlInterpolatedAsync($@"
             UPDATE ""Events""
             SET
                 ""StartAt"" = {startAt},
                 ""EndAt"" = {startAt}
             WHERE ""Id"" = {@event.Id}
             "));
-        
+
         // Then        
         CheckNullConstraint(exIdNull, "Events", "Id");
         CheckNullConstraint(exTitleNull, "Events", "Title");
@@ -299,7 +299,7 @@ public class SchemaTest(TestContainerWrapper<AppDbContext> testContainer) : Data
     {
         // Given
         await ResetDatabase();
-        
+
         Event @event = new(10)
         {
             Title = "Event",
@@ -309,33 +309,33 @@ public class SchemaTest(TestContainerWrapper<AppDbContext> testContainer) : Data
         };
 
         var booking = new Booking(@event.Id);
-        
+
         await using var context = CreateDbContext();
         context.Events.Add(@event);
         context.Bookings.Add(booking);
         await context.SaveChangesAsync();
-    
+
         // When
         await using var work = CreateDbContext();
-        var exIdNull = await Assert.ThrowsAnyAsync<PostgresException>(async() => await work.Database.ExecuteSqlInterpolatedAsync($@"
+        var exIdNull = await Assert.ThrowsAnyAsync<PostgresException>(async () => await work.Database.ExecuteSqlInterpolatedAsync($@"
             UPDATE ""Bookings""
             SET ""Id"" = NULL
             WHERE ""Id"" = {booking.Id}
             "));
 
-        var exEventIdNull = await Assert.ThrowsAnyAsync<PostgresException>(async() => await work.Database.ExecuteSqlInterpolatedAsync($@"
+        var exEventIdNull = await Assert.ThrowsAnyAsync<PostgresException>(async () => await work.Database.ExecuteSqlInterpolatedAsync($@"
             UPDATE ""Bookings""
             SET ""EventId"" = NULL
             WHERE ""Id"" = {booking.Id}
             "));
-        
-        var exStatusNull = await Assert.ThrowsAnyAsync<PostgresException>(async() => await work.Database.ExecuteSqlInterpolatedAsync($@"
+
+        var exStatusNull = await Assert.ThrowsAnyAsync<PostgresException>(async () => await work.Database.ExecuteSqlInterpolatedAsync($@"
             UPDATE ""Bookings""
             SET ""Status"" = NULL
             WHERE ""Id"" = {booking.Id}
             "));
 
-        var exCreatedAtNull = await Assert.ThrowsAnyAsync<PostgresException>(async() => await work.Database.ExecuteSqlInterpolatedAsync($@"
+        var exCreatedAtNull = await Assert.ThrowsAnyAsync<PostgresException>(async () => await work.Database.ExecuteSqlInterpolatedAsync($@"
             UPDATE ""Bookings""
             SET ""CreatedAt"" = NULL
             WHERE ""Id"" = {booking.Id}
@@ -373,7 +373,7 @@ public class SchemaTest(TestContainerWrapper<AppDbContext> testContainer) : Data
         await context.SaveChangesAsync();
 
         DbUpdateException? exBook2 = null;
-    
+
         // When
         {
             await using var work = CreateDbContext();
@@ -383,7 +383,7 @@ public class SchemaTest(TestContainerWrapper<AppDbContext> testContainer) : Data
         {
             await using var work = CreateDbContext();
             work.Bookings.Add(booking2);
-            exBook2 = await Assert.ThrowsAnyAsync<DbUpdateException>(async() => await work.SaveChangesAsync());            
+            exBook2 = await Assert.ThrowsAnyAsync<DbUpdateException>(async () => await work.SaveChangesAsync());
         }
 
         // Then
@@ -400,7 +400,7 @@ public class SchemaTest(TestContainerWrapper<AppDbContext> testContainer) : Data
         Assert.Equal(1, bookingCount);
         CheckForeignKey(exBook2?.InnerException as PostgresException, "Booking", "FK_Bookings_Events_EventId");
     }
-    
+
     void CheckUniqueConstraint(PostgresException? exception, string table, string column)
     {
         Assert.Equal(PostgresErrorCodes.UniqueViolation, exception?.SqlState);

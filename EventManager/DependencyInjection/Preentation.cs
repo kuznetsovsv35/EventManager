@@ -4,7 +4,7 @@ using EventManager.Presentation.Middleware;
 namespace EventManager.DependencyInjection;
 
 public static partial class DependencyInjection
-{    
+{
     public static IServiceCollection ConfigurePresentation(this IServiceCollection services)
     {
         services.AddControllers().AddApplicationPart(Assembly.Load($"{nameof(EventManager)}.{nameof(Presentation)}"));
@@ -29,7 +29,7 @@ public static partial class DependencyInjection
             app.UseSwagger();
             app.UseSwaggerUI();
         }
-        
+
         // Редирект
         app.UseHttpsRedirection();
         // Контролеры.

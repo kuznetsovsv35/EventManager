@@ -13,7 +13,7 @@ public class EventConfiguration : IEntityTypeConfiguration<Event>
             t.HasCheckConstraint("CK_Events_Seats", @$"""{nameof(Event.TotalSeats)}"" > 0 and ""{nameof(Event.ReservedSeats)}"" >= 0");
             t.HasCheckConstraint("CK_Events_StartEnd", @$"""{nameof(Event.StartAt)}"" < ""{nameof(Event.EndAt)}""");
         });
- 
+
         builder.Property(e => e.Id).IsRequired().ValueGeneratedNever();
         builder.Property(e => e.Title).IsRequired().HasMaxLength(200);
         builder.Property(e => e.StartAt).IsRequired();
@@ -21,7 +21,7 @@ public class EventConfiguration : IEntityTypeConfiguration<Event>
         builder.Property(e => e.TotalSeats).IsRequired();
         builder.Property(e => e.ReservedSeats).IsRequired().HasDefaultValue(0);
         builder.Ignore(e => e.AvailableSeats);
-        
+
         builder.HasKey(e => e.Id);
         builder.HasIndex(e => e.StartAt).IsDescending().HasDatabaseName("IX_Events_StartAt_Desc");
     }

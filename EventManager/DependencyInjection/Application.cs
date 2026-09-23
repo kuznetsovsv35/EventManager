@@ -15,5 +15,5 @@ public static partial class DependencyInjection
         services.AddScoped<IBookingService, BookingService>();
         return services;
     }
-    
+
 }

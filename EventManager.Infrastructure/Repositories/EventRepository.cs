@@ -7,12 +7,12 @@ using EventManager.Database;
 namespace EventManager.Infrastructure.Repositories;
 
 public class EventRepository(AppDbContext dbContext) : IEventRepository
-{    
+{
     IQueryable<Event> IEventRepository.GetEvents(Expression<Func<Event, bool>>? filter)
     {
         if (filter is null)
             return dbContext.Events.AsNoTracking().OrderByDescending(e => e.StartAt);
-     
+
         return dbContext.Events.AsNoTracking().Where(filter).OrderByDescending(e => e.StartAt);
     }
 
@@ -25,7 +25,7 @@ public class EventRepository(AppDbContext dbContext) : IEventRepository
         await dbContext.SaveChangesAsync(cancellation);
         return @event;
     }
-    
+
     async Task<Event?> IEventRepository.UpdateEventAsync(Event @event, CancellationToken cancellation)
     {
         dbContext.Events.Update(@event);

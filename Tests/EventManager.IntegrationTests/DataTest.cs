@@ -7,7 +7,7 @@ public abstract class DataTest(TestContainerWrapper<AppDbContext> testContainer)
 {
     protected const string Category_Filters = "Filters";
     protected const string Category_Paginator = "Paginator";
-    
+
     public async Task InitializeAsync()
     {
         await ResetDatabase();

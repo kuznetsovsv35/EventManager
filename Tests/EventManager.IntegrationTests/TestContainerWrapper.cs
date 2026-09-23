@@ -14,14 +14,14 @@ public class TestContainerWrapper<T> : IAsyncLifetime where T : DbContext
             .WithDatabase(DatabaseName)
             .WithUsername(UserName)
             .WithPassword(Password)
-            .Build();       
+            .Build();
 
     public Task DisposeAsync()
         => _postgres.DisposeAsync().AsTask();
 
     public Task InitializeAsync()
         => _postgres.StartAsync();
-    
+
     public T CreateDbContext()
     {
         var options = new DbContextOptionsBuilder<T>()

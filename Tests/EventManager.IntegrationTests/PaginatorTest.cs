@@ -53,4 +53,4 @@ public class PaginatorTest(TestContainerWrapper<AppDbContext> testContainer) : D
         Assert.Equal(expectedPageSize, pageResult.Values.Count());
         Assert.Equal(expectedValues, pageResult.Values);
     }
-}    
+}

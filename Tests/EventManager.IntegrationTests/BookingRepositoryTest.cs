@@ -7,7 +7,7 @@ using EventManager.Infrastructure.Repositories;
 namespace EventManager.IntegrationTests;
 
 [Collection(nameof(TestContainersCollection))]
-public class BookingRepositoryTest(TestContainerWrapper<AppDbContext> testContainer ) : DatabaseTestBase(testContainer)
+public class BookingRepositoryTest(TestContainerWrapper<AppDbContext> testContainer) : DatabaseTestBase(testContainer)
 {
     [Trait(Category, Category_Repositories)]
     [Fact]
@@ -46,7 +46,7 @@ public class BookingRepositoryTest(TestContainerWrapper<AppDbContext> testContai
         Assert.Equal(infoEvent, bookingFound.Event.ToOutputData());
         Assert.Equal(infoBooking, bookingFound.ToInfo());
     }
-    
+
     [Trait(Category, Category_Repositories)]
     [Fact]
     public async Task UpdateBooking_Success()

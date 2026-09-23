@@ -53,7 +53,7 @@ public class EventRepositoryTest(TestContainerWrapper<AppDbContext> testContaine
             StartAt = DateTime.UtcNow,
             EndAt = DateTime.UtcNow.AddHours(1)
         };
-        
+
         await using var context = CreateDbContext();
         context.Events.Add(@event);
         await context.SaveChangesAsync();
@@ -68,7 +68,7 @@ public class EventRepositoryTest(TestContainerWrapper<AppDbContext> testContaine
         modified.EndAt = @event.EndAt.AddHours(2);
         await workRepository.UpdateEventAsync(modified, CancellationToken.None);
         var infoModified = modified.ToOutputData();
-    
+
         // Then
         await using var verifyContext = CreateDbContext();
         IEventRepository verifyRepository = new EventRepository(verifyContext);
@@ -93,7 +93,7 @@ public class EventRepositoryTest(TestContainerWrapper<AppDbContext> testContaine
             StartAt = DateTime.UtcNow,
             EndAt = DateTime.UtcNow.AddHours(1)
         };
-        
+
         await using var context = CreateDbContext();
         context.Events.Add(@event);
         await context.SaveChangesAsync();
@@ -104,7 +104,7 @@ public class EventRepositoryTest(TestContainerWrapper<AppDbContext> testContaine
         IEventRepository workRepository = new EventRepository(workContext);
         var deleting = await workRepository.GetEventAsync(@event.Id, CancellationToken.None)!;
         var deleted = await workRepository.DeleteEventAsync(@event.Id, CancellationToken.None);
-    
+
         // Then
         await using var verifyContext = CreateDbContext();
         IEventRepository verifyRepository = new EventRepository(verifyContext);

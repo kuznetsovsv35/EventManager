@@ -16,7 +16,7 @@ public class BookingRepository(AppDbContext dbContext) : IBookingRepository
         dbContext.Bookings.Add(booking);
         await dbContext.SaveChangesAsync(cancellation);
     }
-    
+
     Task<Booking?> IBookingRepository.GetBookingAsync(Guid id, CancellationToken cancellation)
         => dbContext.Bookings.AsNoTracking().Include(b => b.Event).SingleOrDefaultAsync(b => b.Id == id, cancellation);
 
@@ -45,7 +45,7 @@ public class BookingRepository(AppDbContext dbContext) : IBookingRepository
             .WithCancellation(cancellation);
 
         var chunk = new List<Booking>(chunkSize);
-        await foreach(var item in pendingBookings)
+        await foreach (var item in pendingBookings)
         {
             chunk.Add(item);
             if (chunk.Count == chunkSize)
@@ -55,7 +55,7 @@ public class BookingRepository(AppDbContext dbContext) : IBookingRepository
             }
         }
 
-        if (chunk.Count >0 )
+        if (chunk.Count > 0)
             yield return chunk;
     }
 }

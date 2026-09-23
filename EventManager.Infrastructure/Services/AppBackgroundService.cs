@@ -87,12 +87,12 @@ public class AppBackgroundService(
     }
 
     Task RunPollingTimer(CancellationToken cancellation)
-        => Task.Factory.StartNew(async() =>
+        => Task.Factory.StartNew(async () =>
         {
             var timer = new PeriodicTimer(PollingInterval);
             try
             {
-                while(!cancellation.IsCancellationRequested)
+                while (!cancellation.IsCancellationRequested)
                     if (await timer.WaitForNextTickAsync(cancellation))
                     {
                         if (Interlocked.CompareExchange(ref _isProcessing, 1, 0) == 0)
@@ -102,7 +102,7 @@ public class AppBackgroundService(
                         break;
 
             }
-            catch (OperationCanceledException cancelled) when (cancelled.CancellationToken.IsCancellationRequested) {}
+            catch (OperationCanceledException cancelled) when (cancelled.CancellationToken.IsCancellationRequested) { }
             finally
             {
                 timer.Dispose();
@@ -113,7 +113,7 @@ public class AppBackgroundService(
     {
         if (await notifier.WaitBookingCreationAsync(cancellation) is null)
             return;
-        
+
         cancellation.ThrowIfCancellationRequested();
         if (Interlocked.CompareExchange(ref _isProcessing, 1, 0) == 0)
             await ProcessBookingsAsync(cancellation);

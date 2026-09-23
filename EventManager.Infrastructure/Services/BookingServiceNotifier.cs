@@ -6,11 +6,11 @@ namespace EventManager.Infrastructure.Services;
 public class BookingServiceNotifier : IBookingServiceNotifier
 {
     readonly Channel<Guid> _channel = Channel.CreateBounded<Guid>(new BoundedChannelOptions(1)
-        {
-            FullMode = BoundedChannelFullMode.DropOldest,
-            SingleWriter = false,
-            SingleReader = true
-        });
+    {
+        FullMode = BoundedChannelFullMode.DropOldest,
+        SingleWriter = false,
+        SingleReader = true
+    });
 
     public Task BookingCreatedAsync(Guid bookingId, CancellationToken cancellation)
         => _channel.Writer.WriteAsync(bookingId, cancellation).AsTask();
@@ -21,7 +21,7 @@ public class BookingServiceNotifier : IBookingServiceNotifier
         {
             List<Guid> items = new(_channel.Reader.Count);
 
-            while(_channel.Reader.TryRead(out var item))
+            while (_channel.Reader.TryRead(out var item))
             {
                 items.Add(item);
                 cancellation.ThrowIfCancellationRequested();

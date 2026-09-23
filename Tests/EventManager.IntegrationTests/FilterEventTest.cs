@@ -268,5 +268,5 @@ public class FilterEventTest(TestContainerWrapper<AppDbContext> testContainer) :
                 if (endAt.HasValue)
                     Assert.True(item.EndAt < endAt);
             });
-    }    
+    }
 }

@@ -566,7 +566,7 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
         var allValues = eventService
             .GetAllEvents()
             .ToList();
-        
+
         var expectedTotalCount = allValues.Count;
 
         var expectedValues = allValues
