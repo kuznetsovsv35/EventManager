@@ -18,7 +18,7 @@ public class BookingRepository(AppDbContext dbContext) : IBookingRepository
     }
     
     Task<Booking?> IBookingRepository.GetBookingAsync(Guid id, CancellationToken cancellation)
-        => dbContext.Bookings.AsNoTracking().Include(b => b.Event).SingleOrDefaultAsync(cancellation);
+        => dbContext.Bookings.AsNoTracking().Include(b => b.Event).SingleOrDefaultAsync(b => b.Id == id, cancellation);
 
     async Task IBookingRepository.UpdateBookingStatusAsync(Booking booking, CancellationToken cancellation)
     {
