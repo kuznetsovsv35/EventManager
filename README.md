@@ -45,10 +45,18 @@
 2. Реализованы репозитории для Event и Booking с CRUD-операциями (интерфейсы IEventRepository и IBookingRepository).
 3. Реализованы интеграционные тесты с использованием PostgreSQL в Testcontainers.
 
+## Спринт 7.
+1. Приложение разбито на сборки: Domain, Application, Database, Infrastructure, Presentation и запускаемый модуль (точка входа).
+2. Бизнес-логика перенесена из контроллеров и сервисов в Application и Domain, Presentation оставлена HTTP-обвязка.
+3. Реализация интерфейсов, зависящие от технологий (фоновый процесс, доступ к БД, репозитории) размещены в сборке Infrastructure и Database.
+4. DI контейнер формируется в запускаемой сборке, используя методы расширения, разделенные на функциональные блоки.
+5. Зависимости тестов обновлены и зависят только от необходимых сборок.
+6. Тесты вынесены в отдельную папку Tests.
+
 # Сборка и запуск проекта.
 1. Клонирование репозитория:
    ```bash
-   git clone -b sprint-6 https://github.com/kuznetsovsv35/EventManager.git
+   git clone -b sprint-7 https://github.com/kuznetsovsv35/EventManager.git
    ```
 2. Перейти в паку "EventManager":
    ```bash
@@ -143,12 +151,12 @@
    
    # Создание миграция
    ```bash
-   dotnet ef migrations add InitialCreate --project EventManager
+   dotnet ef migrations add InitialCreate -p EventManager.Database -s EventManager
    ```
 
    # Обновление БД.
    ```bash
-   dotnet ef database update --project EventManager
+   dotnet ef database update -p EventManager.Database -s EventManager
    ```
 
    Примечание: поскольку миграция уже создана и хранится в проектном репозитории, после клонирования нужно только обновить БД.
@@ -218,5 +226,27 @@ pageSize|int|Количество событий на запрошенной с�
 |status|BookingStatus{$int}|Текущий статус брони: 0-ожидание обработки, 1-подтверждена, 2-отклонена.|
 |createdAt|string($date-time)|Дата/время создания брони.|
 |processedAt|string($date-time)|Дата/время обработки брони.|
+
+# Описание структуры решения.
+В таблице 8 приведено описание назначения сборок решения.
+
+Таблица 8. Проекты (сборки) решения.
+| Имя проекта | Пространства имен | Описание |
+| --- | --- | --- |
+| EventManager.Domain | *.ValueObjects | Реализованы основные сущности БЛ (событие и бронь). |
+| EventManager.Domain | *.Exceptions | Исключения, генерируемые в ходе проверки действий бизнес-логики. |
+| EventManager.Common | *.Interfaces | Объекты общего назначения (фильтры, синхронизация) |
+| EventManager.Common | *.Private | Вспомогательные классы для реализации интерфейсов общего назначения. |
+| EventManager.Common | *.Services | Реализация интерфейсов общего назначения. |
+| EventManager.Database | *.Configuration | Описание модели схемы БД. |
+| EventManager.Database | *.Migrations | Миграции модели схемы БД. |
+| EventManager.Database | * | Класс контекста БД для выполнения операций с БД. |
+| EventManager.Infrastructure | *.Repositories | Реализация интерфейсов репозиториев на основе БД. |
+| EventManager.Infrastructure | *.Services | Реализация интерфейсов бизнес-логики, требующих частных технологий. |
+| EventManager.Application | *.DataTransferObject | Реализация объектов входных параметров запросов и выходных параметров ответов. |
+| EventManager.Application | *.Interfaces | Интерфейсы взаимодействия с бизнес логикой и доступа к данным через репозитории. |
+| EventManager.Application | *.services | Реализация моделей взаимодействия с бизнес логикой. |
+| EventManager.Application | *.Validators | Реализация ограничений и правил применения входных параметров запросов. |
+| EventManager | * | Сборка DI контейнера из слоев и запуск процесса веб-приложения. |
 
 ## Продолжение следует...

@@ -1,0 +1,37 @@
+using EventManager.Domain.ValueObjects;
+
+namespace EventManager.Application.DataTransferObjects;
+
+/// <summary>
+/// Информации бронирования.
+/// </summary>
+public class BookingInfo
+{
+    public required Guid Id { get; init; }
+
+    public required Guid EventId { get; init; }
+
+    public required BookingStatus Status { get; init; }
+
+    public required DateTime CreatedAt { get; init; }
+
+    public DateTime? ProcessedAt { get; init; }
+
+    public override bool Equals(object? obj)
+    {
+        if (ReferenceEquals(this, obj))
+            return true;
+
+        if (obj is BookingInfo info)
+            return CreatedAt.ToString() == info.CreatedAt.ToString()
+                && EventId == info.EventId
+                && Id == info.Id
+                && ProcessedAt?.ToString() == info.ProcessedAt?.ToString()
+                && Status == info.Status;
+
+        return base.Equals(obj);
+    }
+
+    public override int GetHashCode()
+        => Id.GetHashCode();
+}

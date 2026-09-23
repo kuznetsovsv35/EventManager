@@ -1,0 +1,27 @@
+namespace EventManager.Application.DataTransferObjects;
+
+/// <summary>
+/// Выходные данные запросов GET.
+/// </summary>
+/// <param name="source"></param>
+public class EventOutputData : EventInputData
+{
+    public Guid Id { get; internal init; }
+
+    public int AvailableSeats { get; internal set; }
+
+    public override bool Equals(object? obj)
+    {
+        if (ReferenceEquals(this, obj))
+            return true;
+
+        if (obj is EventOutputData outputData)
+            return Id == outputData.Id
+                && AvailableSeats == outputData.AvailableSeats
+                && base.Equals((EventInputData)obj);
+
+        return base.Equals(obj);
+    }
+
+    public override int GetHashCode() => Id.GetHashCode();
+}

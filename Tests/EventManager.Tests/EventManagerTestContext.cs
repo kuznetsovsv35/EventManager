@@ -1,0 +1,59 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Moq;
+using EventManager.Domain.ValueObjects;
+using EventManager.Common.Interfaces;
+using EventManager.Common.Services;
+using EventManager.Application.Interfaces;
+using EventManager.Application.Services;
+using EventManager.Infrastructure.Services;
+using EventManager.Infrastructure.Repositories;
+using EventManager.Database;
+
+namespace EventManager.Tests;
+
+/// <summary>
+/// Контекст методов теста.
+/// </summary>
+public class EventManagerTestContext
+{
+    public IServiceProvider ServiceProvider { get; }
+
+    public async Task<Guid> GetRandomEventId(CancellationToken cancellation)
+    {
+        await using var scope = ServiceProvider.CreateAsyncScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        int eventCount = await dbContext.Events.AsNoTracking().CountAsync<Event>(cancellation);
+        var eventIndex = Random.Shared.Next(eventCount);
+        return (await dbContext.Events.AsNoTracking().Skip(eventIndex).FirstAsync(cancellation)).Id;
+    }
+    readonly IServiceCollection _services;
+
+    public EventManagerTestContext()
+    {
+        _services = new ServiceCollection()
+            .AddSingleton<IBookingServiceNotifier, BookingServiceNotifier>()
+            .AddSingleton(_ => new TestAppDbContext($"Test_{Guid.NewGuid()}"))
+            .AddScoped(provider => provider.GetRequiredService<TestAppDbContext>().CreateNewInstance())
+            .AddScoped<IEventRepository, EventRepository>()
+            .AddScoped<IBookingRepository, BookingRepository>()
+            .AddScoped<IFilter<Event>, FilterService<Event>>()
+            .AddScoped<IPaginator<Event>, PaginateService<Event>>()
+            .AddScoped<IEventService, EventService>()
+            .AddScoped<IBookingService, BookingService>()
+            .AddSingleton(_ => LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<AppBackgroundService>())
+            .AddSingleton(provider =>
+            {
+                var mock = new Mock<IServiceScopeFactory>();
+                mock.Setup(x => x.CreateScope()).Returns(provider.CreateScope());
+                return mock.Object;
+            })
+            .AddSingleton<IAppBackgroundService, AppBackgroundService>()
+            .AddSingleton<ISyncContextFactory, SyncContextFactory>();
+        ServiceProvider = CreateServiceProvider();
+    }
+
+    internal IServiceProvider CreateServiceProvider() => _services.BuildServiceProvider();
+    internal AsyncServiceScope CreateAsyncScope() => ServiceProvider.CreateAsyncScope();
+}
