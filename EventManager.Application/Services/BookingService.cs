@@ -22,11 +22,16 @@ public class BookingService(
         UserInfo userInfo,
         CancellationToken cancellation)
     {
+        await CheckUserActiveBookingsAsync(userInfo, cancellation);
+
         var booking = await syncContextFactory.CreateContext<Booking>().ExecuteActionAsync<Booking>(async () =>
         {
             if (await events.GetEventAsync(eventId, cancellation) is Event @event)
             {
                 cancellation.ThrowIfCancellationRequested();
+
+                if (DateTime.UtcNow > @event.StartAt)
+                    throw new BookingStartedException(eventId);
 
                 if (@event.TryReserveSeats())
                 {
@@ -50,5 +55,33 @@ public class BookingService(
             return booking.ToInfo();
 
         throw new BookingNotFoundException(bookingId, nameof(bookingId));
+    }
+
+    public async Task<BookingInfo> CancelBookingAsync(Guid bookingId, UserInfo userInfo, CancellationToken cancellation)
+    {
+        if (await bookings.GetBookingAsync(bookingId, cancellation) is not Booking booking)
+            throw new BookingNotFoundException(bookingId, nameof(bookingId));
+        
+        CheckUserRole(booking, userInfo);
+
+        if (!booking.Cancel())
+            throw new InvalidBookingOperationException(booking.Id, booking.Status);
+        
+        await bookings.UpdateBookingStatusAsync(booking, cancellation);
+        return booking.ToInfo();
+    }
+
+    async Task CheckUserActiveBookingsAsync(UserInfo userInfo, CancellationToken cancellation)
+    {
+        if (await bookings.GetUserActiveBookingCountAsync(userInfo.Id) is int activeBookings && activeBookings > AavailableBookingsPerUser)
+            throw new UserBookingLimitException(userInfo.Login, activeBookings, AavailableBookingsPerUser);
+    }
+
+    void CheckUserRole(Booking booking, UserInfo userInfo)
+    {
+        if (userInfo.Role == UserRole.Admin || booking.UserId == userInfo.Id)
+            return;
+
+        throw new AccessDeniedException(userInfo.Login);
     }
 }

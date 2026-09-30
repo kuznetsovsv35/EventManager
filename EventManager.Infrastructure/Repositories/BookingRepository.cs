@@ -23,7 +23,7 @@ public class BookingRepository(AppDbContext dbContext) : IBookingRepository
     async Task IBookingRepository.UpdateBookingStatusAsync(Booking booking, CancellationToken cancellation)
     {
         dbContext.Bookings.Update(booking);
-        if (booking.Status == BookingStatus.Rejected && booking.Event is not null)
+        if (booking is { Status: BookingStatus.Rejected or BookingStatus.Cancelled } && booking.Event is not null)
         {
             booking.Event.ReleaseSeats();
             dbContext.Events.Update(booking.Event);

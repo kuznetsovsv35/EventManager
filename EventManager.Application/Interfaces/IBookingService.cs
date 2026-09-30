@@ -22,4 +22,6 @@ public interface IBookingService
     /// <param name="bookingId"></param>
     /// <returns></returns>
     Task<BookingInfo> GetBookingByIdAsync(Guid bookingId, CancellationToken cancellation);
+
+    Task<BookingInfo> CancelBookingAsync(Guid bookingId, UserInfo userInfo, CancellationToken cancellation);
 }

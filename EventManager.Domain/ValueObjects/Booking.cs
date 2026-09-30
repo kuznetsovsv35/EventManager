@@ -19,6 +19,11 @@ public enum BookingStatus
     /// Отклоненная бронь.
     /// </summary>
     Rejected,
+
+    /// <summary>
+    /// Отменена пользователем.
+    /// </summary>
+    Cancelled,
 }
 
 /// <summary>
@@ -92,16 +97,23 @@ public class Booking
     public bool Reject() => TryChangeStatus(BookingStatus.Rejected);
 
     /// <summary>
+    /// Отменяет бронь.
+    /// </summary>
+    /// <returns></returns>
+    public bool Cancel() => TryChangeStatus(BookingStatus.Cancelled);
+
+    /// <summary>
     /// Попытка изменить статус брони.
     /// </summary>
     /// <param name="status"></param>
     /// <returns></returns>
     bool TryChangeStatus(BookingStatus status)
     {
-        if (Status == BookingStatus.Pending)
+        if (this is { Status: BookingStatus.Pending or BookingStatus.Cancelled })
         {
             Status = status;
-            ProcessedAt = DateTime.UtcNow;
+            if (Status == BookingStatus.Pending)
+                ProcessedAt = DateTime.UtcNow;
             return true;
         }
         return false;
