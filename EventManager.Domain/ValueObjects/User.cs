@@ -27,4 +27,6 @@ public class User
         Id = Guid.NewGuid();
         Login = login;
     }
+
+    User() { }
 }

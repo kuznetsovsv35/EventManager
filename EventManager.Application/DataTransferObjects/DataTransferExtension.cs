@@ -1,6 +1,4 @@
-using System.ComponentModel.DataAnnotations;
 using EventManager.Domain.ValueObjects;
-using EventManager.Application.Validators;
 
 namespace EventManager.Application.DataTransferObjects;
 
@@ -43,12 +41,6 @@ public static class DataTransferExtension
             AvailableSeats = e.AvailableSeats,
         };
 
-    public static void Check(this EventInputData data)
-    {
-        if (EventInputDataValidationAttribute.Check(data).FirstOrDefault() is ValidationResult result)
-            throw new ValidationException(result, null, data);
-    }
-
     public static BookingInfo ToInfo(this Booking booking)
         => new()
         {
@@ -57,5 +49,20 @@ public static class DataTransferExtension
             Status = booking.Status,
             CreatedAt = booking.CreatedAt,
             ProcessedAt = booking.ProcessedAt,
+        };
+
+    public static User FromRequest(this RegisterUserRequest request, Func<string?, string?> encryptPassword)
+        => new(request.Login)
+        {
+            Role = request.Role,
+            Password =  request.Password is null ? null : encryptPassword(request.Password),
+        };
+        
+    public static UserInfo ToInfo(this User user)
+        => new()
+        {
+            Id = user.Id,
+            Login = user.Login,
+            Role = user.Role,
         };
 }
