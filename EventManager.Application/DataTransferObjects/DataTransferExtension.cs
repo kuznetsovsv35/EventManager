@@ -55,9 +55,9 @@ public static class DataTransferExtension
         => new(request.Login)
         {
             Role = request.Role,
-            Password =  request.Password is null ? null : encryptPassword(request.Password),
+            Password = request.Password is null ? null : encryptPassword(request.Password),
         };
-        
+
     public static UserInfo ToInfo(this User user)
         => new()
         {

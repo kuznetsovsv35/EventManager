@@ -9,7 +9,7 @@ public static class Validation
     {
         if (obj.Validate().FirstOrDefault() is ValidationResult result)
             throw new ValidationException(result, null, obj);
-        
+
     }
 
     public static IReadOnlyCollection<ValidationResult> Validate<T>(this T obj) where T : ValidatingObject
@@ -21,5 +21,5 @@ public static class Validation
             return [];
 
         return results;
-    }    
+    }
 }

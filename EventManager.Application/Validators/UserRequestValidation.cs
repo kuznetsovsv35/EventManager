@@ -7,7 +7,7 @@ namespace EventManager.Application.Validators;
 public class UserRequestValidationAttribute : ValidationBaseAttribute
 {
     public UserRequestValidationAttribute(string errorMessage) : base(errorMessage) { }
-    
+
     public UserRequestValidationAttribute() : base(typeof(UserRequest)) { }
 
     protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)

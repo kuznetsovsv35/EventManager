@@ -16,7 +16,7 @@ public class UserInfo
         if (ReferenceEquals(this, obj))
             return true;
 
-        if (obj is UserInfo { Id: Guid id, Login: string login, Role: UserRole role})
+        if (obj is UserInfo { Id: Guid id, Login: string login, Role: UserRole role })
             return Id == id && login == Login && role == Role;
 
         return base.Equals(obj);
