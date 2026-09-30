@@ -12,7 +12,15 @@ public class BookingService(
     IEventRepository events,
     IBookingServiceNotifier notifier) : IBookingService
 {
-    public async Task<BookingInfo> CreateBookingAsync(Guid eventId, CancellationToken cancellation)
+    public Task<BookingInfo> CreateBookingAsync(
+        Guid eventId, 
+        CancellationToken cancellation)
+        => CreateBookingAsync(eventId, new(){ Id = Guid.Empty }, cancellation);
+
+    public async Task<BookingInfo> CreateBookingAsync(
+        Guid eventId, 
+        UserInfo userInfo,
+        CancellationToken cancellation)
     {
         var booking = await syncContextFactory.CreateContext<Booking>().ExecuteActionAsync<Booking>(async () =>
         {
@@ -22,7 +30,7 @@ public class BookingService(
 
                 if (@event.TryReserveSeats())
                 {
-                    var booking = new Booking(eventId);
+                    var booking = new Booking(eventId, userInfo.Id);
                     await bookings.AddBookingAsync(booking, cancellation);
                     await events.UpdateEventAsync(@event, cancellation);
                     return booking;

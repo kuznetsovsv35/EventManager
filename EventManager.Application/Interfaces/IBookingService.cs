@@ -11,8 +11,10 @@ public interface IBookingService
     /// Создать бронь для события.
     /// </summary>
     /// <param name="eventId">Идентификатор события.</param>
+    /// <param name="cancellation"></param>
     /// <returns></returns>
     Task<BookingInfo> CreateBookingAsync(Guid eventId, CancellationToken cancellation);
+    Task<BookingInfo> CreateBookingAsync(Guid eventId, UserInfo userInfo, CancellationToken cancellation);
 
     /// <summary>
     /// Получить бронь по идентификатору.

@@ -42,6 +42,11 @@ public class Booking
     public Event Event { get; private set; } = null!;
 
     /// <summary>
+    /// Пользователь, создавший бронь.
+    /// </summary>
+    public Guid UserId { get; private set; }
+
+    /// <summary>
     /// Статус бронирования.
     /// </summary>
     public BookingStatus Status { get; private set; }
@@ -65,10 +70,11 @@ public class Booking
     /// Конструктор события.
     /// </summary>
     /// <param name="eventId"></param> 
-    public Booking(Guid eventId)
+    public Booking(Guid eventId, Guid userId)
     {
         Id = Guid.NewGuid();
         EventId = eventId;
+        UserId = userId;
         Status = BookingStatus.Pending;
         CreatedAt = DateTime.UtcNow;
     }
