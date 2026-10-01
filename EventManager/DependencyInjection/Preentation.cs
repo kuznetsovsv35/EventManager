@@ -7,6 +7,7 @@ public static partial class DependencyInjection
 {
     public static IServiceCollection ConfigurePresentation(this IServiceCollection services)
     {
+        services.AddHttpContextAccessor();
         services.AddControllers().AddApplicationPart(Assembly.Load($"{nameof(EventManager)}.{nameof(Presentation)}"));
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
