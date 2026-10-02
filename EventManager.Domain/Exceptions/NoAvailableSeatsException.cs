@@ -1,14 +1,15 @@
+using EventManager.Domain.ValueObjects;
+
 namespace EventManager.Domain.Exceptions;
 
 /// <summary>
 /// Исключение - нет свободных мест на событии.
 /// </summary>
-public class NoAvailableSeatsException : Exception
+public class NoAvailableSeatsException : InvalidEventOperationException
 {
-    public Guid EventId { get; }
+    public NoAvailableSeatsException(Event @event, string login, UserRole role,  Exception? innerException)
+        : base("Нет свободных мест на данном событии", @event, login, role, innerException) { }
 
-    public NoAvailableSeatsException(Guid eventId, Exception? innerException)
-        : base("Нет свободных мест на данном событии", innerException) => EventId = eventId;
-
-    public NoAvailableSeatsException(Guid eventId) : this(eventId, null) { }
+    public NoAvailableSeatsException(Event @event, string login, UserRole role) 
+        : this(@event, login, role, null) {  }
 }

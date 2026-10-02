@@ -12,6 +12,8 @@ public class BookingService(
     IEventRepository events,
     IBookingServiceNotifier notifier) : IBookingService
 {
+    const int AvailableBookingsPerUser = 10;
+
     public Task<BookingInfo> CreateBookingAsync(
         Guid eventId, 
         CancellationToken cancellation)
@@ -31,7 +33,7 @@ public class BookingService(
                 cancellation.ThrowIfCancellationRequested();
 
                 if (DateTime.UtcNow > @event.StartAt)
-                    throw new BookingStartedException(eventId);
+                    throw new StartedEventBookingException(@event, userInfo.Login, userInfo.Role);
 
                 if (@event.TryReserveSeats())
                 {
@@ -40,7 +42,7 @@ public class BookingService(
                     await events.UpdateEventAsync(@event, cancellation);
                     return booking;
                 }
-                throw new NoAvailableSeatsException(eventId);
+                throw new NoAvailableSeatsException(@event, userInfo.Login, userInfo.Role);
             }
             throw new EventNotFoundException(eventId, nameof(eventId));
         }, cancellation);
@@ -65,7 +67,7 @@ public class BookingService(
         CheckUserRole(booking, userInfo);
 
         if (!booking.Cancel())
-            throw new InvalidBookingOperationException(booking.Id, booking.Status);
+            throw new InvalidBookingOperation("Неверный статус брони для операции отмены", booking, userInfo.Login, userInfo.Role);
         
         await bookings.UpdateBookingStatusAsync(booking, cancellation);
         return booking.ToInfo();
@@ -73,8 +75,8 @@ public class BookingService(
 
     async Task CheckUserActiveBookingsAsync(UserInfo userInfo, CancellationToken cancellation)
     {
-        if (await bookings.GetUserActiveBookingCountAsync(userInfo.Id) is int activeBookings && activeBookings > AavailableBookingsPerUser)
-            throw new UserBookingLimitException(userInfo.Login, activeBookings, AavailableBookingsPerUser);
+        if (await bookings.GetUserActiveBookingCountAsync(userInfo.Id) is int activeBookings && activeBookings > AvailableBookingsPerUser)
+            throw new UserOperationException("Превышение максимального числа активных броней для одного пользователя", userInfo.Login, userInfo.Role);
     }
 
     void CheckUserRole(Booking booking, UserInfo userInfo)
@@ -82,6 +84,6 @@ public class BookingService(
         if (userInfo.Role == UserRole.Admin || booking.UserId == userInfo.Id)
             return;
 
-        throw new AccessDeniedException(userInfo.Login);
+        throw new ForbiddenException(userInfo.Login);
     }
 }
