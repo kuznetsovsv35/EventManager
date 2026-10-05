@@ -3,6 +3,7 @@ using EventManager.Domain.Exceptions;
 using EventManager.Common.Interfaces;
 using EventManager.Application.Interfaces;
 using EventManager.Application.DataTransferObjects;
+using EventManager.Application.Authorization;
 
 namespace EventManager.Application.Services;
 
@@ -75,7 +76,7 @@ public class BookingService(
 
     async Task CheckUserActiveBookingsAsync(UserInfo userInfo, CancellationToken cancellation)
     {
-        if (await bookings.GetUserActiveBookingCountAsync(userInfo.Id) is int activeBookings && activeBookings > AvailableBookingsPerUser)
+        if (await bookings.GetUserActiveBookingCountAsync(userInfo.Id, cancellation) is int activeBookings && activeBookings > AvailableBookingsPerUser)
             throw new UserOperationException("Превышение максимального числа активных броней для одного пользователя", userInfo.Login, userInfo.Role);
     }
 
@@ -84,6 +85,6 @@ public class BookingService(
         if (userInfo.Role == UserRole.Admin || booking.UserId == userInfo.Id)
             return;
 
-        throw new ForbiddenException(userInfo.Login);
+        throw new ForbiddenException<BookingService>(Policies.BookingService.CancelBooking, userInfo.Login, userInfo.Role);
     }
 }
