@@ -58,4 +58,11 @@ public class BookingRepository(AppDbContext dbContext) : IBookingRepository
         if (chunk.Count > 0)
             yield return chunk;
     }
+
+    Task<int> IBookingRepository.GetUserActiveBookingCountAsync(Guid userId, CancellationToken cancellation)
+    {
+        return dbContext.Bookings
+            .Where(b => b.UserId == userId && b.Status == BookingStatus.Pending)
+            .CountAsync(cancellation);
+    }
 }
