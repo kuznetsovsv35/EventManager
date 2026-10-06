@@ -13,7 +13,7 @@ public interface IUserRepository
     /// <param name="user"></param>
     /// <param name="cancellation"></param>
     /// <returns></returns>
-    Task AddUserAsync(User user, CancellationToken cancellation);
+    Task<User> AddUserAsync(User user, CancellationToken cancellation);
     /// <summary>
     /// Возвращает возвращает пользователя по логину.
     /// </summary>
