@@ -4,6 +4,7 @@ using EventManager.Application.Interfaces;
 using EventManager.Infrastructure.Services;
 using EventManager.Infrastructure.Repositories;
 using EventManager.Domain.ValueObjects;
+using EventManager.Infrastructure.Cryptography;
 
 namespace EventManager.DependencyInjection;
 
@@ -22,6 +23,7 @@ public static partial class DependencyInjection
         services.AddScoped<IEventRepository, EventRepository>();
         services.AddScoped<IBookingRepository, BookingRepository>();
         services.AddHostedService<AppBackgroundService>();
+        services.AddSingleton<ICryptographicService, CryptographicService>();
 
         return services;
     }

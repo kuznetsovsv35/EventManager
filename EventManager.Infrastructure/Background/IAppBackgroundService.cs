@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Hosting;
 using EventManager.Domain.ValueObjects;
 
-namespace EventManager.Infrastructure.Services;
+namespace EventManager.Infrastructure.Background;
 
 public enum BackgroundServiceStatus
 {
