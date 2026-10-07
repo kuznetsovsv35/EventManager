@@ -3,6 +3,7 @@ using EventManager.Domain.Exceptions;
 using EventManager.Common.Interfaces;
 using EventManager.Application.Interfaces;
 using EventManager.Application.DataTransferObjects;
+using EventManager.Application.Authorization;
 
 namespace EventManager.Application.Services;
 
@@ -12,12 +13,15 @@ namespace EventManager.Application.Services;
 /// <param name="dbContext"></param>
 public class EventService(
     ISyncContextFactory syncContextFactory,
+    ICurrentUser currentUser,
     IEventRepository repository,
     IFilter<Event> filter,
-    IPaginator<Event> paginator) : IEventService
+    IPaginator<Event> paginator) : AppAuthorizeService<EventService>, IEventService
 {
     async Task<EventOutputData> IEventService.CreateEventAsync(EventInputData data, CancellationToken cancellation)
     {
+        CheckUserRole(Policies.EventService.CreateEvent, currentUser.ToInfo(), UserRole.Admin);
+
         if (data == null)
             throw new ArgumentNullException(nameof(data));
 
@@ -28,6 +32,8 @@ public class EventService(
 
     async Task<EventOutputData> IEventService.DeleteEventAsync(Guid id, CancellationToken cancellation)
     {
+        CheckUserRole(Policies.EventService.DeleteEvent, currentUser.ToInfo(), UserRole.Admin);
+
         if (await repository.DeleteEventAsync(id, cancellation) is Event e)
             return e.ToOutputData();
 
@@ -35,15 +41,23 @@ public class EventService(
     }
 
     Task<PaginateResult<EventOutputData>> IEventService.GetEvents(FilterParams? filterParams, PageParams pageParams, CancellationToken cancellation)
-        => paginator.PaginateAsync(
+    {
+        CheckUserRole(Policies.EventService.GetEvents, currentUser.ToInfo(), UserRole.User);
+
+        return paginator.PaginateAsync(
             FilterEvents(filterParams),
             pageParams.CurrentPage, pageParams.PageSize,
             e => e.ToOutputData(), cancellation);
+    }
 
     IEnumerable<EventOutputData> IEventService.GetEvents(FilterParams? filterParams)
-        => FilterEvents(filterParams)
+    {
+        CheckUserRole(Policies.EventService.GetEvents, currentUser.ToInfo(), UserRole.User);
+
+        return FilterEvents(filterParams)
             .Select(e => e.ToOutputData())
             .AsEnumerable();
+    }
 
     IQueryable<Event> FilterEvents(FilterParams? filterParams)
     {
@@ -72,6 +86,8 @@ public class EventService(
 
     async Task<EventOutputData> IEventService.GetEventAsync(Guid id, CancellationToken cancellation)
     {
+        CheckUserRole(Policies.EventService.GetEvents, currentUser.ToInfo(), UserRole.User);
+
         if (await repository.GetEventAsync(id, cancellation) is Event e)
             return e.ToOutputData();
 
@@ -80,6 +96,8 @@ public class EventService(
 
     async Task<EventOutputData> IEventService.UpdateEventAsync(Guid id, EventInputData data, CancellationToken cancellation)
     {
+        CheckUserRole(Policies.EventService.ModifyEvent, currentUser.ToInfo(), UserRole.User);
+
         var e = await syncContextFactory.CreateContext<Booking>().ExecuteActionAsync(
             async () =>
             {
