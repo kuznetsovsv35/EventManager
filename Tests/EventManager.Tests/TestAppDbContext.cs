@@ -14,11 +14,11 @@ class TestAppDbContext : AppDbContext
 
     internal const int EventDuration = 45;
 
-    internal const int MinTotalSeats = 10;
+    internal const int MinTotalSeats = 2;
 
-    internal const int MaxTotalSeats = 100;
+    internal const int MaxTotalSeats = 10;
 
-    internal static readonly DateTime StartAt = new(2026, 6, 28, 10, 0, 0);
+    internal static readonly DateTime StartAt = DateTime.UtcNow.AddMonths(1);
 
     internal static readonly DateTime EndAt = StartAt.AddDays(EventCount);
 
@@ -44,7 +44,7 @@ class TestAppDbContext : AppDbContext
         base.OnModelCreating(modelBuilder);
         modelBuilder.Entity<Event>().HasData(
             [.. Enumerable.Range(1, EventCount)
-            .Select(i => new Event(Random.Shared.Next(MinTotalSeats, MaxTotalSeats))
+            .Select(i => new Event(Random.Shared.Next(MinTotalSeats, MaxTotalSeats + 1))
             {
                 Title = $"Event Title {i}",
                 StartAt = StartAt.AddDays(i - 1),
