@@ -116,7 +116,7 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
             .Select(x => x.ToOutputData()).ToListAsync();
 
         // When
-        var actual = eventService.GetEvents(null).ToList();
+        var actual = (await eventService.GetEvents(null)).ToList();
 
         // Then
         Assert.Equal(expected, actual);
@@ -332,12 +332,12 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
             .ToListAsync();
 
         // When
-        var actualAll = eventService
-            .GetEvents(new() { Title = titleAll })
+        var actualAll = (await eventService
+            .GetEvents(new() { Title = titleAll }))
             .ToList();
 
-        var actualNone = eventService
-            .GetEvents(new() { Title = titleNone })
+        var actualNone = (await eventService
+            .GetEvents(new() { Title = titleNone }))
             .ToList();
 
         // Then
@@ -372,8 +372,8 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
             .Select(x => x.ToOutputData())
             .ToListAsync();
 
-        var actual = eventService
-            .GetEvents(new() { Title = title })
+        var actual = (await eventService
+            .GetEvents(new() { Title = title }))
             .ToList();
 
         Assert.All(actual, item => Assert.Contains(title, item.Title, StringComparison.OrdinalIgnoreCase));
@@ -418,8 +418,8 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
             .ToListAsync();
 
         // When
-        var actual = eventService
-            .GetEvents(new() { From = startAt })
+        var actual = (await eventService
+            .GetEvents(new() { From = startAt }))
             .ToList();
 
         // Then
@@ -465,8 +465,8 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
             .ToListAsync();
 
         // When
-        var actual = eventService
-            .GetEvents(new() { To = endAt })
+        var actual = (await eventService
+            .GetEvents(new() { To = endAt }))
             .ToList();
 
         // Then
@@ -517,8 +517,8 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
             .ToListAsync();
 
         // When
-        var actual = eventService
-            .GetEvents(new() { Title = title, From = startAt, To = endAt })
+        var actual = (await eventService
+            .GetEvents(new() { Title = title, From = startAt, To = endAt }))
             .ToList();
 
         // Then
@@ -563,8 +563,8 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
-        var allValues = eventService
-            .GetEvents(null)
+        var allValues = (await eventService
+            .GetEvents(null))
             .ToList();
 
         var expectedTotalCount = allValues.Count;

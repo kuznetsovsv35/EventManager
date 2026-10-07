@@ -110,7 +110,7 @@ public class SchemaTest(TestContainerWrapper<AppDbContext> testContainer) : Data
         };
         var infoEvent = @event.ToOutputData();
 
-        var booking = new Booking(@event.Id);
+        var booking = new Booking(@event.Id, Guid.Empty);
         var infoBooking = booking.ToInfo();
 
         // When
@@ -308,7 +308,7 @@ public class SchemaTest(TestContainerWrapper<AppDbContext> testContainer) : Data
             EndAt = DateTime.UtcNow.AddHours(1)
         };
 
-        var booking = new Booking(@event.Id);
+        var booking = new Booking(@event.Id, Guid.Empty);
 
         await using var context = CreateDbContext();
         context.Events.Add(@event);
@@ -364,9 +364,9 @@ public class SchemaTest(TestContainerWrapper<AppDbContext> testContainer) : Data
         };
         var infoEvent = @event.ToOutputData();
 
-        var booking = new Booking(@event.Id);
+        var booking = new Booking(@event.Id, Guid.Empty);
         var infoBooking = booking.ToInfo();
-        var booking2 = new Booking(Guid.NewGuid());
+        var booking2 = new Booking(Guid.NewGuid(), Guid.Empty);
 
         await using var context = CreateDbContext();
         context.Events.Add(@event);

@@ -10,6 +10,7 @@ using EventManager.Application.Services;
 using EventManager.Infrastructure.Services;
 using EventManager.Infrastructure.Repositories;
 using EventManager.Database;
+using EventManager.Infrastructure.Background;
 
 namespace EventManager.Tests;
 

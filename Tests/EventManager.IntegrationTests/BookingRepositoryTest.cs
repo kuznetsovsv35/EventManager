@@ -25,7 +25,7 @@ public class BookingRepositoryTest(TestContainerWrapper<AppDbContext> testContai
         };
         var infoEvent = @event.ToOutputData();
 
-        var booking = new Booking(@event.Id);
+        var booking = new Booking(@event.Id, Guid.Empty);
         var infoBooking = booking.ToInfo();
 
         await using var context = CreateDbContext();
@@ -63,7 +63,7 @@ public class BookingRepositoryTest(TestContainerWrapper<AppDbContext> testContai
         };
         var infoEvent = @event.ToOutputData();
 
-        var booking = new Booking(@event.Id);
+        var booking = new Booking(@event.Id, Guid.Empty);
 
         await using var context = CreateDbContext();
         context.Events.Add(@event);
@@ -102,8 +102,8 @@ public class BookingRepositoryTest(TestContainerWrapper<AppDbContext> testContai
             EndAt = DateTime.UtcNow.AddHours(1)
         };
 
-        var bookingPending = new Booking(@event.Id);
-        var bookingConfirmed = new Booking(@event.Id);
+        var bookingPending = new Booking(@event.Id, Guid.Empty);
+        var bookingConfirmed = new Booking(@event.Id, Guid.Empty);
         var infoPending = bookingPending.ToInfo();
 
         await using var context = CreateDbContext();

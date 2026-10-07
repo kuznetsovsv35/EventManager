@@ -4,8 +4,8 @@ using EventManager.Domain.Exceptions;
 using EventManager.Domain.ValueObjects;
 using EventManager.Application.DataTransferObjects;
 using EventManager.Application.Interfaces;
-using EventManager.Infrastructure.Services;
 using EventManager.Database;
+using EventManager.Infrastructure.Background;
 
 namespace EventManager.Tests;
 
@@ -162,7 +162,7 @@ public class BookingServiceTest(EventManagerTestContext context) : TestObjectBas
         var bookingService = scope.ServiceProvider.GetRequiredService<IBookingService>();
 
         var eventId = await context.GetRandomEventId(CancellationToken.None);
-        var booking = new Booking(eventId);
+        var booking = new Booking(eventId, Guid.Empty);
 
         // When
         var bookingCreated = booking.ToInfo();
