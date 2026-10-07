@@ -20,7 +20,7 @@ public interface IEventService
     /// </summary>
     /// <param name="filterParams">Параметры фильтра.</param>
     /// <returns></returns>
-    IEnumerable<EventOutputData> GetEvents(FilterParams? filterParams);
+    Task<IEnumerable<EventOutputData>> GetEvents(FilterParams? filterParams);
 
     /// <summary>
     /// Получить событие по идентификатору.

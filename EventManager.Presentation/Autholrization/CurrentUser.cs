@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace EventManager.Presentation.Authorization;
 
-public class CurrentUser(HttpContextAccessor accessor) : ICurrentUser
+class CurrentUser(HttpContextAccessor accessor) : ICurrentUser
 {
     public Guid Id => GetClaim(ClaimTypes.NameIdentifier) is string id ? Guid.Parse(id) : Guid.Empty;
 
@@ -20,5 +20,5 @@ public class CurrentUser(HttpContextAccessor accessor) : ICurrentUser
     ClaimsPrincipal GetUser() => accessor.HttpContext?.User 
         ?? throw new InvalidOperationException($"{nameof(accessor.HttpContext)}: has no valid context.");
 
-    string? GetClaim(string type) => GetUser().FindFirst(type)?.Value;
+    string? GetClaim(string type) => GetUser().FindFirstValue(type);
 }

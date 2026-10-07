@@ -8,19 +8,18 @@ using EventManager.Application.Authorization;
 namespace EventManager.Application.Services;
 
 public class BookingService(
+    IAppAuthorizationService appAuthorization,
     ISyncContextFactory syncContextFactory,
-    ICurrentUser currentUser,
     IBookingRepository bookings,
     IEventRepository events,
-    IBookingServiceNotifier notifier) : AppAuthorizeService<BookingService>, IBookingService
+    IBookingServiceNotifier notifier) : AppAuthorizeService<BookingService>(appAuthorization), IBookingService
 {
     const int AvailableBookingsPerUser = 10;
 
     public async Task<BookingInfo> CreateBookingAsync(Guid eventId,  CancellationToken cancellation)
     {
-        var userInfo = currentUser.ToInfo();
-
-        CheckUserRole(Policies.BookingService.CreateBooking, userInfo, UserRole.User);
+        await AuthorizeAsync(Policies.BookingService.CreateBooking, cancellation);
+        var userInfo = CurrentUser.ToInfo();
 
         await CheckUserActiveBookingsAsync(userInfo, cancellation);
 
@@ -51,7 +50,7 @@ public class BookingService(
 
     public async Task<BookingInfo> GetBookingByIdAsync(Guid bookingId, CancellationToken cancellation)
     {
-        CheckUserRole(Policies.BookingService.GetBooking, currentUser.ToInfo(), UserRole.User);
+        await AuthorizeAsync(Policies.BookingService.GetBooking, cancellation);
 
         if (await bookings.GetBookingAsync(bookingId, cancellation) is Booking booking)
             return booking.ToInfo();
@@ -61,9 +60,8 @@ public class BookingService(
 
     public async Task<BookingInfo> CancelBookingAsync(Guid bookingId, CancellationToken cancellation)
     {
-        var userInfo = currentUser.ToInfo();
-
-        CheckUserRole(Policies.BookingService.CancelBooking, userInfo, UserRole.User);
+        await AuthorizeAsync(Policies.BookingService.CancelBooking, cancellation);
+        var userInfo = CurrentUser.ToInfo();
 
         if (await bookings.GetBookingAsync(bookingId, cancellation) is not Booking booking)
             throw new BookingNotFoundException(bookingId, nameof(bookingId));

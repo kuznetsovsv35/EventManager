@@ -16,4 +16,12 @@ public static class Policies
         public static readonly string GetBooking = $"{nameof(BookingService)}.{GetBooking}";
         public static readonly string CancelBooking = $"{nameof(BookingService)}.{nameof(CancelBooking)}";
     }
+
+    public static class UserService
+    {
+        public static readonly string ChangePassword = $"{nameof(UserService)}.{nameof(ChangePassword)}";
+        public static readonly string ModifyUser = $"{nameof(UserService)}.{nameof(ModifyUser)}";
+        public static readonly string DeleteUser = $"{nameof(UserService)}.{nameof(DeleteUser)}";
+        public static readonly string RegisterUser = $"{nameof(UserService)}.{nameof(RegisterUser)}";
+    }
 }

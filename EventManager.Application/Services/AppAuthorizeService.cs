@@ -1,15 +1,11 @@
-using EventManager.Application.DataTransferObjects;
-using EventManager.Domain.Exceptions;
-using EventManager.Domain.ValueObjects;
+using EventManager.Application.Authorization;
 
 namespace EventManager.Application.Services;
 
-public abstract class AppAuthorizeService<TService>
+public abstract class AppAuthorizeService<TService>(IAppAuthorizationService appAuthorization)
 {
-    protected static void CheckUserRole(string policyName, UserInfo userInfo, UserRole requiredRole)
-    {
-        if (userInfo.Role < requiredRole)
-            throw new ForbiddenException<TService>(policyName, userInfo.Login, userInfo.Role);
-        
-    }    
+    protected Task AuthorizeAsync(string policyName, CancellationToken cancellation)
+        => appAuthorization.AuthorizeAsync(this, policyName, cancellation);
+
+    protected ICurrentUser CurrentUser => appAuthorization.CurrentUser;
 }

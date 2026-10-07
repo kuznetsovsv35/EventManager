@@ -13,5 +13,9 @@ public interface IAppAuthorizationService
     /// <param name="policyName"></param>
     /// <param name="cancellation"></param>
     /// <returns></returns>
-    Task Authorize<TResource>(TResource resource, string policyName, CancellationToken cancellation);    
+    Task AuthorizeAsync<TResource>(TResource resource, string policyName, CancellationToken cancellation);
+    /// <summary>
+    /// Возвращает текущего пользователя.
+    /// </summary>
+    ICurrentUser CurrentUser { get; }    
 }

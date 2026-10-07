@@ -9,7 +9,9 @@ namespace EventManager.Presentation.Authorization;
 
 public class AppAuthorizationService(IAuthorizationService authorization, HttpContextAccessor accessor) : IAppAuthorizationService
 {
-    public async Task Authorize<TResource>(TResource resource, string policyName, CancellationToken cancellation)
+    public ICurrentUser CurrentUser => new CurrentUser(accessor);
+
+    public async Task AuthorizeAsync<TResource>(TResource resource, string policyName, CancellationToken cancellation)
     {
         if (accessor.HttpContext?.User is not ClaimsPrincipal user)
             throw new ForbiddenException<TResource>(policyName, string.Empty, Domain.ValueObjects.UserRole.User);
