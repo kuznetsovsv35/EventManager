@@ -14,14 +14,18 @@ public interface IBookingService
     /// <param name="cancellation"></param>
     /// <returns></returns>
     Task<BookingInfo> CreateBookingAsync(Guid eventId, CancellationToken cancellation);
-    Task<BookingInfo> CreateBookingAsync(Guid eventId, UserInfo userInfo, CancellationToken cancellation);
-
     /// <summary>
     /// Получить бронь по идентификатору.
     /// </summary>
     /// <param name="bookingId"></param>
+    /// <param name="cancellation"></param>
     /// <returns></returns>
     Task<BookingInfo> GetBookingByIdAsync(Guid bookingId, CancellationToken cancellation);
-
-    Task<BookingInfo> CancelBookingAsync(Guid bookingId, UserInfo userInfo, CancellationToken cancellation);
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="bookingId"></param>
+    /// <param name="cancellation"></param>
+    /// <returns></returns>
+    Task<BookingInfo> CancelBookingAsync(Guid bookingId, CancellationToken cancellation);
 }

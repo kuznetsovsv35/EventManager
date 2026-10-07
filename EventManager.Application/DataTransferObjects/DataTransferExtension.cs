@@ -1,3 +1,4 @@
+using EventManager.Application.Authorization;
 using EventManager.Domain.ValueObjects;
 
 namespace EventManager.Application.DataTransferObjects;
@@ -59,6 +60,14 @@ public static class DataTransferExtension
         };
 
     public static UserInfo ToInfo(this User user)
+        => new()
+        {
+            Id = user.Id,
+            Login = user.Login,
+            Role = user.Role,
+        };
+
+    public static UserInfo ToInfo(this ICurrentUser user)
         => new()
         {
             Id = user.Id,

@@ -9,22 +9,19 @@ namespace EventManager.Application.Services;
 
 public class BookingService(
     ISyncContextFactory syncContextFactory,
+    ICurrentUser currentUser,
     IBookingRepository bookings,
     IEventRepository events,
-    IBookingServiceNotifier notifier) : IBookingService
+    IBookingServiceNotifier notifier) : AppAuthorizeService<BookingService>, IBookingService
 {
     const int AvailableBookingsPerUser = 10;
 
-    public Task<BookingInfo> CreateBookingAsync(
-        Guid eventId, 
-        CancellationToken cancellation)
-        => CreateBookingAsync(eventId, new(){ Id = Guid.Empty }, cancellation);
-
-    public async Task<BookingInfo> CreateBookingAsync(
-        Guid eventId, 
-        UserInfo userInfo,
-        CancellationToken cancellation)
+    public async Task<BookingInfo> CreateBookingAsync(Guid eventId,  CancellationToken cancellation)
     {
+        var userInfo = currentUser.ToInfo();
+
+        CheckUserRole(Policies.BookingService.CreateBooking, userInfo, UserRole.User);
+
         await CheckUserActiveBookingsAsync(userInfo, cancellation);
 
         var booking = await syncContextFactory.CreateContext<Booking>().ExecuteActionAsync<Booking>(async () =>
@@ -54,14 +51,20 @@ public class BookingService(
 
     public async Task<BookingInfo> GetBookingByIdAsync(Guid bookingId, CancellationToken cancellation)
     {
+        CheckUserRole(Policies.BookingService.GetBooking, currentUser.ToInfo(), UserRole.User);
+
         if (await bookings.GetBookingAsync(bookingId, cancellation) is Booking booking)
             return booking.ToInfo();
 
         throw new BookingNotFoundException(bookingId, nameof(bookingId));
     }
 
-    public async Task<BookingInfo> CancelBookingAsync(Guid bookingId, UserInfo userInfo, CancellationToken cancellation)
+    public async Task<BookingInfo> CancelBookingAsync(Guid bookingId, CancellationToken cancellation)
     {
+        var userInfo = currentUser.ToInfo();
+
+        CheckUserRole(Policies.BookingService.CancelBooking, userInfo, UserRole.User);
+
         if (await bookings.GetBookingAsync(bookingId, cancellation) is not Booking booking)
             throw new BookingNotFoundException(bookingId, nameof(bookingId));
         
