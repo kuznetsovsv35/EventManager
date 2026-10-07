@@ -295,11 +295,14 @@ public class BookingServiceTest(EventManagerTestContext context) : TestObjectBas
         // Given
         var serviceProvider = context.CreateServiceProvider();
 
+        var startAt = DateTime.UtcNow.AddMonths(1);
+        var endAt = startAt.AddMinutes(30);
+
         EventInputData inputData = new()
         {
             Title = "Simple event",
-            StartAt = new DateTime(2026, 6, 28, 10, 0, 00),
-            EndAt = new DateTime(2026, 6, 28, 10, 30, 00),
+            StartAt = startAt,
+            EndAt = endAt,
             Description = "Some event",
             TotalSeats = 1,
         };

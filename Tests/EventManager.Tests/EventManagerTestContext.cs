@@ -11,6 +11,7 @@ using EventManager.Infrastructure.Services;
 using EventManager.Infrastructure.Repositories;
 using EventManager.Database;
 using EventManager.Infrastructure.Background;
+using EventManager.Application.Authorization;
 
 namespace EventManager.Tests;
 
@@ -33,6 +34,8 @@ public class EventManagerTestContext
 
     public EventManagerTestContext()
     {
+        var currentUser = new Mock<ICurrentUser>();
+
         _services = new ServiceCollection()
             .AddSingleton<IBookingServiceNotifier, BookingServiceNotifier>()
             .AddSingleton(_ => new TestAppDbContext($"Test_{Guid.NewGuid()}"))
@@ -51,7 +54,13 @@ public class EventManagerTestContext
                 return mock.Object;
             })
             .AddSingleton<IAppBackgroundService, AppBackgroundService>()
-            .AddSingleton<ISyncContextFactory, SyncContextFactory>();
+            .AddSingleton<ISyncContextFactory, SyncContextFactory>()
+            .AddScoped(provider =>
+            {
+                var mock = new Mock<IAppAuthorizationService>();
+                mock.SetupGet(x => x.CurrentUser).Returns(currentUser.Object);
+                return mock.Object;
+            });
         ServiceProvider = CreateServiceProvider();
     }
 
