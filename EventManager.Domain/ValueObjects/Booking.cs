@@ -111,9 +111,10 @@ public class Booking
     {
         if (this is { Status: BookingStatus.Pending or BookingStatus.Cancelled })
         {
-            Status = status;
             if (Status == BookingStatus.Pending)
                 ProcessedAt = DateTime.UtcNow;
+
+            Status = status;
             return true;
         }
         return false;
