@@ -18,7 +18,7 @@ public interface IUserService
     /// </summary>
     /// <param name="request"></param>
     /// <returns></returns>
-    Task<UserInfo?> LoginUserAsync(UserRequest request, CancellationToken cancellation);
+    Task<UserInfo> LoginUserAsync(UserRequest request, CancellationToken cancellation);
     /// <summary>
     /// Логическое управление пользователя.
     /// </summary>

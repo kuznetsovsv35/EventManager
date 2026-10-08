@@ -52,11 +52,11 @@ public static class DataTransferExtension
             ProcessedAt = booking.ProcessedAt,
         };
 
-    public static User FromRequest(this RegisterUserRequest request)
+    public static User FromRequest(this RegisterUserRequest request, Func<string?, string?> hasher)
         => new(request.Login)
         {
             Role = request.Role,
-            Password = request.Password,
+            Password = hasher(request.Password)
         };
 
     public static UserInfo ToInfo(this User user)
