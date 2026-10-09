@@ -50,6 +50,15 @@ public static class ProblemDetailsFactory
         return new(details);
     }
 
+    public static ProblemDetailsBuilder<ProblemDetails> BadRequest(string? detail = null, string? title = null)
+        => new(new()
+        {            
+            Type = "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.1",
+            Title = title ?? "Ошибка валидации запроса",
+            Detail = detail ?? "Один или несколько параметров содержат недопустимые значения.",
+            Status = StatusCodes.Status400BadRequest,
+        });
+
     public static ProblemDetailsBuilder<ProblemDetails> NotFound(string? detail = null, string? title = null)
         => new(new()
         {
@@ -66,5 +75,14 @@ public static class ProblemDetailsFactory
             Title = title ?? "Конфликт",
             Detail = detail ?? "Состояние ресурса изменено, обновление невозможно",
             Status = StatusCodes.Status409Conflict,
+        });
+
+    public static ProblemDetailsBuilder<ProblemDetails> Forbid(string? detail = null, string? title = null)
+        => new(new()
+        {
+            Type = "https://datatracker.ietf.org/doc/html/rfc7231#section-6.5.3",
+            Title = title ?? "Доступ запрещен",
+            Detail = detail ?? "Нет прав на выполнения операции",
+            Status = StatusCodes.Status403Forbidden,
         });
 }

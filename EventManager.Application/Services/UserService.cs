@@ -23,7 +23,7 @@ public class UserService(
         var currentUser = CurrentUser.ToInfo();
                 
         if (currentUser.Login != request.Login && currentUser.Role < user.Role)
-            throw new ForbiddenException<UserService>(Policies.UserService.ChangePassword, currentUser.Login, currentUser.Role);
+            throw new ForbiddenException(this, Policies.UserService.ChangePassword, currentUser.Login, currentUser.Role);
 
         user = await users.UpdateUserAsync(
             request.Login, 

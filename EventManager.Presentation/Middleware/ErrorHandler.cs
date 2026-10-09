@@ -52,13 +52,17 @@ public class ErrorHandler(RequestDelegate next, ILogger<ErrorHandler> logger)
         {
             ValidationException ve => ProblemDetailsFactory.ValidationProblem(ve.ValidationResult, ve.Message),
 
-            PaginatorParamException pe => ProblemDetailsFactory.ValidationProblem(
-                new ValidationResult(
-                    pe.Message, (pe.ParamName is string pn) ? new[] { pn } : null),
-                pe.Message, $"параметр: {pe.ParamName}, значение: {pe.ParamValue}"),
+            PaginatorParamException pe => ProblemDetailsFactory.ValidationProblem
+            (
+                new ValidationResult(pe.Message, (pe.ParamName is string pn) ? new[] { pn } : null),
+                pe.Message, $"параметр: {pe.ParamName}, значение: {pe.ParamValue}"
+            ),
 
             ObjectNotFoundException<Guid> notFound => ProblemDetailsFactory.NotFound($"{notFound.Message}: (ID={notFound.ObjectKey})."),
-            NoAvailableSeatsException noAvailableSeats => ProblemDetailsFactory.Conflict($"{noAvailableSeats.Message}: (ID={noAvailableSeats.EventId})."),
+            NoAvailableSeatsException noAvailableSeats => ProblemDetailsFactory.Conflict($"{noAvailableSeats.Message}: (ID={noAvailableSeats.EventId})."),            
+            StartedEventBookingException startedEventBooking => ProblemDetailsFactory.BadRequest(startedEventBooking.Message),
+            ActiveUserBookingException activeUserBooking => ProblemDetailsFactory.Conflict(activeUserBooking.Message),
+            ForbiddenException forbidden=> ProblemDetailsFactory.Forbid(forbidden.Message),
 
             _ => ProblemDetailsFactory.InternalServiceError(exception.Message)
         };

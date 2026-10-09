@@ -11,10 +11,10 @@ public class AppAuthorizationService(IAuthorizationService authorization, HttpCo
 {
     public ICurrentUser CurrentUser => new CurrentUser(accessor);
 
-    public async Task AuthorizeAsync<TResource>(TResource resource, string policyName, CancellationToken cancellation)
+    public async Task AuthorizeAsync<TResource>(TResource resource, string policyName, CancellationToken cancellation) where TResource: class
     {
         if (accessor.HttpContext?.User is not ClaimsPrincipal user)
-            throw new ForbiddenException<TResource>(policyName, string.Empty, Domain.ValueObjects.UserRole.User);
+            throw new ForbiddenException(resource, policyName, string.Empty, Domain.ValueObjects.UserRole.User);
 
         var result = await authorization.AuthorizeAsync(user, resource, policyName);
 
@@ -22,7 +22,7 @@ public class AppAuthorizationService(IAuthorizationService authorization, HttpCo
         {
             var login = user.FindFirst(ClaimTypes.Name)?.Value ?? string.Empty;
             var role = user.FindFirstValue(ClaimTypes.Role) is not string roleStr ? UserRole.User : Enum.Parse<UserRole>(roleStr);
-            throw new ForbiddenException<TResource>(policyName, login, role);
+            throw new ForbiddenException(resource, policyName, login, role);
         }
     }
 }

@@ -78,7 +78,7 @@ public class BookingService(
     async Task CheckUserActiveBookingsAsync(UserInfo userInfo, CancellationToken cancellation)
     {
         if (await bookings.GetUserActiveBookingCountAsync(userInfo.Id, cancellation) is int activeBookings && activeBookings > AvailableBookingsPerUser)
-            throw new UserOperationException("Превышение максимального числа активных броней для одного пользователя", userInfo.Login, userInfo.Role);
+            throw new ActiveUserBookingException(userInfo.Login, userInfo.Role);
     }
 
     void CheckUserRole(Booking booking, UserInfo userInfo)
@@ -86,6 +86,6 @@ public class BookingService(
         if (userInfo.Role == UserRole.Admin || booking.UserId == userInfo.Id)
             return;
 
-        throw new ForbiddenException<BookingService>(Policies.BookingService.CancelBooking, userInfo.Login, userInfo.Role);
+        throw new ForbiddenException(this, Policies.BookingService.CancelBooking, userInfo.Login, userInfo.Role);
     }
 }
