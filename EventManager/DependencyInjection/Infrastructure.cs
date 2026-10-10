@@ -22,6 +22,7 @@ public static partial class DependencyInjection
         services.AddScoped<IPaginator<Event>, PaginateService<Event>>();
         services.AddScoped<IEventRepository, EventRepository>();
         services.AddScoped<IBookingRepository, BookingRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
         services.AddHostedService<AppBackgroundService>();
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
 

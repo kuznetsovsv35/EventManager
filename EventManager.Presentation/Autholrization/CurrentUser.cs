@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace EventManager.Presentation.Authorization;
 
-class CurrentUser(HttpContextAccessor accessor) : ICurrentUser
+class CurrentUser(IHttpContextAccessor accessor) : ICurrentUser
 {
     public Guid Id => GetClaim(ClaimTypes.NameIdentifier) is string id ? Guid.Parse(id) : Guid.Empty;
 

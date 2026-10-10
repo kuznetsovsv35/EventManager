@@ -7,14 +7,14 @@ using Microsoft.AspNetCore.Http;
 
 namespace EventManager.Presentation.Authorization;
 
-public class AppAuthorizationService(IAuthorizationService authorization, HttpContextAccessor accessor) : IAppAuthorizationService
+public class AppAuthorizationService(IAuthorizationService authorization, IHttpContextAccessor accessor) : IAppAuthorizationService
 {
     public ICurrentUser CurrentUser => new CurrentUser(accessor);
 
     public async Task AuthorizeAsync<TResource>(TResource resource, string policyName, CancellationToken cancellation) where TResource: class
     {
         if (accessor.HttpContext?.User is not ClaimsPrincipal user)
-            throw new ForbiddenException(resource, policyName, string.Empty, Domain.ValueObjects.UserRole.User);
+            throw new ForbiddenException(resource, policyName, string.Empty, UserRole.User);
 
         var result = await authorization.AuthorizeAsync(user, resource, policyName);
 

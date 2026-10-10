@@ -11,6 +11,7 @@ public static partial class DependencyInjection
         services.AddControllers().AddApplicationPart(Assembly.Load($"{nameof(EventManager)}.{nameof(Presentation)}"));
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
+        services.ConfigureAuthorization();
         return services;
     }
 
