@@ -44,12 +44,17 @@ public class Booking
     /// <summary>
     /// Ссылка на связанное события.
     /// </summary>
-    public Event Event { get; private set; } = null!;
+    public Event Event { get; private set; }
 
     /// <summary>
     /// Пользователь, создавший бронь.
     /// </summary>
     public Guid UserId { get; private set; }
+
+    /// <summary>
+    /// ССылка на связанного пользователя.
+    /// </summary>
+    public User User { get; private set; } 
 
     /// <summary>
     /// Статус бронирования.

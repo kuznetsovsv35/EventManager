@@ -123,17 +123,20 @@ public class SchemaTest(TestContainerWrapper<AppDbContext> testContainer) : Data
         await using var verify = CreateDbContext();
         var bookingFound = await verify
             .Bookings.FromSqlInterpolated($@"
-                SELECT b.""Id"", b.""EventId"", b.""Status"", b.""CreatedAt"", b.""ProcessedAt""
+                SELECT b.""Id"", b.""EventId"", b.""UserId"", b.""Status"", b.""CreatedAt"", b.""ProcessedAt""
                 FROM ""Events"" e
                 INNER JOIN ""Bookings"" b ON b.""EventId"" = e.""Id""
+                INNER JOIN ""Users"" u ON b.""UserId"" = u.""Id""
                 WHERE b.""Id"" = {booking.Id}
             ")
             .AsNoTracking()
             .Include(b => b.Event)
+            .Include(b => b.User)
             .SingleOrDefaultAsync();
 
         Assert.NotNull(bookingFound?.Event);
         Assert.Equal(infoEvent.Id, bookingFound.EventId);
+        Assert.NotNull(bookingFound.User);
         Assert.Equal(infoBooking, bookingFound.ToInfo());
     }
 
