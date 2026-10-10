@@ -44,7 +44,7 @@ public class Booking
     /// <summary>
     /// Ссылка на связанное события.
     /// </summary>
-    public Event Event { get; private set; }
+    public Event Event { get; private set; } = null!;
 
     /// <summary>
     /// Пользователь, создавший бронь.
@@ -54,7 +54,7 @@ public class Booking
     /// <summary>
     /// ССылка на связанного пользователя.
     /// </summary>
-    public User User { get; private set; } 
+    public User User { get; private set; } = null!;
 
     /// <summary>
     /// Статус бронирования.

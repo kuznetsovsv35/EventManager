@@ -32,5 +32,6 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
 
         builder.HasIndex(b => b.CreatedAt).HasDatabaseName("IX_Bookings_CreatedAt");
         builder.HasIndex(b => b.EventId).HasDatabaseName("IX_Bookings_EventId");
+        builder.HasIndex(b => b.UserId).HasDatabaseName("IX_Bookings_UserId");
     }
 }
