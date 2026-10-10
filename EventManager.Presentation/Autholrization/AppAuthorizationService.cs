@@ -7,22 +7,34 @@ using Microsoft.AspNetCore.Http;
 
 namespace EventManager.Presentation.Authorization;
 
-public class AppAuthorizationService(IAuthorizationService authorization, IHttpContextAccessor accessor) : IAppAuthorizationService
+public class AppAuthorizationService : IAppAuthorizationService
 {
-    public ICurrentUser CurrentUser => new CurrentUser(accessor);
+    public ICurrentUser CurrentUser { get; }
+
+    readonly ClaimsPrincipal? _principal;
+
+    readonly IAuthorizationService _authorization;
+
+    public AppAuthorizationService(IAuthorizationService authorization, IHttpContextAccessor accessor)
+    {
+        _principal = accessor.HttpContext?.User;
+        CurrentUser = new CurrentUser(_principal);
+        _authorization = authorization;
+    }
 
     public async Task AuthorizeAsync<TResource>(TResource resource, string policyName, CancellationToken cancellation) where TResource: class
     {
-        if (accessor.HttpContext?.User is not ClaimsPrincipal user)
+        if (!CurrentUser.IsAuthenticated || _principal is null)
             throw new ForbiddenException(resource, policyName, string.Empty, UserRole.User);
 
-        var result = await authorization.AuthorizeAsync(user, resource, policyName);
+        var result = await _authorization.AuthorizeAsync(_principal, resource, policyName);
 
         if (!result.Succeeded)
-        {
-            var login = user.FindFirst(ClaimTypes.Name)?.Value ?? string.Empty;
-            var role = user.FindFirstValue(ClaimTypes.Role) is not string roleStr ? UserRole.User : Enum.Parse<UserRole>(roleStr);
-            throw new ForbiddenException(resource, policyName, login, role);
-        }
+            throw new ForbiddenException
+            (
+                resource, policyName, 
+                CurrentUser.Login, 
+                CurrentUser.Role
+            );
     }
 }
