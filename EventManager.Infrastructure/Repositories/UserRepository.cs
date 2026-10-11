@@ -49,6 +49,7 @@ public class UserRepository(AppDbContext dbContext) : IUserRepository
         if (await GetUserAsync(predicate, cancellation) is User user)
         {
             action?.Invoke(user);
+            dbContext.Update(user);
             await dbContext.SaveChangesAsync(cancellation);
             return user;
         }
