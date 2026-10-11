@@ -1,4 +1,5 @@
 using EventManager.Database;
+using EventManager.IntegrationTests.Extensions;
 
 namespace EventManager.IntegrationTests;
 
@@ -10,4 +11,10 @@ public abstract class DatabaseTestBase(TestContainerWrapper<AppDbContext> testCo
 
     protected AppDbContext CreateDbContext() => testContainer.CreateDbContext();
     protected Task ResetDatabase() => testContainer.ResetDatabase();
+
+    protected async Task<Guid> GetAdminUser()
+    {
+        await using var context = CreateDbContext();
+        return await context.EnsureCreatedUser(Domain.ValueObjects.UserRole.Admin);
+    }
 }
