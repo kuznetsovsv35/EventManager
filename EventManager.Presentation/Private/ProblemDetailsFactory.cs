@@ -85,4 +85,13 @@ public static class ProblemDetailsFactory
             Detail = detail ?? "Нет прав на выполнения операции",
             Status = StatusCodes.Status403Forbidden,
         });
+    
+    public static ProblemDetailsBuilder<ProblemDetails> Unauthorized(string? detail = null, string? title = null)
+        => new(new()
+        {
+            Type = "https://datatracker.ietf.org/doc/html/rfc7235#section-3.1",
+            Title = title ?? "Ошибка аутентификации пользователя",
+            Detail = detail ?? "Логин или пароль указан неверно",
+            Status = StatusCodes.Status401Unauthorized,
+        });
 }

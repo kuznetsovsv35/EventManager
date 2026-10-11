@@ -2,6 +2,7 @@ using System.Data;
 using Microsoft.EntityFrameworkCore;
 using EventManager.Domain.ValueObjects;
 using EventManager.Database;
+using EventManager.Infrastructure.Services;
 
 namespace EventManager.Tests;
 
@@ -17,6 +18,12 @@ class TestAppDbContext : AppDbContext
     internal const int MinTotalSeats = 2;
 
     internal const int MaxTotalSeats = 10;
+
+    internal static readonly string AdminLogin = "admin" ;
+    internal static readonly string AdminPassword = "admin";
+
+    internal static readonly string  UserLogin = "user";
+    internal static readonly string UserPassword = "user";
 
     internal static readonly DateTime StartAt = DateTime.UtcNow.AddMonths(1);
 
@@ -52,5 +59,20 @@ class TestAppDbContext : AppDbContext
                 Description = $"Event Description {i}",
             })]
         );
+
+        var passwordHasher = new PasswordHasher();
+
+        modelBuilder.Entity<User>().HasData([
+            new(AdminLogin)
+            {
+                Role = UserRole.Admin,
+                Password = passwordHasher.Hash(AdminPassword),
+            },
+            new(UserLogin)
+            {
+                Role = UserRole.User,
+                Password = passwordHasher.Hash(UserPassword),
+            }
+        ]);
     }
 }

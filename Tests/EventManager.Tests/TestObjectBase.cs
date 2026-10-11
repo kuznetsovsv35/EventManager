@@ -9,4 +9,5 @@ public class TestObjectBase
     protected const string Category_Booking = "Booking";
     protected const string Category_DTO = "DTO";
     protected const string Category_Seats = "Seats";
+    protected const string Category_Users = "Users";
 }

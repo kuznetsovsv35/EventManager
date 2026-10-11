@@ -27,7 +27,7 @@ public class UserService(
 
         user = await users.UpdateUserAsync(
             request.Login, 
-            u => u.Password = request.Password is string p ? hasher.Hash(p) : null,
+            u => u.Password = newPassword is string p ? hasher.Hash(p) : null,
             cancellation);
 
         if (user is null)
@@ -71,6 +71,15 @@ public class UserService(
     public async Task<UserInfo> RegisterUserAsync(RegisterUserRequest request, CancellationToken cancellation)
     {
         await AuthorizeAsync(Policies.UserService.RegisterUser, cancellation);
-        return (await users.AddUserAsync(request.FromRequest(hasher.Hash), cancellation)).ToInfo();
+        try
+        {
+            var user = await users.AddUserAsync(request.FromRequest(hasher.Hash), cancellation);
+            return user.ToInfo();
+        }
+        catch (Exception ex)
+        {
+            var userInfo = CurrentUser.ToInfo();
+            throw new RegisterUserException(userInfo.Login, userInfo.Role, ex);
+        }
     }
 }

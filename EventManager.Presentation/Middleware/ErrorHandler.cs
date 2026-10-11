@@ -62,7 +62,9 @@ public class ErrorHandler(RequestDelegate next, ILogger<ErrorHandler> logger)
             NoAvailableSeatsException noAvailableSeats => ProblemDetailsFactory.Conflict($"{noAvailableSeats.Message}: (ID={noAvailableSeats.EventId})."),            
             StartedEventBookingException startedEventBooking => ProblemDetailsFactory.BadRequest(startedEventBooking.Message),
             ActiveUserBookingException activeUserBooking => ProblemDetailsFactory.Conflict(activeUserBooking.Message),
-            ForbiddenException forbidden=> ProblemDetailsFactory.Forbid(forbidden.Message),
+            ForbiddenException forbidden => ProblemDetailsFactory.Forbid(forbidden.Message),
+            LoginUserException loginUser => ProblemDetailsFactory.Unauthorized(loginUser.Message),
+            RegisterUserException registerUser => ProblemDetailsFactory.BadRequest(registerUser.InnerException?.Message, registerUser.Message),
 
             _ => ProblemDetailsFactory.InternalServiceError(exception.Message)
         };

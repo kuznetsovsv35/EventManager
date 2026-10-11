@@ -12,6 +12,8 @@ using EventManager.Infrastructure.Repositories;
 using EventManager.Database;
 using EventManager.Infrastructure.Background;
 using EventManager.Application.Authorization;
+using EventManager.Application.DataTransferObjects;
+using EventManager.Application.Cryptography;
 
 namespace EventManager.Tests;
 
@@ -30,6 +32,17 @@ public class EventManagerTestContext
         var eventIndex = Random.Shared.Next(eventCount);
         return (await dbContext.Events.AsNoTracking().Skip(eventIndex).FirstAsync(cancellation)).Id;
     }
+
+    public async Task<UserInfo> GetUserInfo(string login, UserRole role)
+    {
+        await using var scope = CreateAsyncScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        return (await dbContext.Users
+            .AsNoTracking()
+            .SingleAsync(u => u.Login == login && u.Role == role && u.IsActive))
+            .ToInfo();
+    }
+
     readonly IServiceCollection _services;
 
     public EventManagerTestContext()
@@ -60,7 +73,10 @@ public class EventManagerTestContext
                 var mock = new Mock<IAppAuthorizationService>();
                 mock.SetupGet(x => x.CurrentUser).Returns(currentUser.Object);
                 return mock.Object;
-            });
+            })
+            .AddScoped<IUserRepository, UserRepository>()
+            .AddScoped<IUserService, UserService>()
+            .AddSingleton<IPasswordHasher, PasswordHasher>();            
         ServiceProvider = CreateServiceProvider();
     }
 
