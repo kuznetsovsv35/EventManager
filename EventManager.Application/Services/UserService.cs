@@ -14,6 +14,8 @@ public class UserService(
 {
     public async Task<UserInfo?> ChangePasswordAsync(UserRequest request, string? newPassword, CancellationToken cancellation)
     {
+        request.Check();
+
         await AuthorizeAsync(Policies.UserService.ChangePassword, cancellation);
         var user = await users.GetUserAsync(request.Login, cancellation);
 
@@ -38,6 +40,8 @@ public class UserService(
 
     public async Task<UserInfo?> ChangeRoleAsync(RegisterUserRequest request, CancellationToken cancellation)
     {
+        request.Check();
+
         await AuthorizeAsync(Policies.UserService.ModifyUser, cancellation);
         var user = await users.UpdateUserAsync(request.Login, u => u.Role = request.Role, cancellation);
 
@@ -49,6 +53,8 @@ public class UserService(
 
     public async Task<UserInfo> DeleteUserAsync(UserRequest request, CancellationToken cancellation)
     {
+        request.Check();
+
         await AuthorizeAsync(Policies.UserService.DeleteUser, cancellation);
         var user = await users.DeleteUserAsync(request.Login, cancellation);
 
@@ -60,6 +66,7 @@ public class UserService(
 
     public async Task<UserInfo> LoginUserAsync(UserRequest request, CancellationToken cancellation)
     {
+        request.Check();
         var user = await users.GetUserAsync(request.Login, cancellation);
         
         if (user is null || !hasher.Verify(user.Password, request.Password))
@@ -71,6 +78,7 @@ public class UserService(
     public async Task<UserInfo> RegisterUserAsync(RegisterUserRequest request, CancellationToken cancellation)
     {
         await AuthorizeAsync(Policies.UserService.RegisterUser, cancellation);
+        
         try
         {
             var user = await users.AddUserAsync(request.FromRequest(hasher.Hash), cancellation);
