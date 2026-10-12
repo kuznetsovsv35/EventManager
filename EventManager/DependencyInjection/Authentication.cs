@@ -1,5 +1,7 @@
 using EventManager.Infrastructure.Authentication;
+using EventManager.Infrastructure.Authorization;
 using EventManager.Infrastructure.Configuration;
+using EventManager.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 
@@ -15,6 +17,9 @@ public static partial class DependencyInjection
                 JwtSettings settings = configuration.GetSection("Jwt").Get<JwtSettings>() ?? new();
                 option.TokenValidationParameters = new TokenValidationParameters().Configure(settings);
             });
+
+        services.AddScoped<IAuthenticationService, AuthenticationService>();
+        services.AddSingleton<ITokenService, JwtTokenService>();
         
         return services;
     }
