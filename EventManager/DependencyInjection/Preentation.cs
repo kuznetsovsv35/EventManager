@@ -5,13 +5,15 @@ namespace EventManager.DependencyInjection;
 
 public static partial class DependencyInjection
 {
-    public static IServiceCollection ConfigurePresentation(this IServiceCollection services)
+    public static IServiceCollection ConfigurePresentation(this IServiceCollection services, IConfiguration configuration)
     {
+        services.ConfigureAuthentication(configuration);
+        services.ConfigureAuthorization(configuration);
+
         services.AddHttpContextAccessor();
         services.AddControllers().AddApplicationPart(Assembly.Load($"{nameof(EventManager)}.{nameof(Presentation)}"));
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
-        services.ConfigureAuthorization();
         return services;
     }
 
@@ -34,6 +36,10 @@ public static partial class DependencyInjection
 
         // Редирект
         app.UseHttpsRedirection();
+        // Аутентификация
+        app.UseAuthentication();
+        // Авторизация
+        app.UseAuthentication();
         // Контролеры.
         app.MapControllers();
         return app;

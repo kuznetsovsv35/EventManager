@@ -1,7 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Text;
 using EventManager.Application.DataTransferObjects;
+using EventManager.Infrastructure.Authentication;
 using EventManager.Infrastructure.Authorization;
 using EventManager.Infrastructure.Configuration;
 using Microsoft.Extensions.Options;
@@ -15,17 +15,7 @@ public class JwtTokenService(IOptions<JwtSettings> options) : ITokenService
    
     readonly JwtSecurityTokenHandler _jwtHandler = new();
 
-    readonly TokenValidationParameters _tokenValidationParams = new()
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-
-        ValidIssuer = options.Value.Issuer,
-        ValidAudience = options.Value.Audience,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(options.Value.SigningKey))
-    };
+    readonly TokenValidationParameters _tokenValidationParams = new TokenValidationParameters().Configure(options.Value);
 
     public string GenerateAccessToken(UserInfo userInfo, IEnumerable<Claim>? extraClaims)
     {
