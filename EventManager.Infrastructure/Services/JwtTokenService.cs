@@ -17,7 +17,7 @@ public class JwtTokenService(IOptions<JwtSettings> options) : ITokenService
 
     readonly TokenValidationParameters _tokenValidationParams = new TokenValidationParameters().Configure(options.Value);
 
-    public string GenerateAccessToken(UserInfo userInfo, IEnumerable<Claim>? extraClaims)
+    public AuthResult GenerateTokens(UserInfo userInfo, IEnumerable<Claim>? extraClaims)
     {
         var claims = new List<Claim>
         {
@@ -38,10 +38,11 @@ public class JwtTokenService(IOptions<JwtSettings> options) : ITokenService
             signingCredentials: new SigningCredentials(_tokenValidationParams.IssuerSigningKey, SecurityAlgorithms.HmacSha256)
         );
 
-        return _jwtHandler.WriteToken(token);
+        return new(
+            _jwtHandler.WriteToken(token),
+            Guid.NewGuid().ToString("N"),
+            Settings.AccessTokenExpiredAfter);
     }
-
-    public string GenerateRefreshToken() => Guid.NewGuid().ToString("N");
 
     public ClaimsPrincipal? ValidateAccessToken(string token)
     {

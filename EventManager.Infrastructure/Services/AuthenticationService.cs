@@ -9,8 +9,5 @@ public class AuthenticationService(
     ITokenService tokenService) : IAuthenticationService
 {
     public async Task<AuthResult> LoginAsync(UserRequest user, CancellationToken cancellation)
-    {
-        var info = await userService.LoginUserAsync(user, cancellation);
-        return new(tokenService.GenerateAccessToken(info, null), tokenService.GenerateRefreshToken(), 10);
-    }
+        => tokenService.GenerateTokens(await userService.LoginUserAsync(user, cancellation), null);
 }
