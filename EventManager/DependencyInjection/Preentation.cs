@@ -13,7 +13,7 @@ public static partial class DependencyInjection
         services.AddHttpContextAccessor();
         services.AddControllers().AddApplicationPart(Assembly.Load($"{nameof(EventManager)}.{nameof(Presentation)}"));
         services.AddEndpointsApiExplorer();
-        services.AddSwaggerGen();
+        services.ConfigureSwagger();
         return services;
     }
 
