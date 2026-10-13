@@ -41,9 +41,6 @@ namespace EventManager.Database.Migrations
                         .HasMaxLength(9)
                         .HasColumnType("character varying(9)");
 
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
                     b.HasKey("Id");
 
                     b.HasIndex("CreatedAt")
@@ -51,9 +48,6 @@ namespace EventManager.Database.Migrations
 
                     b.HasIndex("EventId")
                         .HasDatabaseName("IX_Bookings_EventId");
-
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("IX_Bookings_UserId");
 
                     b.ToTable("Bookings", (string)null);
                 });
@@ -99,47 +93,6 @@ namespace EventManager.Database.Migrations
                         });
                 });
 
-            modelBuilder.Entity("EventManager.Domain.ValueObjects.User", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Login")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
-
-                    b.Property<string>("Password")
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
-
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .HasMaxLength(5)
-                        .HasColumnType("character varying(5)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Login")
-                        .IsUnique();
-
-                    b.ToTable("Users", null, t =>
-                        {
-                            t.HasCheckConstraint("CK_Users_Login", "LENGTH(\"Login\") BETWEEN 1 AND 32");
-
-                            t.HasCheckConstraint("CK_Users_Password", "\"Password\" IS NULL OR LENGTH(\"Password\") = 64");
-                        });
-                });
-
             modelBuilder.Entity("EventManager.Domain.ValueObjects.Booking", b =>
                 {
                     b.HasOne("EventManager.Domain.ValueObjects.Event", "Event")
@@ -148,15 +101,7 @@ namespace EventManager.Database.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("EventManager.Domain.ValueObjects.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
                     b.Navigation("Event");
-
-                    b.Navigation("User");
                 });
 #pragma warning restore 612, 618
         }
