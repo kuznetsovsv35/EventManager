@@ -32,5 +32,11 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasKey(u => u.Id);
 
         builder.HasIndex(u => u.Login).IsUnique();
+
+        builder.HasData
+        (
+            User.DefaultAdmin,
+            User.DefaultUser
+        );
     }
 }
