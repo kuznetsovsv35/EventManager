@@ -9,7 +9,9 @@ public static partial class DependencyInjection
 
         services.AddSwaggerGen(c =>
         {
+            /*
             c.SwaggerDoc("v1", new OpenApiInfo { Title = "Events API", Version = "v1" });
+            */
 
             // 1. Описание схемы
             c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -18,18 +20,21 @@ public static partial class DependencyInjection
                 Name = "Authorization",
                 In = ParameterLocation.Header,
                 Type = SecuritySchemeType.Http,
-                Scheme = "bearer",
-                BearerFormat = "JWT"
+                Scheme = "Bearer",
+                BearerFormat = "JWT"                
             });
 
             // 2. Требование (исправленный блок без OpenApiReference)
             c.AddSecurityRequirement((_) => 
             {
-                var requirement = new OpenApiSecurityRequirement();
-                requirement.Add(new OpenApiSecuritySchemeReference("Bearer"), []);
+                var requirement = new OpenApiSecurityRequirement
+                {
+                    { new OpenApiSecuritySchemeReference("Bearer"), [] }
+                };
                 return requirement;
             });     
         });
+
         return services;
     }
 }

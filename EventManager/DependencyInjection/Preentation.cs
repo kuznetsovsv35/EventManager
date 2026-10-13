@@ -27,6 +27,15 @@ public static partial class DependencyInjection
     {
         app.ConfigureMiddleware();
 
+        // Редирект
+        app.UseHttpsRedirection();
+        // Аутентификация
+        app.UseAuthentication();
+        // Авторизация
+        app.UseAuthorization();
+        // Контролеры.
+        app.MapControllers();
+
         // В разработке работа с API в веб-интерфейсе.
         if (app.Environment.IsDevelopment())
         {
@@ -34,14 +43,6 @@ public static partial class DependencyInjection
             app.UseSwaggerUI();
         }
 
-        // Редирект
-        app.UseHttpsRedirection();
-        // Аутентификация
-        app.UseAuthentication();
-        // Авторизация
-        app.UseAuthentication();
-        // Контролеры.
-        app.MapControllers();
         return app;
     }
 }
