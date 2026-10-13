@@ -1,6 +1,7 @@
 using EventManager.Application.Authorization;
 using EventManager.Application.DataTransferObjects;
 using EventManager.Application.Interfaces;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -8,13 +9,13 @@ using Microsoft.AspNetCore.Mvc;
 namespace EventManager.Presentation.Controllers;
 
 [ApiController]
-[Authorize]
+[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 public class UsersController(IUserService userService) : ControllerBase
 {
     [HttpPost("/auth/register")]
     [ProducesResponseType<UserInfo>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [Authorize(Policy = Policies.UserService.RegisterUser)]
     public async Task<ActionResult<UserInfo>> Register([FromBody] RegisterUserRequest request, CancellationToken cancellation)
         => await userService.RegisterUserAsync(request, cancellation);
