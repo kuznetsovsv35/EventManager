@@ -12,7 +12,7 @@ public class UserService(
     IPasswordHasher hasher
     ) : AppAuthorizeService<UserService>(appAuthorization), IUserService
 {
-    public async Task<UserInfo?> ChangePasswordAsync(UserRequest request, string? newPassword, CancellationToken cancellation)
+    public async Task<UserInfo?> ChangePasswordAsync(UserRequest request, CancellationToken cancellation)
     {
         request.Check();
 
@@ -29,7 +29,7 @@ public class UserService(
 
         user = await users.UpdateUserAsync(
             request.Login, 
-            u => u.Password = newPassword is string p ? hasher.Hash(p) : null,
+            u => u.Password = request.Password is string p ? hasher.Hash(p) : null,
             cancellation);
 
         if (user is null)

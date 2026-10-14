@@ -37,5 +37,5 @@ public interface IUserService
     /// <param name="request"></param>
     /// <param name="newPassword"></param>
     /// <returns></returns>
-    Task<UserInfo?> ChangePasswordAsync(UserRequest request, string? newPassword, CancellationToken cancellation);
+    Task<UserInfo?> ChangePasswordAsync(UserRequest request, CancellationToken cancellation);
 }
