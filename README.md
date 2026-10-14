@@ -132,6 +132,11 @@
    dotnet test --filter "Category=Repositories"
    # или
    ./test-repos.sh
+
+   # Запуск тестов сервиса пользователей.
+   dotnet test --filter "Category=Users"
+   # или
+   ./test-users.sh
    ```
 
 6. запуск приложения:
@@ -151,7 +156,11 @@
    
    # Создание миграция
    ```bash
+   # Создание миграции создания БД.
    dotnet ef migrations add InitialCreate -p EventManager.Database -s EventManager
+   
+   $ Создание пользователей.
+   dotnet ef migrations add CreateUsers -p EventManager.Database -s EventManager
    ```
 
    # Обновление БД.
