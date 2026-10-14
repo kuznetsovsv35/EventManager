@@ -25,12 +25,21 @@ public static partial class DependencyInjection
     }
 
     static void ConfigurePolicies(this AuthorizationOptions options)
-    {
+    {        
         options
             .AddPolicy(Policies.UserService.RegisterUser, UserRole.Admin)
             .AddPolicy(Policies.UserService.ModifyUser, UserRole.Admin)
             .AddPolicy(Policies.UserService.ChangePassword, UserRole.User)
-            .AddPolicy(Policies.UserService.DeleteUser, UserRole.Admin);
+            .AddPolicy(Policies.UserService.DeleteUser, UserRole.Admin)
+            
+            .AddPolicy(Policies.BookingService.CreateBooking, UserRole.User)
+            .AddPolicy(Policies.BookingService.GetBooking, UserRole.User)
+            .AddPolicy(Policies.BookingService.CancelBooking, UserRole.User)
+            
+            .AddPolicy(Policies.EventService.CreateEvent, UserRole.Admin)
+            .AddPolicy(Policies.EventService.DeleteEvent, UserRole.Admin)
+            .AddPolicy(Policies.EventService.GetEvents, UserRole.User)
+            .AddPolicy(Policies.EventService.ModifyEvent, UserRole.Admin);        
     }
 
     public static IServiceCollection ConfigureAuthorization(this IServiceCollection services, IConfiguration configuration)

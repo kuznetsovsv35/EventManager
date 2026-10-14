@@ -4,17 +4,17 @@ public static class Policies
 {
     public static class EventService
     {
-        public static readonly string CreateEvent = $"{nameof(EventService)}.{nameof(CreateEvent)}";
-        public static readonly string DeleteEvent = $"{nameof(EventService)}.{nameof(DeleteEvent)}";
-        public static readonly string GetEvents = $"{nameof(EventService)}.{nameof(GetEvents)}";
-        public static readonly string ModifyEvent = $"{nameof(EventService)}.{nameof(ModifyEvent)}";
+        public const string CreateEvent = $"{nameof(EventService)}.{nameof(CreateEvent)}";
+        public const string DeleteEvent = $"{nameof(EventService)}.{nameof(DeleteEvent)}";
+        public const string GetEvents = $"{nameof(EventService)}.{nameof(GetEvents)}";
+        public const string ModifyEvent = $"{nameof(EventService)}.{nameof(ModifyEvent)}";
     }
 
     public static class BookingService
     {
-        public static readonly string CreateBooking = $"{nameof(BookingService)}.{nameof(CreateBooking)}";
-        public static readonly string GetBooking = $"{nameof(BookingService)}.{GetBooking}";
-        public static readonly string CancelBooking = $"{nameof(BookingService)}.{nameof(CancelBooking)}";
+        public const string CreateBooking = $"{nameof(BookingService)}.{nameof(CreateBooking)}";
+        public const string GetBooking = $"{nameof(BookingService)}.{nameof(GetBooking)}";
+        public const string CancelBooking = $"{nameof(BookingService)}.{nameof(CancelBooking)}";
     }
 
     public static class UserService
