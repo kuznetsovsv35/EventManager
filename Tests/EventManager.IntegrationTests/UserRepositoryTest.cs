@@ -19,14 +19,14 @@ public class UserRepositoryTest(TestContainerWrapper<AppDbContext> testContainer
         await ResetDatabase();
         var hasher = new PasswordHasher();
 
-        User admin = new("admin") 
+        User admin = new("admin-1") 
         {
             Role = UserRole.Admin,
             Password = hasher.Hash("admin")
         };
         var adminInfo = admin.ToInfo();
 
-        User user = new("user") 
+        User user = new("user-1") 
         {
             Role = UserRole.User,
             Password = hasher.Hash("user")
@@ -42,8 +42,8 @@ public class UserRepositoryTest(TestContainerWrapper<AppDbContext> testContainer
         // Then
         await using var verifyContext = CreateDbContext();
         IUserRepository verifyRepository = new UserRepository(verifyContext);
-        var adminAdded = await verifyRepository.GetUserAsync("admin", CancellationToken.None);
-        var userAdded = await verifyRepository.GetUserAsync("user", CancellationToken.None);
+        var adminAdded = await verifyRepository.GetUserAsync("admin-1", CancellationToken.None);
+        var userAdded = await verifyRepository.GetUserAsync("user-1", CancellationToken.None);
 
         Assert.NotNull(adminAdded);
         Assert.Equal(adminInfo, adminAdded.ToInfo());

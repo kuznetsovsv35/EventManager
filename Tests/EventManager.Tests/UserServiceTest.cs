@@ -37,7 +37,7 @@ public class UserServiceTest(EventManagerTestContext context) : TestObjectBase, 
     [Trait(Category, Category_Users)]
     [Theory]
     [InlineData(["unknown", "password"])]
-    [InlineData(["admin", "123"])]
+    [InlineData(["test-admin", "123"])]
     public async Task LoginUser_Fail(string login, string password)
     {
         // Given
@@ -140,9 +140,9 @@ public class UserServiceTest(EventManagerTestContext context) : TestObjectBase, 
             UserRequest passwordRequest = new() 
             { 
                 Login = login,
-                Password = password,
+                Password = newPassword,
             };        
-            passwordChanged = await userService.ChangePasswordAsync(passwordRequest, newPassword, CancellationToken.None);
+            passwordChanged = await userService.ChangePasswordAsync(passwordRequest, CancellationToken.None);
         }
 
         {
