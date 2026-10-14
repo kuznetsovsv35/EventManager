@@ -65,6 +65,7 @@ public class ErrorHandler(RequestDelegate next, ILogger<ErrorHandler> logger)
             ForbiddenException forbidden => ProblemDetailsFactory.Forbid(forbidden.Message),
             LoginUserException loginUser => ProblemDetailsFactory.Unauthorized(loginUser.Message),
             RegisterUserException registerUser => ProblemDetailsFactory.BadRequest(registerUser.InnerException?.Message, registerUser.Message),
+            UserNotFoundException userNotFound => ProblemDetailsFactory.NotFound($"{userNotFound.Message}: {userNotFound.Login}."),
 
             _ => ProblemDetailsFactory.InternalServiceError(exception.Message)
         };
