@@ -30,12 +30,12 @@ public interface IUserService
     /// </summary>
     /// <param name="request"></param>
     /// <returns></returns>
-    Task<UserInfo?> ChangeRoleAsync(RegisterUserRequest request, CancellationToken cancellation);
+    Task<UserInfo> ChangeRoleAsync(RegisterUserRequest request, CancellationToken cancellation);
     /// <summary>
     /// Изменение пароля пользователя.
     /// </summary>
     /// <param name="request"></param>
     /// <param name="newPassword"></param>
     /// <returns></returns>
-    Task<UserInfo?> ChangePasswordAsync(UserRequest request, CancellationToken cancellation);
+    Task<UserInfo> ChangePasswordAsync(UserRequest request, CancellationToken cancellation);
 }

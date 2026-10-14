@@ -27,7 +27,10 @@ public static partial class DependencyInjection
     static void ConfigurePolicies(this AuthorizationOptions options)
     {
         options
-            .AddPolicy(Policies.UserService.RegisterUser, UserRole.Admin);
+            .AddPolicy(Policies.UserService.RegisterUser, UserRole.Admin)
+            .AddPolicy(Policies.UserService.ModifyUser, UserRole.Admin)
+            .AddPolicy(Policies.UserService.ChangePassword, UserRole.User)
+            .AddPolicy(Policies.UserService.DeleteUser, UserRole.Admin);
     }
 
     public static IServiceCollection ConfigureAuthorization(this IServiceCollection services, IConfiguration configuration)

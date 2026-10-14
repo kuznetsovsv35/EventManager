@@ -12,7 +12,7 @@ public class UserService(
     IPasswordHasher hasher
     ) : AppAuthorizeService<UserService>(appAuthorization), IUserService
 {
-    public async Task<UserInfo?> ChangePasswordAsync(UserRequest request, CancellationToken cancellation)
+    public async Task<UserInfo> ChangePasswordAsync(UserRequest request, CancellationToken cancellation)
     {
         request.Check();
 
@@ -38,7 +38,7 @@ public class UserService(
         return user.ToInfo();
     }
 
-    public async Task<UserInfo?> ChangeRoleAsync(RegisterUserRequest request, CancellationToken cancellation)
+    public async Task<UserInfo> ChangeRoleAsync(RegisterUserRequest request, CancellationToken cancellation)
     {
         request.Check();
 
