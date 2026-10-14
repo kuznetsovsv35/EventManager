@@ -12,41 +12,53 @@ namespace EventManager.Presentation.Controllers;
 public class UsersController(IUserService userService) : ControllerBase
 {
     [HttpPost("/auth/register")]
-    [ProducesResponseType<UserInfo>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [Authorize(Policy = Policies.UserService.RegisterUser)]
     public async Task<ActionResult<UserInfo>> Register([FromBody] RegisterUserRequest request, CancellationToken cancellation)
-        => await userService.RegisterUserAsync(request, cancellation);
+    {
+        await userService.RegisterUserAsync(request, cancellation);
+        return NoContent();
+    }
 
     [HttpPut("/auth/register")]
-    [ProducesResponseType<UserInfo>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     [Authorize(Policy = Policies.UserService.ModifyUser)]
     public async Task<ActionResult<UserInfo>> ChangeRole([FromBody] RegisterUserRequest request, CancellationToken cancellation)
-        => await userService.ChangeRoleAsync(request, cancellation);
+    {
+        await userService.ChangeRoleAsync(request, cancellation);
+        return NoContent();
+    }
 
     [HttpPut("/auth/password")]
-    [ProducesResponseType<UserInfo>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     [Authorize(Policy = Policies.UserService.ChangePassword)]
     public async Task<ActionResult<UserInfo>> ChangePassword(UserRequest request, CancellationToken cancellation)
-        => await userService.ChangePasswordAsync(request, cancellation);
+    {
+        await userService.ChangePasswordAsync(request, cancellation);
+        return NoContent();
+    }
 
     [HttpDelete("/auth/register")]
-    [ProducesResponseType<UserInfo>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     [Authorize(Policy = Policies.UserService.DeleteUser)]
     public async Task<ActionResult<UserInfo>> Delete(UserRequest request, CancellationToken cancellation)
-        => await userService.DeleteUserAsync(request, cancellation);
+    {
+        await userService.DeleteUserAsync(request, cancellation);
+        return NoContent();
+    }
 }
