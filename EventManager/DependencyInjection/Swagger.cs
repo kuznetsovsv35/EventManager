@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi;
 
 namespace EventManager.DependencyInjection;
@@ -6,33 +7,30 @@ public static partial class DependencyInjection
 {
     public static IServiceCollection ConfigureSwagger(this IServiceCollection services)
     {
-
-        services.AddSwaggerGen(c =>
+        services.AddSwaggerGen(swagger =>
         {
-            /*
-            c.SwaggerDoc("v1", new OpenApiInfo { Title = "Events API", Version = "v1" });
-            */
-
-            // 1. Описание схемы
-            c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            swagger.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
             {
                 Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
                 Name = "Authorization",
                 In = ParameterLocation.Header,
                 Type = SecuritySchemeType.Http,
-                Scheme = "Bearer",
+                Scheme = JwtBearerDefaults.AuthenticationScheme,
                 BearerFormat = "JWT"                
             });
 
-            // 2. Требование (исправленный блок без OpenApiReference)
-            c.AddSecurityRequirement((_) => 
+            swagger.AddSecurityRequirement(doc => 
             {
                 var requirement = new OpenApiSecurityRequirement
                 {
-                    { new OpenApiSecuritySchemeReference("Bearer"), [] }
+                    { 
+                        new OpenApiSecuritySchemeReference(JwtBearerDefaults.AuthenticationScheme, doc), 
+                        [] 
+                    }
                 };
+
                 return requirement;
-            });     
+            });
         });
 
         return services;
