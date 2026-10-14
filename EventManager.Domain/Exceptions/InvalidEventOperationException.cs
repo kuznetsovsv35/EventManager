@@ -2,6 +2,9 @@ using EventManager.Domain.ValueObjects;
 
 namespace EventManager.Domain.Exceptions;
 
+/// <summary>
+/// Исключение - неверная операция над событиями.
+/// </summary>
 public class InvalidEventOperationException : UserOperationException
 {
     public Guid EventId { get; }

@@ -1,7 +1,12 @@
 namespace EventManager.Domain.Exceptions;
 
+/// <summary>
+/// Исключение - ошибка валидации параметров разбивки на страницы.
+/// </summary>
 public class PaginatorParamException : ArgumentException
 {
+    public int ParamValue { get; }
+
     public PaginatorParamException(string paramName, int paramValue)
         : this(paramName, paramValue, null) { }
 
@@ -10,5 +15,4 @@ public class PaginatorParamException : ArgumentException
     {
         ParamValue = paramValue;
     }
-    public int ParamValue { get; }
 }

@@ -7,9 +7,10 @@ namespace EventManager.Domain.Exceptions;
 /// </summary>
 public class NoAvailableSeatsException : InvalidEventOperationException
 {
+    public NoAvailableSeatsException(Event @event, string login, UserRole role) 
+        : this(@event, login, role, null) {  }
+
     public NoAvailableSeatsException(Event @event, string login, UserRole role,  Exception? innerException)
         : base("Нет свободных мест на данном событии", @event, login, role, innerException) { }
 
-    public NoAvailableSeatsException(Event @event, string login, UserRole role) 
-        : this(@event, login, role, null) {  }
 }

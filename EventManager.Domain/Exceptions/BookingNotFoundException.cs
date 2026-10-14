@@ -9,5 +9,5 @@ public class BookingNotFoundException : ObjectNotFoundException<Guid>
         : this(bookingId, paramName, null) { }
 
     public BookingNotFoundException(Guid bookingId, string paramName, Exception? innerException)
-        : base("Бронирование не найдено", paramName, bookingId) { }
+        : base("Бронирование не найдено", paramName, bookingId, innerException) { }
 }

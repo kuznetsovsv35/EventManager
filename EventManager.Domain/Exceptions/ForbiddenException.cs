@@ -2,6 +2,9 @@ using EventManager.Domain.ValueObjects;
 
 namespace EventManager.Domain.Exceptions;
 
+/// <summary>
+/// Исключение - нет прав на выполнение операцией.
+/// </summary>
 public class ForbiddenException : UserOperationException
 {
     public string ResourceName { get; }

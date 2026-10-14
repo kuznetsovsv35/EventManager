@@ -2,6 +2,9 @@ using EventManager.Domain.ValueObjects;
 
 namespace EventManager.Domain.Exceptions;
 
+/// <summary>
+/// Исключение - неверная операция с бронирования.
+/// </summary>
 public class InvalidBookingOperation : UserOperationException
 {
     public Guid BookingId { get; }

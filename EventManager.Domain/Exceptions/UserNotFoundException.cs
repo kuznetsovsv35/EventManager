@@ -6,12 +6,10 @@ namespace EventManager.Domain.Exceptions;
 public class UserNotFoundException : ApplicationException
 {
     public string Login { get; }
+    
     public UserNotFoundException(string login)
         : this(login, null) {}
 
     public UserNotFoundException(string login, Exception? innerException)
-        : base("Пользователь не найден", innerException)
-    {
-        Login = login;
-    }
+        : base("Пользователь не найден", innerException) => Login = login;
 }
