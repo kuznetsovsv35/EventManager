@@ -29,16 +29,16 @@ public static partial class DependencyInjection
         options
             .AddPolicy(Policies.UserService.RegisterUser, UserRole.Admin)
             .AddPolicy(Policies.UserService.ModifyUser, UserRole.Admin)
-            .AddPolicy(Policies.UserService.ChangePassword, UserRole.User)
+            .AddPolicy(Policies.UserService.ChangePassword, UserRole.Admin, UserRole.User)
             .AddPolicy(Policies.UserService.DeleteUser, UserRole.Admin)
             
-            .AddPolicy(Policies.BookingService.CreateBooking, UserRole.User)
-            .AddPolicy(Policies.BookingService.GetBooking, UserRole.User)
-            .AddPolicy(Policies.BookingService.CancelBooking, UserRole.User)
+            .AddPolicy(Policies.BookingService.CreateBooking, UserRole.Admin, UserRole.User)
+            .AddPolicy(Policies.BookingService.GetBooking, UserRole.Admin, UserRole.User)
+            .AddPolicy(Policies.BookingService.CancelBooking, UserRole.Admin, UserRole.User)
             
             .AddPolicy(Policies.EventService.CreateEvent, UserRole.Admin)
             .AddPolicy(Policies.EventService.DeleteEvent, UserRole.Admin)
-            .AddPolicy(Policies.EventService.GetEvents, UserRole.User)
+            .AddPolicy(Policies.EventService.GetEvents, UserRole.Admin, UserRole.User)
             .AddPolicy(Policies.EventService.ModifyEvent, UserRole.Admin);        
     }
 
