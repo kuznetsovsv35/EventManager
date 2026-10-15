@@ -17,7 +17,7 @@ public class UserRequestValidationAttribute : ValidationBaseAttribute
             switch (validationContext.MemberName)
             {
                 case nameof(UserRequest.Login):
-                    if (string.IsNullOrWhiteSpace(userRequest.Login))
+                    if (string.IsNullOrWhiteSpace(userRequest.Login) || (userRequest.Login.Length < 1 && userRequest.Login.Length > 32))
                         return CreateResult(validationContext);
                     break;
             }

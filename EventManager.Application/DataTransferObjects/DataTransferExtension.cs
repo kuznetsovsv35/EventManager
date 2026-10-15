@@ -78,4 +78,26 @@ public static class DataTransferExtension
             Login = user.Login,
             Role = user.Role,
         };
+
+    public static RegisterUserRequest SetLogin(this RegisterUserRequest request, string login)
+    {
+        request.Login = login;
+        return request;
+    }
+
+    public static RegisterUserRequest ChangeRole(this RegisterUserRequest request,  string roleName)
+    {
+        if (!Enum.TryParse<UserRole>(roleName, out var role))
+            throw new ArgumentException("Неверное наименование роли", nameof(roleName));
+        
+        request.Role = role;
+        return request;
+    }
+
+    public static RegisterUserRequest SetPassword(this RegisterUserRequest request, string? password)
+    {
+        request.Password = password;
+        return request;
+    }
+    
 }
