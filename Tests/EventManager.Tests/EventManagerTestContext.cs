@@ -28,9 +28,16 @@ public class EventManagerTestContext
     {
         await using var scope = ServiceProvider.CreateAsyncScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        int eventCount = await dbContext.Events.AsNoTracking().CountAsync<Event>(cancellation);
+        int eventCount = await dbContext.Events.AsNoTracking().CountAsync(cancellation);
         var eventIndex = Random.Shared.Next(eventCount);
-        return (await dbContext.Events.AsNoTracking().Skip(eventIndex).FirstAsync(cancellation)).Id;
+        var id = (await dbContext.Events.AsNoTracking().Skip(eventIndex).FirstAsync(cancellation)).Id;
+        /*
+        if (id == Guid.Empty)
+        {
+            throw new Exception();
+        }
+        */
+        return id;
     }
 
     public async Task<UserInfo> GetUserInfo(string login, UserRole role)

@@ -77,7 +77,7 @@ public class BookingService(
 
     async Task CheckUserActiveBookingsAsync(UserInfo userInfo, CancellationToken cancellation)
     {
-        if (await bookings.GetUserActiveBookingCountAsync(userInfo.Id, cancellation) is int activeBookings && activeBookings > AvailableBookingsPerUser)
+        if (await bookings.GetUserActiveBookingCountAsync(userInfo.Id, cancellation) is int activeBookings && activeBookings >= AvailableBookingsPerUser)
             throw new ActiveUserBookingException(userInfo.Login, userInfo.Role);
     }
 

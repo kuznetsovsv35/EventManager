@@ -438,4 +438,80 @@ public class BookingServiceTest(EventManagerTestContext context) : TestObjectBas
         Assert.Equal(originAvailableSeats, availableSeatsAfterBooking + 1);
         Assert.Equal(originAvailableSeats, availableSeatsAfterReject);
     }
+
+    /// <summary>
+    /// Попытка забронировать прошедшее события.
+    /// </summary>
+    /// <returns></returns>
+    [Trait(Category, Category_Booking)]
+    [Fact]
+    public async Task CreateBookingPastEvent_Fail()
+    {
+        // Given
+        var startAt = DateTime.UtcNow.AddYears(-1);
+        var endAt = startAt.AddHours(2);
+        
+        EventInputData pastEvent = new()
+        {
+            Title = "Past Event",
+            StartAt = startAt,
+            EndAt = endAt,
+            TotalSeats = 50,
+        };
+
+        await using var scope = context.CreateAsyncScope();
+        var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();        
+        var eventInfo = await eventService.CreateEventAsync(pastEvent, CancellationToken.None);
+
+        var bookingService = scope.ServiceProvider.GetRequiredService<IBookingService>();
+    
+        // When
+    
+        // Then
+        await Assert.ThrowsAnyAsync<StartedEventBookingException>(async() 
+            => await bookingService.CreateBookingAsync(eventInfo.Id, CancellationToken.None));
+    }
+
+    [Trait(Category, Category_Booking)]
+    [Fact]
+    public async Task CreateBookingOnActiveBookingsLimit_Fail()
+    {
+        // Given
+        const int bookingLimit = 10;
+        
+        var startAt = DateTime.UtcNow.AddYears(1);
+        var endAt = startAt.AddHours(2);
+        
+        EventInputData futureEvent = new()
+        {
+            Title = "Future Event",
+            StartAt = startAt,
+            EndAt = endAt,
+            TotalSeats = 50,
+        };
+
+        var serviceProvider = context.CreateServiceProvider();
+        await using var workScope = serviceProvider.CreateAsyncScope();
+        var eventService = workScope.ServiceProvider.GetRequiredService<IEventService>();        
+        var eventInfo = await eventService.CreateEventAsync(futureEvent, CancellationToken.None);
+    
+        // When
+        var bookingTasks = Enumerable
+            .Range(0, bookingLimit)
+            .Select(async (_) =>
+            {
+                await using var scope = serviceProvider.CreateAsyncScope();
+                var bookingService = scope.ServiceProvider.GetRequiredService<IBookingService>();
+                return await bookingService.CreateBookingAsync(eventInfo.Id, CancellationToken.None);
+            })
+            .ToList();
+
+        await Task.WhenAll(bookingTasks);
+    
+        // Then
+        await using var verifyScope = serviceProvider.CreateAsyncScope();
+        var bookingService = verifyScope.ServiceProvider.GetRequiredService<IBookingService>();
+        await Assert.ThrowsAnyAsync<ActiveUserBookingException>(async() 
+            => await bookingService.CreateBookingAsync(eventInfo.Id, CancellationToken.None));
+    }
 }
