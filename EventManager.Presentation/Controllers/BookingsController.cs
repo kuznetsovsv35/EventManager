@@ -36,7 +36,7 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
     public async Task<ActionResult<BookingInfo>> GetBooking(Guid id, CancellationToken cancellation)
         => Ok(await bookingService.GetBookingByIdAsync(id, cancellation));
 
-    [HttpGet("{id:guid}")]
+    [HttpDelete("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
