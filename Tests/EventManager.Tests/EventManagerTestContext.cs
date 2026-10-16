@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -9,10 +8,8 @@ using EventManager.Application.Interfaces;
 using EventManager.Application.Services;
 using EventManager.Infrastructure.Services;
 using EventManager.Infrastructure.Repositories;
-using EventManager.Database;
 using EventManager.Infrastructure.Background;
 using EventManager.Application.Authorization;
-using EventManager.Application.DataTransferObjects;
 using EventManager.Application.Cryptography;
 
 namespace EventManager.Tests;
@@ -22,34 +19,6 @@ namespace EventManager.Tests;
 /// </summary>
 public class EventManagerTestContext
 {
-    public IServiceProvider ServiceProvider { get; }
-
-    public async Task<Guid> GetRandomEventId(CancellationToken cancellation)
-    {
-        await using var scope = ServiceProvider.CreateAsyncScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        int eventCount = await dbContext.Events.AsNoTracking().CountAsync(cancellation);
-        var eventIndex = Random.Shared.Next(eventCount);
-        var id = (await dbContext.Events.AsNoTracking().Skip(eventIndex).FirstAsync(cancellation)).Id;
-        /*
-        if (id == Guid.Empty)
-        {
-            throw new Exception();
-        }
-        */
-        return id;
-    }
-
-    public async Task<UserInfo> GetUserInfo(string login, UserRole role)
-    {
-        await using var scope = CreateAsyncScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        return (await dbContext.Users
-            .AsNoTracking()
-            .SingleAsync(u => u.Login == login && u.Role == role && u.IsActive))
-            .ToInfo();
-    }
-
     readonly IServiceCollection _services;
 
     public EventManagerTestContext()
@@ -84,9 +53,7 @@ public class EventManagerTestContext
             .AddScoped<IUserRepository, UserRepository>()
             .AddScoped<IUserService, UserService>()
             .AddSingleton<IPasswordHasher, PasswordHasher>();            
-        ServiceProvider = CreateServiceProvider();
     }
 
-    internal IServiceProvider CreateServiceProvider() => _services.BuildServiceProvider();
-    internal AsyncServiceScope CreateAsyncScope() => ServiceProvider.CreateAsyncScope();
+    public IServiceProvider CreateServiceProvider() => _services.BuildServiceProvider();
 }

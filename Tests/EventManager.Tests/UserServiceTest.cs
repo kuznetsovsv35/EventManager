@@ -17,9 +17,10 @@ public class UserServiceTest(EventManagerTestContext context) : TestObjectBase, 
     public async Task LoginUser_Success()
     {
         // Given
-        await using var scope = context.CreateAsyncScope();
+        var serviceProvider = context.CreateServiceProvider();
+        await using var scope = serviceProvider.CreateAsyncScope();
         var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
-        var expectedInfo = await context.GetUserInfo(TestAppDbContext.AdminLogin, UserRole.Admin);
+        var expectedInfo = await serviceProvider.GetUserInfo(TestAppDbContext.AdminLogin, UserRole.Admin);
     
         // When
         var loginRequest = new UserRequest
@@ -41,7 +42,8 @@ public class UserServiceTest(EventManagerTestContext context) : TestObjectBase, 
     public async Task LoginUser_Fail(string login, string password)
     {
         // Given
-        await using var scope = context.CreateAsyncScope();
+        var serviceProvider = context.CreateServiceProvider();
+        await using var scope = serviceProvider.CreateAsyncScope();
         var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
     
         // When
@@ -61,7 +63,8 @@ public class UserServiceTest(EventManagerTestContext context) : TestObjectBase, 
     public async Task RegisterUser_Success()
     {
         // Given
-        await using var scope = context.CreateAsyncScope();
+        var serviceProvider = context.CreateServiceProvider();
+        await using var scope = serviceProvider.CreateAsyncScope();
         var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
         const string login = "test";
         const string password = "123";
@@ -87,7 +90,8 @@ public class UserServiceTest(EventManagerTestContext context) : TestObjectBase, 
     public async Task RegisterUser_Fail()
     {
         // Given
-        await using var scope = context.CreateAsyncScope();
+        var serviceProvider = context.CreateServiceProvider();
+        await using var scope = serviceProvider.CreateAsyncScope();
         var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
         string login = TestAppDbContext.UserLogin;
         const string password = "123";
@@ -120,8 +124,10 @@ public class UserServiceTest(EventManagerTestContext context) : TestObjectBase, 
         UserInfo? passwordChanged;
         UserInfo? logged;
 
+        var serviceProvider = context.CreateServiceProvider();
+
         {
-            await using var scope = context.CreateAsyncScope();
+            await using var scope = serviceProvider.CreateAsyncScope();
             var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
 
             RegisterUserRequest request = new()
@@ -135,7 +141,7 @@ public class UserServiceTest(EventManagerTestContext context) : TestObjectBase, 
 
         // When
         {
-            await using var scope = context.CreateAsyncScope();
+            await using var scope = serviceProvider.CreateAsyncScope();
             var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
             UserRequest passwordRequest = new() 
             { 
@@ -146,7 +152,7 @@ public class UserServiceTest(EventManagerTestContext context) : TestObjectBase, 
         }
 
         {
-            await using var scope = context.CreateAsyncScope();
+            await using var scope = serviceProvider.CreateAsyncScope();
             var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
 
             UserRequest loginRequest = new()
@@ -161,6 +167,7 @@ public class UserServiceTest(EventManagerTestContext context) : TestObjectBase, 
         Assert.Equal(registered, passwordChanged);
         Assert.Equal(registered, logged);
     }
+    
     [Trait(Category, Category_Users)]
     [Fact]
     public async Task ChangeRole_Success()
@@ -172,9 +179,10 @@ public class UserServiceTest(EventManagerTestContext context) : TestObjectBase, 
         const UserRole newRole = UserRole.Admin;
         UserInfo? registered;
         UserInfo? roleChanged;
+        var serviceProvider = context.CreateServiceProvider();
 
-        {
-            await using var scope = context.CreateAsyncScope();
+        {            
+            await using var scope = serviceProvider.CreateAsyncScope();
             var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
 
             RegisterUserRequest request = new()
@@ -188,7 +196,7 @@ public class UserServiceTest(EventManagerTestContext context) : TestObjectBase, 
 
         // When
         {
-            await using var scope = context.CreateAsyncScope();
+            await using var scope = serviceProvider.CreateAsyncScope();
             var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
             RegisterUserRequest roleRequest = new() 
             { 
