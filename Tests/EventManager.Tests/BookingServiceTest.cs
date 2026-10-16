@@ -67,7 +67,8 @@ public class BookingServiceTest(EventManagerTestContext context) : TestObjectBas
             return (await eventService.GetEventAsync(eventId, CancellationToken.None)).AvailableSeats;
         }
 
-        var bookingCount = await GetAvailableSeats();
+        var availableSeatsBefore = await GetAvailableSeats();
+        var bookingCount = Math.Min(10, availableSeatsBefore);
 
         // When
         var bookingTasks = Enumerable
@@ -81,13 +82,13 @@ public class BookingServiceTest(EventManagerTestContext context) : TestObjectBas
             .ToList();
 
         var bookingIds = (await Task.WhenAll(bookingTasks)).Select(t => t.Id).ToList();
-        var availableSeats = await GetAvailableSeats();
+        var availableSeatsAfter = await GetAvailableSeats();
 
         // Then
         Assert.True(bookingCount > 0);
         Assert.Equal(bookingCount, bookingIds.Count);
         Assert.Distinct(bookingIds);
-        Assert.Equal(0, availableSeats);
+        Assert.Equal(availableSeatsBefore, availableSeatsAfter + bookingCount); 
     }
 
     /// <summary>
