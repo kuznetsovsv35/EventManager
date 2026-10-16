@@ -1,10 +1,8 @@
 using EventManager.Application.Authorization;
 using EventManager.Application.DataTransferObjects;
 using EventManager.Application.Interfaces;
-using EventManager.Domain.ValueObjects;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EventManager.Presentation.Controllers;
@@ -33,8 +31,8 @@ public class UsersController(IUserService userService) : ControllerBase
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     [Authorize(Policy = Policies.UserService.ModifyUser)]
     public async Task<ActionResult> ChangeRole(
-        [FromRoute]string login, 
-        [FromQuery]string role, 
+        [FromRoute] string login,
+        [FromQuery] string role,
         CancellationToken cancellation)
     {
         var request = new RegisterUserRequest()
@@ -53,7 +51,7 @@ public class UsersController(IUserService userService) : ControllerBase
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     [Authorize(Policy = Policies.UserService.ChangePassword)]
     public async Task<ActionResult> ChangePassword(
-        [FromRoute]string login, 
+        [FromRoute] string login,
         [FromBody] string? password,
         CancellationToken cancellation)
     {
@@ -72,7 +70,7 @@ public class UsersController(IUserService userService) : ControllerBase
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     [Authorize(Policy = Policies.UserService.DeleteUser)]
-    public async Task<ActionResult> Unregister([FromRoute]string login, CancellationToken cancellation)
+    public async Task<ActionResult> Unregister([FromRoute] string login, CancellationToken cancellation)
     {
         var request = new RegisterUserRequest().SetLogin(login);
         await userService.DeleteUserAsync(request, cancellation);

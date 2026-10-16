@@ -13,7 +13,7 @@ public static class DbContextExtensions
             .AsNoTracking()
             .Where(u => u.Role == role)
             .Select(u => u.Id);
-            
+
         if (await query.FirstOrDefaultAsync(CancellationToken.None) is Guid userId && userId != Guid.Empty)
             return userId;
 

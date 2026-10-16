@@ -12,7 +12,7 @@ namespace EventManager.Infrastructure.Services;
 public class JwtTokenService(IOptions<JwtSettings> options) : ITokenService
 {
     public JwtSettings Settings => options.Value;
-   
+
     readonly JwtSecurityTokenHandler _jwtHandler = new();
 
     readonly TokenValidationParameters _tokenValidationParams = new TokenValidationParameters().Configure(options.Value);

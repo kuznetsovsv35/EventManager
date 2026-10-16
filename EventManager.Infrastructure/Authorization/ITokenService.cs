@@ -1,8 +1,8 @@
-namespace EventManager.Infrastructure.Authorization;
-
 using System.Security.Claims;
 using EventManager.Application.DataTransferObjects;
 using EventManager.Infrastructure.Authentication;
+
+namespace EventManager.Infrastructure.Authorization;
 
 public interface ITokenService
 {

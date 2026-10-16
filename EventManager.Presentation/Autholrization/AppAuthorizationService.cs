@@ -22,7 +22,7 @@ public class AppAuthorizationService : IAppAuthorizationService
         _authorization = authorization;
     }
 
-    public async Task AuthorizeAsync<TResource>(TResource resource, string policyName, CancellationToken cancellation) where TResource: class
+    public async Task AuthorizeAsync<TResource>(TResource resource, string policyName, CancellationToken cancellation) where TResource : class
     {
         if (!CurrentUser.IsAuthenticated || _principal is null)
             throw new ForbiddenException(resource, policyName, string.Empty, UserRole.User);
@@ -32,8 +32,8 @@ public class AppAuthorizationService : IAppAuthorizationService
         if (!result.Succeeded)
             throw new ForbiddenException
             (
-                resource, policyName, 
-                CurrentUser.Login, 
+                resource, policyName,
+                CurrentUser.Login,
                 CurrentUser.Role
             );
     }

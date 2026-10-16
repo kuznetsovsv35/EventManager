@@ -16,16 +16,16 @@ public static partial class DependencyInjection
                 In = ParameterLocation.Header,
                 Type = SecuritySchemeType.Http,
                 Scheme = JwtBearerDefaults.AuthenticationScheme,
-                BearerFormat = "JWT"                
+                BearerFormat = "JWT"
             });
 
-            swagger.AddSecurityRequirement(doc => 
+            swagger.AddSecurityRequirement(doc =>
             {
                 var requirement = new OpenApiSecurityRequirement
                 {
-                    { 
-                        new OpenApiSecuritySchemeReference(JwtBearerDefaults.AuthenticationScheme, doc), 
-                        [] 
+                    {
+                        new OpenApiSecuritySchemeReference(JwtBearerDefaults.AuthenticationScheme, doc),
+                        []
                     }
                 };
 

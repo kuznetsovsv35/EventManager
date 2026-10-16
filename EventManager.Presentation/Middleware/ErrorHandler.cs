@@ -59,7 +59,7 @@ public class ErrorHandler(RequestDelegate next, ILogger<ErrorHandler> logger)
             ),
 
             ObjectNotFoundException<Guid> notFound => ProblemDetailsFactory.NotFound($"{notFound.Message}: (ID={notFound.ObjectKey})."),
-            NoAvailableSeatsException noAvailableSeats => ProblemDetailsFactory.Conflict($"{noAvailableSeats.Message}: (ID={noAvailableSeats.EventId})."),            
+            NoAvailableSeatsException noAvailableSeats => ProblemDetailsFactory.Conflict($"{noAvailableSeats.Message}: (ID={noAvailableSeats.EventId})."),
             StartedEventBookingException startedEventBooking => ProblemDetailsFactory.BadRequest(startedEventBooking.Message),
             ActiveUserBookingException activeUserBooking => ProblemDetailsFactory.Conflict(activeUserBooking.Message),
             ForbiddenException forbidden => ProblemDetailsFactory.Forbid(forbidden.Message),

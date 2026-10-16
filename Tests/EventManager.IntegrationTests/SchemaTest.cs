@@ -432,12 +432,12 @@ public class SchemaTest(TestContainerWrapper<AppDbContext> testContainer) : Data
         };
 
         UserInfo info = user.ToInfo();
-    
+
         // When
         await using var workContext = CreateDbContext();
         workContext.Users.Add(user);
         await workContext.SaveChangesAsync();
-    
+
         // Then
         await using var verifyContext = CreateDbContext();
         var userFound = await verifyContext.Users
@@ -447,7 +447,7 @@ public class SchemaTest(TestContainerWrapper<AppDbContext> testContainer) : Data
                 ")
             .AsNoTracking()
             .SingleOrDefaultAsync();
-        
+
         var infoFound = userFound?.ToInfo();
 
         Assert.NotNull(infoFound);
@@ -470,15 +470,15 @@ public class SchemaTest(TestContainerWrapper<AppDbContext> testContainer) : Data
         const bool isActive = default;
         await using var context = CreateDbContext();
         var db = context.Database;
-    
+
         // When
         await db.ExecuteSqlInterpolatedAsync($@"
             INSERT INTO ""Users"" (""Id"", ""Login"", ""Role"", ""IsActive"", ""CreatedAt"")
             VALUES ({id}, {login1}, {role}, {isActive}, {createdAt})
         ");
-    
+
         // Then
-        var ex = await Assert.ThrowsAnyAsync<PostgresException>(async() =>
+        var ex = await Assert.ThrowsAnyAsync<PostgresException>(async () =>
         {
             await db.ExecuteSqlInterpolatedAsync($@"
                 INSERT INTO ""Users"" (""Id"", ""Login"", ""Role"", ""IsActive"", ""CreatedAt"")
@@ -515,7 +515,7 @@ public class SchemaTest(TestContainerWrapper<AppDbContext> testContainer) : Data
         // When
         var verify = CreateDbContext();
 
-        var exIdNull = await Assert.ThrowsAnyAsync<PostgresException>(async() =>
+        var exIdNull = await Assert.ThrowsAnyAsync<PostgresException>(async () =>
         {
             await verify.Database.ExecuteSqlInterpolatedAsync($@"
                 UPDATE ""Users"" 
@@ -524,42 +524,42 @@ public class SchemaTest(TestContainerWrapper<AppDbContext> testContainer) : Data
             ");
         });
 
-        var exLoginNull = await Assert.ThrowsAnyAsync<PostgresException>(async() =>
+        var exLoginNull = await Assert.ThrowsAnyAsync<PostgresException>(async () =>
         {
             await verify.Database.ExecuteSqlInterpolatedAsync($@"
                 UPDATE ""Users""
                 SET ""Login"" = NULL
                 WHERE ""Id"" = {user.Id}
-            "); 
+            ");
         });
 
-        var exLoginMinLength = await Assert.ThrowsAnyAsync<PostgresException>(async() =>
+        var exLoginMinLength = await Assert.ThrowsAnyAsync<PostgresException>(async () =>
         {
             await verify.Database.ExecuteSqlInterpolatedAsync($@"
                 UPDATE ""Users""
                 SET ""Login"" = {loginMinLength}
                 WHERE ""Id"" = {user.Id}
-            "); 
+            ");
         });
-        var exLoginMaxLength = await Assert.ThrowsAnyAsync<PostgresException>(async() =>
+        var exLoginMaxLength = await Assert.ThrowsAnyAsync<PostgresException>(async () =>
         {
             await verify.Database.ExecuteSqlInterpolatedAsync($@"
                 UPDATE ""Users""
                 SET ""Login"" = {loginMaxLength}
                 WHERE ""Id"" = {user.Id}
-            "); 
+            ");
         });
 
-        var exPassword = await Assert.ThrowsAnyAsync<PostgresException>(async() =>
+        var exPassword = await Assert.ThrowsAnyAsync<PostgresException>(async () =>
         {
             await verify.Database.ExecuteSqlInterpolatedAsync($@"
                 UPDATE ""Users""
                 SET ""Password"" = {invalidPassword}
                 WHERE ""Id"" = {user.Id}
-            ") ;
+            ");
         });
 
-        var exRoleNull = await Assert.ThrowsAnyAsync<PostgresException>(async() =>
+        var exRoleNull = await Assert.ThrowsAnyAsync<PostgresException>(async () =>
         {
             await verify.Database.ExecuteSqlInterpolatedAsync($@"
                 UPDATE ""Users""
@@ -568,7 +568,7 @@ public class SchemaTest(TestContainerWrapper<AppDbContext> testContainer) : Data
             ");
         });
 
-        var exIsActiveNull = await Assert.ThrowsAnyAsync<PostgresException>(async() =>
+        var exIsActiveNull = await Assert.ThrowsAnyAsync<PostgresException>(async () =>
         {
             await verify.Database.ExecuteSqlInterpolatedAsync($@"
                 UPDATE ""Users""
@@ -577,17 +577,17 @@ public class SchemaTest(TestContainerWrapper<AppDbContext> testContainer) : Data
             ");
         });
 
-        var exCreatedAtNull = await Assert.ThrowsAnyAsync<PostgresException>(async() =>
+        var exCreatedAtNull = await Assert.ThrowsAnyAsync<PostgresException>(async () =>
         {
             await verify.Database.ExecuteSqlInterpolatedAsync($@"
                 UPDATE ""Users""
                 SET ""CreatedAt"" = NULL
             ");
         });
-    
+
         // Then
         CheckNullConstraint(exIdNull, "Users", "Id");
-        
+
         CheckNullConstraint(exLoginNull, "Users", "Login");
         CheckValueConstraint(exLoginMinLength, "Users", "CK_Users_Login");
         CheckMaxLengthConstraint(exLoginMaxLength, "Users");

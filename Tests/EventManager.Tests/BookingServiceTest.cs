@@ -88,7 +88,7 @@ public class BookingServiceTest(EventManagerTestContext context) : TestObjectBas
         Assert.True(bookingCount > 0);
         Assert.Equal(bookingCount, bookingIds.Count);
         Assert.Distinct(bookingIds);
-        Assert.Equal(availableSeatsBefore, availableSeatsAfter + bookingCount); 
+        Assert.Equal(availableSeatsBefore, availableSeatsAfter + bookingCount);
     }
 
     /// <summary>
@@ -136,7 +136,7 @@ public class BookingServiceTest(EventManagerTestContext context) : TestObjectBas
                     Interlocked.Increment(ref failCount);
                     Interlocked.Add(ref availableSeatsCount, await GetAvailableSeats());
                 }
-                catch(ActiveUserBookingException)
+                catch (ActiveUserBookingException)
                 {
                     Interlocked.Increment(ref failCount);
                 }
@@ -457,7 +457,7 @@ public class BookingServiceTest(EventManagerTestContext context) : TestObjectBas
         // Given
         var startAt = DateTime.UtcNow.AddYears(-1);
         var endAt = startAt.AddHours(2);
-        
+
         EventInputData pastEvent = new()
         {
             Title = "Past Event",
@@ -468,15 +468,15 @@ public class BookingServiceTest(EventManagerTestContext context) : TestObjectBas
 
         var serviceProvider = context.CreateServiceProvider();
         await using var scope = serviceProvider.CreateAsyncScope();
-        var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();        
+        var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
         var eventInfo = await eventService.CreateEventAsync(pastEvent, CancellationToken.None);
 
         var bookingService = scope.ServiceProvider.GetRequiredService<IBookingService>();
-    
+
         // When
-    
+
         // Then
-        await Assert.ThrowsAnyAsync<StartedEventBookingException>(async() 
+        await Assert.ThrowsAnyAsync<StartedEventBookingException>(async ()
             => await bookingService.CreateBookingAsync(eventInfo.Id, CancellationToken.None));
     }
 
@@ -486,10 +486,10 @@ public class BookingServiceTest(EventManagerTestContext context) : TestObjectBas
     {
         // Given
         const int bookingLimit = 10;
-        
+
         var startAt = DateTime.UtcNow.AddYears(1);
         var endAt = startAt.AddHours(2);
-        
+
         EventInputData futureEvent = new()
         {
             Title = "Future Event",
@@ -500,9 +500,9 @@ public class BookingServiceTest(EventManagerTestContext context) : TestObjectBas
 
         var serviceProvider = context.CreateServiceProvider();
         await using var workScope = serviceProvider.CreateAsyncScope();
-        var eventService = workScope.ServiceProvider.GetRequiredService<IEventService>();        
+        var eventService = workScope.ServiceProvider.GetRequiredService<IEventService>();
         var eventInfo = await eventService.CreateEventAsync(futureEvent, CancellationToken.None);
-    
+
         // When
         var bookingTasks = Enumerable
             .Range(0, bookingLimit)
@@ -515,11 +515,11 @@ public class BookingServiceTest(EventManagerTestContext context) : TestObjectBas
             .ToList();
 
         await Task.WhenAll(bookingTasks);
-    
+
         // Then
         await using var verifyScope = serviceProvider.CreateAsyncScope();
         var bookingService = verifyScope.ServiceProvider.GetRequiredService<IBookingService>();
-        await Assert.ThrowsAnyAsync<ActiveUserBookingException>(async() 
+        await Assert.ThrowsAnyAsync<ActiveUserBookingException>(async ()
             => await bookingService.CreateBookingAsync(eventInfo.Id, CancellationToken.None));
     }
 }

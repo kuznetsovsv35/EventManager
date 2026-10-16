@@ -52,7 +52,7 @@ public class EventManagerTestContext
             })
             .AddScoped<IUserRepository, UserRepository>()
             .AddScoped<IUserService, UserService>()
-            .AddSingleton<IPasswordHasher, PasswordHasher>();            
+            .AddSingleton<IPasswordHasher, PasswordHasher>();
     }
 
     public IServiceProvider CreateServiceProvider() => _services.BuildServiceProvider();

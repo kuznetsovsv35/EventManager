@@ -15,9 +15,9 @@ public class ForbiddenException : UserOperationException
         : this(resource, policyName, login, role, null) { }
 
     public ForbiddenException(object resource, string policyName, string login, UserRole role, Exception? innerException)
-        : base("Доступ запрещен", login, role, innerException) 
-    { 
+        : base("Доступ запрещен", login, role, innerException)
+    {
         ResourceName = resource?.GetType().Name ?? string.Empty;
-        PolicyName = policyName; 
+        PolicyName = policyName;
     }
 }

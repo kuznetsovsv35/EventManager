@@ -55,7 +55,7 @@ public static class DataTransferExtension
     public static User FromRequest(this RegisterUserRequest request, Func<string?, string?> hasher)
     {
         request.Check();
-        
+
         return new(request.Login)
         {
             Role = request.Role,
@@ -85,11 +85,11 @@ public static class DataTransferExtension
         return request;
     }
 
-    public static RegisterUserRequest ChangeRole(this RegisterUserRequest request,  string roleName)
+    public static RegisterUserRequest ChangeRole(this RegisterUserRequest request, string roleName)
     {
         if (!Enum.TryParse<UserRole>(roleName, out var role))
             throw new ArgumentException("Неверное наименование роли", nameof(roleName));
-        
+
         request.Role = role;
         return request;
     }
@@ -99,5 +99,5 @@ public static class DataTransferExtension
         request.Password = password;
         return request;
     }
-    
+
 }

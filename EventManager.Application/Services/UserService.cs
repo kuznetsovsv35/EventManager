@@ -20,20 +20,20 @@ public class UserService(
         var user = await users.GetUserAsync(request.Login, cancellation);
 
         if (user is null)
-            throw new UserNotFoundException(request.Login);            
+            throw new UserNotFoundException(request.Login);
 
         var currentUser = CurrentUser.ToInfo();
-                
+
         if (currentUser.Login != request.Login && currentUser.Role < user.Role)
             throw new ForbiddenException(this, Policies.UserService.ChangePassword, currentUser.Login, currentUser.Role);
 
         user = await users.UpdateUserAsync(
-            request.Login, 
+            request.Login,
             u => u.Password = request.Password is string p ? hasher.Hash(p) : null,
             cancellation);
 
         if (user is null)
-            throw new UserNotFoundException(request.Login);            
+            throw new UserNotFoundException(request.Login);
 
         return user.ToInfo();
     }
@@ -68,17 +68,17 @@ public class UserService(
     {
         request.Check();
         var user = await users.GetUserAsync(request.Login, cancellation);
-        
+
         if (user is null || !hasher.Verify(user.Password, request.Password))
             throw new LoginUserException();
-        
+
         return user.ToInfo();
     }
 
     public async Task<UserInfo> RegisterUserAsync(RegisterUserRequest request, CancellationToken cancellation)
     {
         await AuthorizeAsync(Policies.UserService.RegisterUser, cancellation);
-        
+
         try
         {
             var user = await users.AddUserAsync(request.FromRequest(hasher.Hash), cancellation);

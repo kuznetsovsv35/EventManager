@@ -12,7 +12,7 @@ public class UserRepository(AppDbContext dbContext) : IUserRepository
     {
         if (await dbContext.Users.AsNoTracking().AnyAsync(u => u.Login == user.Login))
             throw new InvalidOperationException($"Логин {user.Login} уже существует");
-        
+
         dbContext.Add(user);
         await dbContext.SaveChangesAsync(cancellation);
         return user;

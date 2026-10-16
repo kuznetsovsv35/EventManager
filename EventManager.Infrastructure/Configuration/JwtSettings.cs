@@ -6,9 +6,9 @@ public class JwtSettings
 
     public string Audience { get; set; } = "Events-API-Clients";
 
-    public string SigningKey {get; set; } = string.Empty;
+    public string SigningKey { get; set; } = string.Empty;
 
     public int AccessTokenExpiredAfter { get; set; } = 15;
 
-    public int RefreshTokenExpiredAfter { get; set; } = 7;    
+    public int RefreshTokenExpiredAfter { get; set; } = 7;
 }

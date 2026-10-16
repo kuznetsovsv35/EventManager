@@ -11,14 +11,14 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.ToTable("Users", t =>
         {
             t.HasCheckConstraint("CK_Users_Login", $@"LENGTH(""{nameof(User.Login)}"") BETWEEN 1 AND 32");
-            
+
             const string fieldPassword = nameof(User.Password);
             t.HasCheckConstraint("CK_Users_Password", $@"""{fieldPassword}"" IS NULL OR LENGTH(""{fieldPassword}"") = 64");
         });
-        
+
         builder.Property(u => u.Id).IsRequired().ValueGeneratedNever();
         builder.Property(u => u.Login).IsRequired().HasMaxLength(32);
-        
+
         builder.Property(u => u.Role).HasConversion<string>().IsRequired().HasMaxLength
         (
             Enum.GetNames<UserRole>().Max(name => name.Length)

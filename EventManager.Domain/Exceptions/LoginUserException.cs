@@ -5,8 +5,8 @@ namespace EventManager.Domain.Exceptions;
 /// </summary>
 public class LoginUserException : ApplicationException
 {
-    public LoginUserException() : this(null) {}
+    public LoginUserException() : this(null) { }
 
     public LoginUserException(Exception? innerException)
-        : base("Логин или пароль указан неверно", innerException) {}
+        : base("Логин или пароль указан неверно", innerException) { }
 }

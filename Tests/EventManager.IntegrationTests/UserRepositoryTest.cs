@@ -19,14 +19,14 @@ public class UserRepositoryTest(TestContainerWrapper<AppDbContext> testContainer
         await ResetDatabase();
         var hasher = new PasswordHasher();
 
-        User admin = new("admin-1") 
+        User admin = new("admin-1")
         {
             Role = UserRole.Admin,
             Password = hasher.Hash("admin")
         };
         var adminInfo = admin.ToInfo();
 
-        User user = new("user-1") 
+        User user = new("user-1")
         {
             Role = UserRole.User,
             Password = hasher.Hash("user")
@@ -64,7 +64,7 @@ public class UserRepositoryTest(TestContainerWrapper<AppDbContext> testContainer
         const string login = "test";
         const string newPassword = "123";
         const UserRole newRole = UserRole.Admin;
-        
+
         User user = new("test") { Role = UserRole.User, };
 
         await using var context = CreateDbContext();
@@ -97,7 +97,7 @@ public class UserRepositoryTest(TestContainerWrapper<AppDbContext> testContainer
         var hasher = new PasswordHasher();
 
         const string login = "test";
-        
+
         User user = new("test") { Role = UserRole.User };
 
         await using var context = CreateDbContext();

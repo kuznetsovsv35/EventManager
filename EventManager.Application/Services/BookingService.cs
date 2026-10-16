@@ -16,7 +16,7 @@ public class BookingService(
 {
     const int AvailableBookingsPerUser = 10;
 
-    public async Task<BookingInfo> CreateBookingAsync(Guid eventId,  CancellationToken cancellation)
+    public async Task<BookingInfo> CreateBookingAsync(Guid eventId, CancellationToken cancellation)
     {
         await AuthorizeAsync(Policies.BookingService.CreateBooking, cancellation);
         var userInfo = CurrentUser.ToInfo();
@@ -65,12 +65,12 @@ public class BookingService(
 
         if (await bookings.GetBookingAsync(bookingId, cancellation) is not Booking booking)
             throw new BookingNotFoundException(bookingId, nameof(bookingId));
-        
+
         CheckUserRole(booking, userInfo);
 
         if (!booking.Cancel())
             throw new InvalidBookingOperation("Неверный статус брони для операции отмены", booking, userInfo.Login, userInfo.Role);
-        
+
         await bookings.UpdateBookingStatusAsync(booking, cancellation);
         return booking.ToInfo();
     }

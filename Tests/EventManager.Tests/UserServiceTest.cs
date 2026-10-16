@@ -21,16 +21,16 @@ public class UserServiceTest(EventManagerTestContext context) : TestObjectBase, 
         await using var scope = serviceProvider.CreateAsyncScope();
         var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
         var expectedInfo = await serviceProvider.GetUserInfo(TestAppDbContext.AdminLogin, UserRole.Admin);
-    
+
         // When
         var loginRequest = new UserRequest
-        { 
-            Login = TestAppDbContext.AdminLogin, 
-            Password = TestAppDbContext.AdminPassword 
+        {
+            Login = TestAppDbContext.AdminLogin,
+            Password = TestAppDbContext.AdminPassword
         };
 
         var userInfo = await userService.LoginUserAsync(loginRequest, CancellationToken.None);
-    
+
         // Then
         Assert.Equal(expectedInfo, userInfo);
     }
@@ -45,16 +45,16 @@ public class UserServiceTest(EventManagerTestContext context) : TestObjectBase, 
         var serviceProvider = context.CreateServiceProvider();
         await using var scope = serviceProvider.CreateAsyncScope();
         var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
-    
+
         // When
         var loginRequest = new UserRequest
-        { 
-            Login = login, 
-            Password = password 
+        {
+            Login = login,
+            Password = password
         };
-    
+
         // Then
-        await Assert.ThrowsAnyAsync<LoginUserException>(async() 
+        await Assert.ThrowsAnyAsync<LoginUserException>(async ()
             => await userService.LoginUserAsync(loginRequest, CancellationToken.None));
     }
 
@@ -79,7 +79,7 @@ public class UserServiceTest(EventManagerTestContext context) : TestObjectBase, 
 
         // When
         var userInfo = await userService.RegisterUserAsync(request, CancellationToken.None);
-    
+
         // Then
         Assert.Equal(login, userInfo.Login);
         Assert.Equal(role, userInfo.Role);
@@ -105,8 +105,8 @@ public class UserServiceTest(EventManagerTestContext context) : TestObjectBase, 
         };
 
         // When
-        var ex = await Assert.ThrowsAnyAsync<Exception>(async() => await userService.RegisterUserAsync(request, CancellationToken.None));
-    
+        var ex = await Assert.ThrowsAnyAsync<Exception>(async () => await userService.RegisterUserAsync(request, CancellationToken.None));
+
         // Then
         Assert.IsType<RegisterUserException>(ex);
     }
@@ -143,11 +143,11 @@ public class UserServiceTest(EventManagerTestContext context) : TestObjectBase, 
         {
             await using var scope = serviceProvider.CreateAsyncScope();
             var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
-            UserRequest passwordRequest = new() 
-            { 
+            UserRequest passwordRequest = new()
+            {
                 Login = login,
                 Password = newPassword,
-            };        
+            };
             passwordChanged = await userService.ChangePasswordAsync(passwordRequest, CancellationToken.None);
         }
 
@@ -167,7 +167,7 @@ public class UserServiceTest(EventManagerTestContext context) : TestObjectBase, 
         Assert.Equal(registered, passwordChanged);
         Assert.Equal(registered, logged);
     }
-    
+
     [Trait(Category, Category_Users)]
     [Fact]
     public async Task ChangeRole_Success()
@@ -181,7 +181,7 @@ public class UserServiceTest(EventManagerTestContext context) : TestObjectBase, 
         UserInfo? roleChanged;
         var serviceProvider = context.CreateServiceProvider();
 
-        {            
+        {
             await using var scope = serviceProvider.CreateAsyncScope();
             var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
 
@@ -198,11 +198,11 @@ public class UserServiceTest(EventManagerTestContext context) : TestObjectBase, 
         {
             await using var scope = serviceProvider.CreateAsyncScope();
             var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
-            RegisterUserRequest roleRequest = new() 
-            { 
+            RegisterUserRequest roleRequest = new()
+            {
                 Login = login,
                 Role = newRole,
-            };        
+            };
             roleChanged = await userService.ChangeRoleAsync(roleRequest, CancellationToken.None);
         }
 

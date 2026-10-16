@@ -20,7 +20,7 @@ public static partial class DependencyInjection
 
         services.AddScoped<IAuthenticationService, AuthenticationService>();
         services.AddSingleton<ITokenService, JwtTokenService>();
-        
+
         return services;
     }
 }
