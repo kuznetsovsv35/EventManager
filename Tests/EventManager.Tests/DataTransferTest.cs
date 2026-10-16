@@ -94,9 +94,9 @@ public class DataTransferTest : TestObjectBase
     }
 
     public static readonly IEnumerable<object[]> Bookings = [
-        [new Booking(Guid.NewGuid())],
-        [new Booking(Guid.NewGuid())],
-        [new Booking(Guid.NewGuid())],
+        [new Booking(Guid.NewGuid(), Guid.Empty)],
+        [new Booking(Guid.NewGuid(), Guid.Empty)],
+        [new Booking(Guid.NewGuid(), Guid.Empty)],
     ];
 
     /// <summary>

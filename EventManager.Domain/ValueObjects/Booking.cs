@@ -19,6 +19,11 @@ public enum BookingStatus
     /// Отклоненная бронь.
     /// </summary>
     Rejected,
+
+    /// <summary>
+    /// Отменена пользователем.
+    /// </summary>
+    Cancelled,
 }
 
 /// <summary>
@@ -40,6 +45,16 @@ public class Booking
     /// Ссылка на связанное события.
     /// </summary>
     public Event Event { get; private set; } = null!;
+
+    /// <summary>
+    /// Пользователь, создавший бронь.
+    /// </summary>
+    public Guid UserId { get; private set; }
+
+    /// <summary>
+    /// ССылка на связанного пользователя.
+    /// </summary>
+    public User User { get; private set; } = null!;
 
     /// <summary>
     /// Статус бронирования.
@@ -65,10 +80,11 @@ public class Booking
     /// Конструктор события.
     /// </summary>
     /// <param name="eventId"></param> 
-    public Booking(Guid eventId)
+    public Booking(Guid eventId, Guid userId)
     {
         Id = Guid.NewGuid();
         EventId = eventId;
+        UserId = userId;
         Status = BookingStatus.Pending;
         CreatedAt = DateTime.UtcNow;
     }
@@ -86,16 +102,24 @@ public class Booking
     public bool Reject() => TryChangeStatus(BookingStatus.Rejected);
 
     /// <summary>
+    /// Отменяет бронь.
+    /// </summary>
+    /// <returns></returns>
+    public bool Cancel() => TryChangeStatus(BookingStatus.Cancelled);
+
+    /// <summary>
     /// Попытка изменить статус брони.
     /// </summary>
     /// <param name="status"></param>
     /// <returns></returns>
     bool TryChangeStatus(BookingStatus status)
     {
-        if (Status == BookingStatus.Pending)
+        if (this is { Status: BookingStatus.Pending or BookingStatus.Cancelled })
         {
+            if (Status == BookingStatus.Pending)
+                ProcessedAt = DateTime.UtcNow;
+
             Status = status;
-            ProcessedAt = DateTime.UtcNow;
             return true;
         }
         return false;

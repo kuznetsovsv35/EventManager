@@ -2,6 +2,9 @@ using EventManager.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Добавление поддержки IOption<>
+builder.Services.AddOptions();
+
 // Добавляем функциональность приложения.
 builder.Services.ConfigureApplication();
 
@@ -9,7 +12,7 @@ builder.Services.ConfigureApplication();
 builder.Services.ConfigureInfrastructure(builder.Configuration, builder.Environment);
 
 // Добавляем представления.
-builder.Services.ConfigurePresentation();
+builder.Services.ConfigurePresentation(builder.Configuration);
 
 // Включаем проверку построения.
 if (builder.Environment.IsDevelopment())
