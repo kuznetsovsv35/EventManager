@@ -19,8 +19,8 @@ class TestAppDbContext : AppDbContext
 
     internal const int MaxTotalSeats = 100;
 
-    internal static readonly string AdminLogin = "test_admin";
-    internal static readonly string AdminPassword = "test_admin";
+    internal static readonly string AdminLogin = "admin";
+    internal static readonly string AdminPassword = "admin";
 
     internal static readonly string UserLogin = "user";
     internal static readonly string UserPassword = "user";
