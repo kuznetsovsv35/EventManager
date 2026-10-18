@@ -77,17 +77,18 @@ public class UserService(
 
     public async Task<UserInfo> RegisterUserAsync(RegisterUserRequest request, CancellationToken cancellation)
     {
-        await AuthorizeAsync(Policies.UserService.RegisterUser, cancellation);
+        // Оставлена без авторизации.
+        // await AuthorizeAsync(Policies.UserService.RegisterUser, cancellation);
 
-        try
-        {
+        // try
+        // {
             var user = await users.AddUserAsync(request.FromRequest(hasher.Hash), cancellation);
             return user.ToInfo();
-        }
-        catch (Exception ex)
-        {
-            var userInfo = CurrentUser.ToInfo();
-            throw new RegisterUserException(userInfo.Login, userInfo.Role, ex);
-        }
+        // }
+        // catch (Exception ex)
+        // {
+        //    var userInfo = CurrentUser.ToInfo();
+        //    throw new RegisterUserException(userInfo.Login, userInfo.Role, ex);
+        // }
     }
 }
