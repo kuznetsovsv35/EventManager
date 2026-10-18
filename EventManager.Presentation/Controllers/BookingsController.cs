@@ -12,11 +12,9 @@ namespace EventManager.Presentation.Controllers;
 /// </summary>
 /// <param name="bookingService"></param>
 [ApiController]
-[Route("[controller]")]
-[Authorize]
 public class BookingsController(IBookingService bookingService) : ControllerBase
 {
-    [HttpPost("/Events/{eventId:guid}/book")]
+    [HttpPost("/events/{eventId:guid}/book")]
     [ProducesResponseType<BookingInfo>(StatusCodes.Status202Accepted)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict)]
@@ -28,7 +26,7 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
         return Accepted(new Uri($"/Bookings/{booking.Id}", UriKind.Relative), booking);
     }
 
-    [HttpGet("{id:guid}")]
+    [HttpGet("/bookings/{id:guid}")]
     [ProducesResponseType<BookingInfo>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -36,7 +34,7 @@ public class BookingsController(IBookingService bookingService) : ControllerBase
     public async Task<ActionResult<BookingInfo>> GetBooking(Guid id, CancellationToken cancellation)
         => Ok(await bookingService.GetBookingByIdAsync(id, cancellation));
 
-    [HttpDelete("{id:guid}")]
+    [HttpDelete("/bookings/{id:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]

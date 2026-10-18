@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Mvc;
 namespace EventManager.Presentation.Controllers;
 
 [ApiController]
-[Authorize]
 public class UsersController(IUserService userService) : ControllerBase
 {
     [HttpPost("/auth/register")]
@@ -16,7 +15,8 @@ public class UsersController(IUserService userService) : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
-    [Authorize(Policy = Policies.UserService.RegisterUser)]
+    //[Authorize(Policy = Policies.UserService.RegisterUser)]
+    [AllowAnonymous]
     public async Task<ActionResult> Register([FromBody] RegisterUserRequest request, CancellationToken cancellation)
     {
         await userService.RegisterUserAsync(request, cancellation);

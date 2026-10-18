@@ -11,7 +11,6 @@ namespace EventManager.Presentation.Controllers;
 /// </summary>
 /// <param name="authentication"></param>
 [ApiController]
-[Authorize]
 public class AuthenticationController(IAuthenticationService authentication) : ControllerBase
 {
     [HttpPost("/auth/login")]

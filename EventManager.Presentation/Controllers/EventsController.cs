@@ -12,11 +12,9 @@ namespace EventManager.Presentation.Controllers;
 /// </summary>
 /// <param name="eventService"></param>
 [ApiController]
-[Route("[controller]")]
-[Authorize]
 public class EventsController(IEventService eventService) : ControllerBase
 {
-    [HttpGet]
+    [HttpGet("/events")]
     [ProducesResponseType<PaginateResult<EventOutputData>>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -25,7 +23,7 @@ public class EventsController(IEventService eventService) : ControllerBase
         [FromQuery] EventQueryParams queryParams, CancellationToken cancellation)
             => Ok(await eventService.GetEvents(queryParams, queryParams, cancellation));
 
-    [HttpGet("{id:guid}")]
+    [HttpGet("/events/{id:guid}")]
     [ProducesResponseType<EventOutputData>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -33,7 +31,7 @@ public class EventsController(IEventService eventService) : ControllerBase
     public async Task<ActionResult<EventOutputData>> GetEvent(Guid id, CancellationToken cancellation)
         => Ok(await eventService.GetEventAsync(id, cancellation));
 
-    [HttpPost]
+    [HttpPost("/events")]
     [ProducesResponseType<EventOutputData>(StatusCodes.Status201Created)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -48,7 +46,7 @@ public class EventsController(IEventService eventService) : ControllerBase
             e);
     }
 
-    [HttpPut("{id:guid}")]
+    [HttpPut("/events/{id:guid}")]
     [ProducesResponseType<EventOutputData>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
@@ -58,7 +56,7 @@ public class EventsController(IEventService eventService) : ControllerBase
     public async Task<ActionResult<EventOutputData>> UpdateEvent(Guid id, [FromBody] EventInputData data, CancellationToken cancellation)
         => Ok(await eventService.UpdateEventAsync(id, data, cancellation));
 
-    [HttpDelete("{id:guid}")]
+    [HttpDelete("/events/{id:guid}")]
     [ProducesResponseType<EventOutputData>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
