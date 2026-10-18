@@ -16,10 +16,7 @@ public class PasswordHasher : IPasswordHasher
 
     public bool Verify(string? hash, string? password)
     {
-        if (hash is null || hash.Length == 0)
-            return true;
-
-        if (password is null || password.Length == 0)
+        if (hash is null || hash.Length == 0 || password is null || password.Length == 0)
             return false;
 
         return EncodeText(password) == hash;
