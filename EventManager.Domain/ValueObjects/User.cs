@@ -67,22 +67,4 @@ public class User
         IsActive = false;
         DeletedAt = DateTime.UtcNow;
     }
-
-    static readonly Guid _adminId = new("ac28e281-33c8-4f15-b257-f935d8bb8b2c");
-    static readonly Guid _userId = new("435f8caf-cfb0-433e-a694-385383dfa3f7");
-
-    static User CreateUser(Guid id, UserRole role)
-        => new()
-        {
-            Id = id,
-            Login = role.ToString().ToLower(),
-            Role = role,
-        };
-
-    static readonly User _defaultAdmin = CreateUser(_adminId, UserRole.Admin);
-
-    static readonly User _defaultUser = CreateUser(_userId, UserRole.User);
-
-    public static User DefaultAdmin => _defaultAdmin;
-    public static User DefaultUser => _defaultUser;
 }
