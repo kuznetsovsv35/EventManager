@@ -17,7 +17,7 @@ public static partial class DependencyInjection
         options.AddPolicy(name, builder =>
         {
             builder.RequireAuthenticatedUser();
-            builder.RequireRole(string.Join(",", roles));
+            builder.RequireRole(roles.Select(x => x.ToString()));
             builder.AuthenticationSchemes.Add(JwtBearerDefaults.AuthenticationScheme);
         });
 
