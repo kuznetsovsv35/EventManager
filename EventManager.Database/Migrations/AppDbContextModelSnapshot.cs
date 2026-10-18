@@ -138,24 +138,6 @@ namespace EventManager.Database.Migrations
 
                             t.HasCheckConstraint("CK_Users_Password", "\"Password\" IS NULL OR LENGTH(\"Password\") = 64");
                         });
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("ac28e281-33c8-4f15-b257-f935d8bb8b2c"),
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            IsActive = true,
-                            Login = "admin",
-                            Role = "Admin"
-                        },
-                        new
-                        {
-                            Id = new Guid("435f8caf-cfb0-433e-a694-385383dfa3f7"),
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            IsActive = true,
-                            Login = "user",
-                            Role = "User"
-                        });
                 });
 
             modelBuilder.Entity("EventManager.Domain.ValueObjects.Booking", b =>

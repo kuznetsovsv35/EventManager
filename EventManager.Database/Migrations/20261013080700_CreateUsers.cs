@@ -39,15 +39,6 @@ namespace EventManager.Database.Migrations
                     table.CheckConstraint("CK_Users_Password", "\"Password\" IS NULL OR LENGTH(\"Password\") = 64");
                 });
 
-            migrationBuilder.InsertData(
-                table: "Users",
-                columns: new[] { "Id", "CreatedAt", "DeletedAt", "IsActive", "Login", "Password", "Role" },
-                values: new object[,]
-                {
-                    { new Guid("435f8caf-cfb0-433e-a694-385383dfa3f7"), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, true, "user", null, "User" },
-                    { new Guid("ac28e281-33c8-4f15-b257-f935d8bb8b2c"), new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), null, true, "admin", null, "Admin" }
-                });
-
             migrationBuilder.CreateIndex(
                 name: "IX_Bookings_UserId",
                 table: "Bookings",
