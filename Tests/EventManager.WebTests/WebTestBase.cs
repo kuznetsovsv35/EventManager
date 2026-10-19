@@ -37,7 +37,7 @@ public abstract class WebTestBase(WebTestFactory factory) : IClassFixture<WebTes
         return await client.PutAsJsonAsync(uri, payload, CancellationToken.None);
     }
 
-    protected async Task<HttpResponseMessage> GetAsync<TPayload>(string uri, string? token = null) where TPayload : class
+    protected async Task<HttpResponseMessage> GetAsync(string uri, string? token = null)
     {
         using var client = factory.CreateClient();
         if (token is not null)
@@ -53,5 +53,23 @@ public abstract class WebTestBase(WebTestFactory factory) : IClassFixture<WebTes
         var result = await response.Content.ReadFromJsonAsync<AuthResult>();
         Assert.NotNull(result);
         return result.AccessToken;
+    }
+
+    protected async Task<EventOutputData?> CreateRandomEvent()
+    {
+        string eventTitle = $"Event {Guid.NewGuid()}";
+        DateTime startAt = DateTime.UtcNow;
+        EventInputData eventInputData = new()
+        {
+            Title = eventTitle,
+            StartAt = startAt,
+            EndAt = startAt.AddHours(1),
+            TotalSeats = 50
+        };
+        string accessToken = await LoginUser("admin", "admin");
+    
+        var response = await PostAsync("/events", eventInputData, accessToken);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<EventOutputData>();
     }
 }
