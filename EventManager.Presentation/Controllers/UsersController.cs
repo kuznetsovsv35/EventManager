@@ -12,8 +12,8 @@ public class UsersController(IUserService userService) : ControllerBase
 {
     [HttpPost("/auth/register")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    //[ProducesResponseType(StatusCodes.Status403Forbidden)]
+    //[ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     //[Authorize(Policy = Policies.UserService.RegisterUser)]
     [AllowAnonymous]

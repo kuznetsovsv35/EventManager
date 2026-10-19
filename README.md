@@ -90,6 +90,7 @@
    | Database | В категорию входят тесты схемы БД. |
    | Repositories | Тесты шаблонов репозиториев пользователей событий и броней. |
    | Users | Тесты подсистемы управления пользователями. |
+   | Web | Тест функциональности от начального запроса до конечного ответа. |
 
    Для корректной работы тестов необходим установленный Docker. В проекте добавлен файл сценарий установки.
    ```bash
@@ -148,6 +149,11 @@
    dotnet test --filter "Category=Users"
    # или
    ./test-users.sh
+
+   # Запуск тестов End-to-end.
+   dotnet test --filter "Category=web"
+   # или
+   ./test-web.sh
    ```
 
 6. запуск приложения:
@@ -198,7 +204,7 @@
 |GET|/bookings/{id:uuid}|Получить информацию о брони.|id - ID брони.|OK|см. таблицу 7|BAD_REQUEST, NOT_FOUND, UNAUTHORIZED|
 |DELETE|/bookings/{id:uuid}Отмена бронирования.|id - ID брони.|NO_CONTENT||NOT_FOUND, UNAUTHORIZED, FORBIDDEN|
 |POST|/auth/login|Аутентификация пользователя по логину и паролю.|См. таблицу 8|OK|См. таблицу 9|UNAUTHORIZED|
-|POST|/auth/register/|Регистрация пользователя.|См. таблицу 10.|NO_CONTENT||BAD_REQUEST, UNAUTHORIZED, FORBIDDEN|
+|POST|/auth/register/|Регистрация пользователя.|См. таблицу 10.|NO_CONTENT||BAD_REQUEST|
 |PUT|/auth/{login:string}?role=string|Изменение роли пользователя.|login - логин, role - User или Admin|NO_CONTENT||UNAUTHORIZED, FORBIDDEN, BAD_REQUEST, NOT_FOUND|
 |PUT|/auth/{login:string}/password|Смена пароля|login - логин, тело - строка пароля.|NO_CONTENT||UNAUTHORIZED, FORBIDDEN, BAD_REQUEST, NOTFOUND|
 |DELETE|/auth/{login:string}/unregister|Удаление регистрации пользователя.|login - логин|NO_CONTENT||UNAUTHORIZED, FORBIDDEN, BAD_REQUEST, NOT_FOUND|
@@ -296,5 +302,8 @@ pageSize|int|Количество событий на запрошенной с�
 | EventManager.Application | *.services | Реализация моделей взаимодействия с бизнес логикой. |
 | EventManager.Application | *.Validators | Реализация ограничений и правил применения входных параметров запросов. |
 | EventManager | * | Сборка DI контейнера из слоев и запуск процесса веб-приложения. |
+| EventManager.Tests | * | Юнит-тесты базовой логики. |
+| EventManager.IntegrationTests | * | Интеграционные тесты бизнес-логики и отдельных подсистем.. |
+| EventManager.WebTests | * | End-to-end case тесты. |
 
 ## Продолжение следует...
