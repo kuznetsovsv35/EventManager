@@ -1,21 +1,59 @@
-﻿using System.Net.Mime;
-using System.Text;
-using System.Text.Json;
-using EventManager.Domain.ValueObjects;
-using Microsoft.AspNetCore.Identity.Data;
-using Microsoft.AspNetCore.Mvc.Formatters;
+﻿using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using EventManager.Application.DataTransferObjects;
+using EventManager.Infrastructure.Authentication;
 
 namespace EventManager.WebTests;
 
-public class UserServiceTest(ApiTestFactory factory) : IClassFixture<ApiTestFactory>
+public class UserServiceTest(WebTestFactory factory) : IClassFixture<WebTestFactory>
 {
-    readonly HttpClient _client = factory.CreateClient();
+    const string Category = nameof(Category);
+
+    async Task<HttpResponseMessage> PostAsync<TPayload>(string uri, TPayload? payload, string? token = null) where TPayload : class
+    {
+        using var client = factory.CreateClient();
+        
+        if (token is not null)
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        
+        return await client.PutAsJsonAsync(
+            uri, 
+            payload is object obj ? JsonContent.Create(obj) : null, 
+            CancellationToken.None);
+    }
+
+    async Task<HttpResponseMessage> PutAsync<TPayload>(string uri, TPayload payload, string? token = null) where TPayload : class
+    {
+        using var client = factory.CreateClient();
+        
+        if (token is not null)
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        return await client.PutAsJsonAsync(uri, payload, CancellationToken.None);
+    }
+
+    async Task<HttpResponseMessage> GetAsync<TPayload>(string uri, string? token = null) where TPayload : class
+    {
+        using var client = factory.CreateClient();
+        if (token is not null)
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        return await client.GetAsync(uri, CancellationToken.None);        
+    }
+
+    async Task<string> LoginUser(string login, string? password)
+    {
+        UserRequest request = new(){ Login = login, Password = password };
+        var response = await PostAsync("/auth/login", request);
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync<AuthResult>();
+        Assert.NotNull(result);
+        return result.AccessToken;
+    }
     
+
     [Fact]
     public async Task Test1()
     {
-        var request = new { Login = "admin", Password = "admin", Role = UserRole.Admin };
-        var content = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, MediaTypeNames.Application.Json);
-        var response = await _client.PostAsync("auth/register", content);
+        var accessToken = await LoginUser("admin", "admin");
     }
 }
