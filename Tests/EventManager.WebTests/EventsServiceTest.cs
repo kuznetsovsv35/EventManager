@@ -327,4 +327,72 @@ public class EventsServiceTest(WebTestFactory factory) : WebTestBase(factory)
         Assert.NotNull(response);
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
+
+    [Trait(Category, Category_Web)]
+    [Fact]
+    public async Task Events_Delete_Success()
+    {
+        // Given
+        EventOutputData original = (await CreateRandomEvent())!;
+        string accessToken = await LoginUser("admin", "admin");
+    
+        // When
+        var response = await DeleteAsync($"/events/{original.Id}", accessToken);
+        response?.EnsureSuccessStatusCode();
+        EventOutputData? deleted = response is not null
+            ? await response.Content.ReadFromJsonAsync<EventOutputData>()
+            : null;
+    
+        // Then
+        Assert.NotNull(response);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.NotNull(deleted);
+        Assert.Equal(original, deleted);
+    }
+
+    [Trait(Category, Category_Web)]
+    [Fact]
+    public async Task Events_Delete_NotFound()
+    {
+        // Given
+        string accessToken = await LoginUser("admin", "admin");
+    
+        // When
+        var response = await DeleteAsync($"/events/{Guid.Empty}", accessToken);
+    
+        // Then
+        Assert.NotNull(response);
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+    }
+
+    [Trait(Category, Category_Web)]
+    [Fact]
+    public async Task Events_Delete_Unauthorized()
+    {
+        // Given
+        EventOutputData original = (await CreateRandomEvent())!;
+    
+        // When
+        var response = await DeleteAsync($"/events/{original.Id}");
+    
+        // Then
+        Assert.NotNull(response);
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+    [Trait(Category, Category_Web)]
+    [Fact]
+    public async Task Events_Delete_Forbidden()
+    {
+        // Given
+        EventOutputData original = (await CreateRandomEvent())!;
+        string accessToken = await LoginUser("user", "user");
+    
+        // When
+        var response = await DeleteAsync($"/events/{original.Id}", accessToken);
+    
+        // Then
+        Assert.NotNull(response);
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
 }

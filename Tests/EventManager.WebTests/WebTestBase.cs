@@ -40,9 +40,21 @@ public abstract class WebTestBase(WebTestFactory factory) : IClassFixture<WebTes
     protected async Task<HttpResponseMessage> GetAsync(string uri, string? token = null)
     {
         using var client = factory.CreateClient();
+     
         if (token is not null)
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+     
         return await client.GetAsync(uri, CancellationToken.None);        
+    }
+
+    protected async Task<HttpResponseMessage> DeleteAsync(string uri, string? token = null)
+    {
+        using var client = factory.CreateClient();
+
+        if (token is not null)
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+        return await client.DeleteAsync(uri, CancellationToken.None);
     }
 
     protected async Task<string> LoginUser(string login, string? password)
