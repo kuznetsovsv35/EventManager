@@ -5,6 +5,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Testcontainers.PostgreSql;
 using EventManager.Application.Cryptography;
+using EventManager.Infrastructure.Services;
+
+namespace EventManager.WebTests;
 
 public class WebTestFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
@@ -18,16 +21,23 @@ public class WebTestFactory : WebApplicationFactory<Program>, IAsyncLifetime
             .WithPassword(Password)
             .Build();
 
+    static void RemoveService<T>(IServiceCollection services)
+    {
+        var descriptor = services.SingleOrDefault(x => x.ServiceType == typeof(T));
+        if (descriptor is null)
+            return;
+        
+        services.Remove(descriptor);
+    }
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.ConfigureServices(services =>
         {
-            // Удаляем регистрацию реального DbContext и ставим тестовый
-            var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
-            if (descriptor != null)
-            {
-                services.Remove(descriptor);
-            }
+            // Подмена контекста данных.
+            RemoveService<DbContextOptions<AppDbContext>>(services);
+            // Исключение фонового процесс.
+            RemoveService<AppBackgroundService>(services);
 
             services.AddDbContext<AppDbContext>(options =>
             {
