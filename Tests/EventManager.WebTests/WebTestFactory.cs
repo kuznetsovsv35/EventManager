@@ -26,7 +26,7 @@ public class WebTestFactory : WebApplicationFactory<Program>, IAsyncLifetime
         var descriptor = services.SingleOrDefault(x => x.ServiceType == typeof(T));
         if (descriptor is null)
             return;
-        
+
         services.Remove(descriptor);
     }
 
@@ -48,7 +48,7 @@ public class WebTestFactory : WebApplicationFactory<Program>, IAsyncLifetime
         });
     }
 
-#region IAsyncLifetime
+    #region IAsyncLifetime
     async Task IAsyncLifetime.InitializeAsync()
     {
         await _postgres.StartAsync();
@@ -62,5 +62,5 @@ public class WebTestFactory : WebApplicationFactory<Program>, IAsyncLifetime
 
     Task IAsyncLifetime.DisposeAsync()
         => _postgres.DisposeAsync().AsTask();
-#endregion
+    #endregion
 }

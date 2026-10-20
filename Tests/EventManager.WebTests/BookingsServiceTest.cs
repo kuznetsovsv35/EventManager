@@ -13,26 +13,26 @@ public class BookingsServiceTest(WebTestFactory factory) : WebTestBase(factory)
         // Given
         Guid eventId = (await CreateRandomEvent())!.Id;
         string accessToken = await LoginUser("user", "user");
-    
+
         // When
         var postResponse = await PostAsync($"/events/{eventId}/book", (object)null!, accessToken);
         postResponse?.EnsureSuccessStatusCode();
-        
+
         BookingInfo? created = postResponse?.Content is not null
             ? await postResponse.Content.ReadFromJsonAsync<BookingInfo>()
             : null;
         var location = postResponse?.Headers.Location?.ToString();
-        
+
         var getResponse = location is not null
             ? await GetAsync(location, accessToken)
             : null;
 
         getResponse?.EnsureSuccessStatusCode();
 
-        BookingInfo? located = getResponse is not null 
+        BookingInfo? located = getResponse is not null
             ? await getResponse.Content.ReadFromJsonAsync<BookingInfo>()
             : null;
-    
+
         // Then
         Assert.NotNull(postResponse);
         Assert.Equal(HttpStatusCode.Accepted, postResponse.StatusCode);
@@ -52,10 +52,10 @@ public class BookingsServiceTest(WebTestFactory factory) : WebTestBase(factory)
         // Given
         Guid eventId = Guid.Empty;
         string accessToken = await LoginUser("user", "user");
-    
+
         // When
         var postResponse = await PostAsync($"/events/{eventId}/book", (object)null!, accessToken);
-    
+
         // Then
         Assert.NotNull(postResponse);
         Assert.Equal(HttpStatusCode.NotFound, postResponse.StatusCode);
@@ -68,10 +68,10 @@ public class BookingsServiceTest(WebTestFactory factory) : WebTestBase(factory)
         // Given
         Guid eventId = (await CreatePastEvent())!.Id;
         string accessToken = await LoginUser("user", "user");
-    
+
         // When
         var postResponse = await PostAsync($"/events/{eventId}/book", (object)null!, accessToken);
-    
+
         // Then
         Assert.NotNull(postResponse);
         Assert.Equal(HttpStatusCode.BadRequest, postResponse.StatusCode);
@@ -83,10 +83,10 @@ public class BookingsServiceTest(WebTestFactory factory) : WebTestBase(factory)
     {
         // Given
         Guid eventId = (await CreateRandomEvent())!.Id;
-    
+
         // When
         var postResponse = await PostAsync($"/events/{eventId}/book", (object)null!);
-            
+
         // Then
         Assert.NotNull(postResponse);
         Assert.Equal(HttpStatusCode.Unauthorized, postResponse.StatusCode);
@@ -99,11 +99,11 @@ public class BookingsServiceTest(WebTestFactory factory) : WebTestBase(factory)
         // Given
         Guid eventId = (await CreateRandomEvent())!.Id;
         string accessToken = await LoginUser("user", "user");
-    
+
         // When
         var success = await PostAsync($"/events/{eventId}/book", (object)null!, accessToken);
         var fail = await PostAsync($"/events/{eventId}/book", (object)null!, accessToken);
-            
+
         // Then
         Assert.NotNull(success);
         Assert.Equal(HttpStatusCode.Accepted, success.StatusCode);
@@ -120,11 +120,11 @@ public class BookingsServiceTest(WebTestFactory factory) : WebTestBase(factory)
             .StartAt(DateTime.UtcNow.AddDays(1))
             .HasTotalSeats(50)
             .Build();
-        
+
         Guid eventId = (await CreateEvent(eventData))!.Id;
 
         string userName_1 = $"{nameof(Bookings_Post_LimitReached)}_1";
-        string userName_2 = $"{nameof(Bookings_Post_LimitReached)}_2";;
+        string userName_2 = $"{nameof(Bookings_Post_LimitReached)}_2";
         const string password = nameof(password);
 
         await CreateUser(userName_1, password);
@@ -133,29 +133,29 @@ public class BookingsServiceTest(WebTestFactory factory) : WebTestBase(factory)
         string token_1 = await LoginUser(userName_1, password);
         string token_2 = await LoginUser(userName_2, password);
         const int MaxBookingCount = 10;
-    
+
         // When
         List<Task> successBookings = new(MaxBookingCount * 2);
-        
+
         successBookings.AddRange(Enumerable.Range(0, MaxBookingCount)
-            .Select(async(_)  =>
+            .Select(async (_) =>
             {
                 var response = await PostAsync($"/events/{eventId}/book", (object)null!, token_1);
                 response.EnsureSuccessStatusCode();
             }));
 
         successBookings.AddRange(Enumerable.Range(0, MaxBookingCount)
-            .Select(async(_) => 
+            .Select(async (_) =>
             {
                 var response = await PostAsync($"/events/{eventId}/book", (object)null!, token_2);
                 response.EnsureSuccessStatusCode();
             }));
 
         await Task.WhenAll(successBookings);
-        
+
         var failure_1 = await PostAsync($"/events/{eventId}/book", (object)null!, token_1);
         var failure_2 = await PostAsync($"/events/{eventId}/book", (object)null!, token_2);
-            
+
         // Then
         Assert.True(token_2 != token_1);
         Assert.NotNull(failure_1);
@@ -170,7 +170,7 @@ public class BookingsServiceTest(WebTestFactory factory) : WebTestBase(factory)
     {
         // Given
         string userName_1 = $"{nameof(Bookings_Delete_Success)}_1";
-        string userName_2 = $"{nameof(Bookings_Delete_Success)}_2";;
+        string userName_2 = $"{nameof(Bookings_Delete_Success)}_2"; ;
         const string password = nameof(password);
 
         await CreateUser(userName_1, password);
@@ -201,7 +201,7 @@ public class BookingsServiceTest(WebTestFactory factory) : WebTestBase(factory)
         var cancel_2 = bookingInfo_2 is not null
             ? await DeleteAsync($"/bookings/{bookingInfo_2.Id}", accessToken_2)
             : null;
-        
+
         cancel_1?.EnsureSuccessStatusCode();
         cancel_2?.EnsureSuccessStatusCode();
 
@@ -218,7 +218,7 @@ public class BookingsServiceTest(WebTestFactory factory) : WebTestBase(factory)
     {
         // Given
         string userName_1 = $"{nameof(Bookings_Delete_Forbidden)}_1";
-        string userName_2 = $"{nameof(Bookings_Delete_Forbidden)}_2";;
+        string userName_2 = $"{nameof(Bookings_Delete_Forbidden)}_2"; ;
         const string password = nameof(password);
 
         await CreateUser(userName_1, password);
@@ -250,7 +250,7 @@ public class BookingsServiceTest(WebTestFactory factory) : WebTestBase(factory)
         var failure_2 = bookingInfo_2 is not null
             ? await DeleteAsync($"/bookings/{bookingInfo_2.Id}", accessToken_1)
             : null;
-        
+
         var success_1 = bookingInfo_1 is not null
             ? await DeleteAsync($"/bookings/{bookingInfo_1.Id}", adminToken)
             : null;
@@ -271,7 +271,7 @@ public class BookingsServiceTest(WebTestFactory factory) : WebTestBase(factory)
         Assert.NotNull(success_2);
         Assert.Equal(HttpStatusCode.NoContent, success_2.StatusCode);
     }
-    
+
     [Trait(Category, Category_Web)]
     [Fact]
     public async Task Bookings_Delete_NotFound()
@@ -310,7 +310,7 @@ public class BookingsServiceTest(WebTestFactory factory) : WebTestBase(factory)
         var cancel = bookingInfo is not null
             ? await DeleteAsync($"/bookings/{bookingInfo.Id}", deleteToken)
             : null;
-        
+
         // Then
         Assert.NotNull(cancel);
         Assert.Equal(HttpStatusCode.Unauthorized, cancel.StatusCode);

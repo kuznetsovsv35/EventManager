@@ -10,7 +10,7 @@ namespace EventManager.WebTests;
 
 public class UserServiceTest(WebTestFactory factory) : WebTestBase(factory)
 {
-    
+
     [Trait(Category, Category_Web)]
     [Fact]
     public async Task Auth_Register_Success()
@@ -25,7 +25,7 @@ public class UserServiceTest(WebTestFactory factory) : WebTestBase(factory)
 
         // When
         var response = await PostAsync("/auth/register", request);
-        
+
         // Then
         response.EnsureSuccessStatusCode();
         Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
@@ -42,10 +42,10 @@ public class UserServiceTest(WebTestFactory factory) : WebTestBase(factory)
             Password = "123",
             Role = UserRole.User,
         };
-    
+
         // When
         var response = await PostAsync("/auth/register", request);
-    
+
         // Then
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
@@ -55,19 +55,19 @@ public class UserServiceTest(WebTestFactory factory) : WebTestBase(factory)
     public async Task Auth_Register_DuplicateLogin_BadRequest()
     {
         // Given
-        UserRequest loginRequest = new(){ Login = "admin", Password = "admin" };
+        UserRequest loginRequest = new() { Login = "admin", Password = "admin" };
 
         RegisterUserRequest registerRequest = new()
         {
             Login = "admin",
             Password = "pass",
             Role = UserRole.Admin,
-        };        
-    
+        };
+
         // When
         var loginResponse = await PostAsync("auth/login", loginRequest);
         var registerResponse = await PostAsync("/auth/register", registerRequest);
-    
+
         // Then
         loginResponse.EnsureSuccessStatusCode();
         Assert.Equal(HttpStatusCode.BadRequest, registerResponse.StatusCode);
@@ -85,11 +85,11 @@ public class UserServiceTest(WebTestFactory factory) : WebTestBase(factory)
             Login = login,
             Password = password,
         };
-    
+
         // When
         var response = await PostAsync("/auth/login", loginRequest);
         var authResult = await response.Content.ReadFromJsonAsync<AuthResult>();
-    
+
         // Then
         response.EnsureSuccessStatusCode();
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -108,11 +108,11 @@ public class UserServiceTest(WebTestFactory factory) : WebTestBase(factory)
             Login = login,
             Password = password,
         };
-    
+
         // When
         var response = await PostAsync("/auth/login", loginRequest);
         var authResult = await response.Content.ReadFromJsonAsync<AuthResult>();
-    
+
         // Then
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
         Assert.Null(authResult?.AccessToken);

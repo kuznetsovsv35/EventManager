@@ -8,8 +8,8 @@ public static class DbSeeder
     {
         if (!context.Users.Any(u => u.Login == login && u.Role == role))
         {
-            var user = new User(login) 
-            { 
+            var user = new User(login)
+            {
                 Role = role,
                 Password = hasher(login)
             };
@@ -18,7 +18,7 @@ public static class DbSeeder
         }
         return false;
     }
-    
+
     public static async Task SeedAsync(this AppDbContext context, Func<string?, string?> hasher, CancellationToken cancellation)
     {
         var adminCreated = EnsureUserCreated(context, "admin", UserRole.Admin, hasher);
