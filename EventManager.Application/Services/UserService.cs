@@ -3,6 +3,7 @@ using EventManager.Application.Cryptography;
 using EventManager.Application.DataTransferObjects;
 using EventManager.Application.Interfaces;
 using EventManager.Domain.Exceptions;
+using EventManager.Domain.ValueObjects;
 
 namespace EventManager.Application.Services;
 
@@ -24,7 +25,7 @@ public class UserService(
 
         var currentUser = CurrentUser.ToInfo();
 
-        if (currentUser.Login != request.Login && currentUser.Role < user.Role)
+        if (currentUser.Login != request.Login && user.Role == UserRole.Admin && currentUser.Role != UserRole.Admin)
             throw new ForbiddenException(this, Policies.UserService.ChangePassword, currentUser.Login, currentUser.Role);
 
         user = await users.UpdateUserAsync(
