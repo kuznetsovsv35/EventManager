@@ -24,7 +24,7 @@ public class BookingService(
         var booking = await syncContextFactory.CreateContext<Booking>().ExecuteActionAsync<Booking>(async () =>
         {
             await CheckUserActiveBookingsAsync(userInfo, cancellation);
-            
+
             if (await events.GetEventAsync(eventId, cancellation) is Event @event)
             {
                 cancellation.ThrowIfCancellationRequested();
