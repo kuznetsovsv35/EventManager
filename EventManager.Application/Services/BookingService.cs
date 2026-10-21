@@ -21,10 +21,10 @@ public class BookingService(
         await AuthorizeAsync(Policies.BookingService.CreateBooking, cancellation);
         var userInfo = CurrentUser.ToInfo();
 
-        await CheckUserActiveBookingsAsync(userInfo, cancellation);
-
         var booking = await syncContextFactory.CreateContext<Booking>().ExecuteActionAsync<Booking>(async () =>
         {
+            await CheckUserActiveBookingsAsync(userInfo, cancellation);
+            
             if (await events.GetEventAsync(eventId, cancellation) is Event @event)
             {
                 cancellation.ThrowIfCancellationRequested();
