@@ -204,7 +204,7 @@
 |GET|/bookings/{id:uuid}|Получить информацию о брони.|id - ID брони.|OK|см. таблицу 7|BAD_REQUEST, NOT_FOUND, UNAUTHORIZED|
 |DELETE|/bookings/{id:uuid}Отмена бронирования.|id - ID брони.|NO_CONTENT||NOT_FOUND, UNAUTHORIZED, FORBIDDEN|
 |POST|/auth/login|Аутентификация пользователя по логину и паролю.|См. таблицу 8|OK|См. таблицу 9|UNAUTHORIZED|
-|POST|/auth/register/|Регистрация пользователя.|См. таблицу 10.|NO_CONTENT||BAD_REQUEST|
+|POST|/auth/register/|Регистрация пользователя.|См. таблицу 8.|NO_CONTENT||BAD_REQUEST|
 |PUT|/auth/{login:string}?role=string|Изменение роли пользователя.|login - логин, role - User или Admin|NO_CONTENT||UNAUTHORIZED, FORBIDDEN, BAD_REQUEST, NOT_FOUND|
 |PUT|/auth/{login:string}/password|Смена пароля|login - логин, тело - строка пароля.|NO_CONTENT||UNAUTHORIZED, FORBIDDEN, BAD_REQUEST, NOTFOUND|
 |DELETE|/auth/{login:string}/unregister|Удаление регистрации пользователя.|login - логин|NO_CONTENT||UNAUTHORIZED, FORBIDDEN, BAD_REQUEST, NOT_FOUND|
