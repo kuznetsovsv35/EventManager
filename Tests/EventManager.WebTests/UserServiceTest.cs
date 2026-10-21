@@ -16,10 +16,9 @@ public class UserServiceTest(WebTestFactory factory) : WebTestBase(factory)
     public async Task Auth_Register_Success()
     {
         // Given
-        RegisterUserRequest request = new()
+        UserRequest request = new()
         {
             Login = "Test",
-            Role = UserRole.User,
             Password = "123",
         };
 
@@ -36,11 +35,10 @@ public class UserServiceTest(WebTestFactory factory) : WebTestBase(factory)
     public async Task Auth_Register_InvalidLogin_BadRequest()
     {
         // Given
-        RegisterUserRequest request = new()
+        UserRequest request = new()
         {
             Login = string.Empty,
             Password = "123",
-            Role = UserRole.User,
         };
 
         // When
@@ -57,11 +55,10 @@ public class UserServiceTest(WebTestFactory factory) : WebTestBase(factory)
         // Given
         UserRequest loginRequest = new() { Login = "admin", Password = "admin" };
 
-        RegisterUserRequest registerRequest = new()
+        UserRequest registerRequest = new()
         {
             Login = "admin",
             Password = "pass",
-            Role = UserRole.Admin,
         };
 
         // When

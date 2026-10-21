@@ -68,12 +68,10 @@ public class UserServiceTest(EventManagerTestContext context) : TestObjectBase, 
         var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
         const string login = "test";
         const string password = "123";
-        const UserRole role = UserRole.User;
 
-        RegisterUserRequest request = new()
+        UserRequest request = new()
         {
             Login = login,
-            Role = role,
             Password = password,
         };
 
@@ -82,7 +80,7 @@ public class UserServiceTest(EventManagerTestContext context) : TestObjectBase, 
 
         // Then
         Assert.Equal(login, userInfo.Login);
-        Assert.Equal(role, userInfo.Role);
+        Assert.Equal(UserRole.User, userInfo.Role);
     }
 
     [Trait(Category, Category_Users)]
@@ -95,12 +93,10 @@ public class UserServiceTest(EventManagerTestContext context) : TestObjectBase, 
         var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
         string login = TestAppDbContext.UserLogin;
         const string password = "123";
-        const UserRole role = UserRole.User;
 
-        RegisterUserRequest request = new()
+        UserRequest request = new()
         {
             Login = login,
-            Role = role,
             Password = password,
         };
 

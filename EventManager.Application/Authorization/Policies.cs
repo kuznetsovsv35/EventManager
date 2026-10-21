@@ -22,7 +22,6 @@ public static class Policies
         public const string ChangePassword = $"{nameof(UserService)}.{nameof(ChangePassword)}";
         public const string ModifyUser = $"{nameof(UserService)}.{nameof(ModifyUser)}";
         public const string DeleteUser = $"{nameof(UserService)}.{nameof(DeleteUser)}";
-        // Удалено по требованию задания.
-        // public const string RegisterUser = $"{nameof(UserService)}.{nameof(RegisterUser)}";
+        public const string RegisterUser = $"{nameof(UserService)}.{nameof(RegisterUser)}";
     }
 }

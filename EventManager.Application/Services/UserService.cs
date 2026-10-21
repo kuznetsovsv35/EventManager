@@ -75,10 +75,10 @@ public class UserService(
         return user.ToInfo();
     }
 
-    public async Task<UserInfo> RegisterUserAsync(RegisterUserRequest request, CancellationToken cancellation)
+    public async Task<UserInfo> RegisterUserAsync(UserRequest request, CancellationToken cancellation)
     {
-        // Оставлена без авторизации.
-        // await AuthorizeAsync(Policies.UserService.RegisterUser, cancellation);
+        if (request is RegisterUserRequest)
+            await AuthorizeAsync(Policies.UserService.RegisterUser, cancellation);
 
         try
         {

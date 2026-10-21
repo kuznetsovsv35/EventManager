@@ -61,11 +61,10 @@ public abstract class WebTestBase(WebTestFactory factory) : IClassFixture<WebTes
 
     protected async Task CreateUser(string login, string? password)
     {
-        RegisterUserRequest request = new()
+        UserRequest request = new()
         {
             Login = login,
             Password = password,
-            Role = UserRole.User,
         };
         var response = await PostAsync("auth/register", request);
         response.EnsureSuccessStatusCode();

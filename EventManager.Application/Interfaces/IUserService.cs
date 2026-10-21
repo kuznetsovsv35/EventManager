@@ -12,7 +12,7 @@ public interface IUserService
     /// </summary>
     /// <param name="request"></param>
     /// <returns></returns>
-    Task<UserInfo> RegisterUserAsync(RegisterUserRequest request, CancellationToken cancellation);
+    Task<UserInfo> RegisterUserAsync(UserRequest request, CancellationToken cancellation);
     /// <summary>
     /// Вход пользователя в систему.
     /// </summary>

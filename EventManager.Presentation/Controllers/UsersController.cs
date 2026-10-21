@@ -12,11 +12,20 @@ public class UsersController(IUserService userService) : ControllerBase
 {
     [HttpPost("/auth/register")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    //[ProducesResponseType(StatusCodes.Status403Forbidden)]
-    //[ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
-    //[Authorize(Policy = Policies.UserService.RegisterUser)]
     [AllowAnonymous]
+    public async Task<ActionResult> Register([FromBody] UserRequest request, CancellationToken cancellation)
+    {
+        await userService.RegisterUserAsync(request, cancellation);
+        return NoContent();
+    }
+
+    [HttpPost("/auth/register2")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    [Authorize(Policy = Policies.UserService.RegisterUser)]
     public async Task<ActionResult> Register([FromBody] RegisterUserRequest request, CancellationToken cancellation)
     {
         await userService.RegisterUserAsync(request, cancellation);
