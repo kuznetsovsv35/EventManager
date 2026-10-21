@@ -1,7 +1,6 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
 using EventManager.Application.DataTransferObjects;
-using EventManager.Domain.ValueObjects;
 using EventManager.Infrastructure.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
@@ -113,5 +112,27 @@ public class UserServiceTest(WebTestFactory factory) : WebTestBase(factory)
         // Then
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
         Assert.Null(authResult?.AccessToken);
+    }
+
+    [Trait(Category, Category_Web)]
+    [Fact]
+    public async Task Auth_Register_OnlyUserRole()
+    {
+        // Given
+        UserRequest request = new()
+        {
+            Login = "Test2",
+            Password = "123",
+        };
+        var userResponse = await PostAsync("/auth/register", request);
+        userResponse.EnsureSuccessStatusCode();
+
+        // When
+        string accessToken = await LoginUser(request.Login, request.Password);
+        EventInputData eventData = new EventDataBuilder().Build();
+        var eventResponse = await PostAsync("/events", eventData, accessToken);
+
+        // Then
+        Assert.Equal(HttpStatusCode.Forbidden, eventResponse.StatusCode);
     }
 }
