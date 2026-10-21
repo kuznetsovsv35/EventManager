@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Testcontainers.PostgreSql;
 using EventManager.Application.Cryptography;
 using EventManager.Infrastructure.Services;
+using Microsoft.Extensions.Hosting;
 
 namespace EventManager.WebTests;
 
@@ -21,9 +22,10 @@ public class WebTestFactory : WebApplicationFactory<Program>, IAsyncLifetime
             .WithPassword(Password)
             .Build();
 
-    static void RemoveService<T>(IServiceCollection services)
+    static void RemoveService<T>(IServiceCollection services, Func<ServiceDescriptor, bool>? predicate = null)
     {
-        var descriptor = services.SingleOrDefault(x => x.ServiceType == typeof(T));
+        var descriptor = services
+            .SingleOrDefault(x => x.ServiceType == typeof(T) && (predicate is null ? true : predicate(x)));
         if (descriptor is null)
             return;
 
@@ -37,7 +39,7 @@ public class WebTestFactory : WebApplicationFactory<Program>, IAsyncLifetime
             // Подмена контекста данных.
             RemoveService<DbContextOptions<AppDbContext>>(services);
             // Исключение фонового процесс.
-            RemoveService<AppBackgroundService>(services);
+            RemoveService<IHostedService>(services, d => d.ImplementationType == typeof(AppBackgroundService));
 
             services.AddDbContext<AppDbContext>(options =>
             {
