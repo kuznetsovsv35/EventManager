@@ -1,0 +1,138 @@
+﻿using System.Net;
+using System.Net.Http.Json;
+using EventManager.Application.DataTransferObjects;
+using EventManager.Infrastructure.Authentication;
+using Microsoft.AspNetCore.Http;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
+
+namespace EventManager.WebTests;
+
+public class UserServiceTest(WebTestFactory factory) : WebTestBase(factory)
+{
+
+    [Trait(Category, Category_Web)]
+    [Fact]
+    public async Task Auth_Register_Success()
+    {
+        // Given
+        UserRequest request = new()
+        {
+            Login = "Test",
+            Password = "123",
+        };
+
+        // When
+        var response = await PostAsync("/auth/register", request);
+
+        // Then
+        response.EnsureSuccessStatusCode();
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+    }
+
+    [Trait(Category, Category_Web)]
+    [Fact]
+    public async Task Auth_Register_InvalidLogin_BadRequest()
+    {
+        // Given
+        UserRequest request = new()
+        {
+            Login = string.Empty,
+            Password = "123",
+        };
+
+        // When
+        var response = await PostAsync("/auth/register", request);
+
+        // Then
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
+    [Trait(Category, Category_Web)]
+    [Fact]
+    public async Task Auth_Register_DuplicateLogin_BadRequest()
+    {
+        // Given
+        UserRequest loginRequest = new() { Login = "admin", Password = "admin" };
+
+        UserRequest registerRequest = new()
+        {
+            Login = "admin",
+            Password = "pass",
+        };
+
+        // When
+        var loginResponse = await PostAsync("auth/login", loginRequest);
+        var registerResponse = await PostAsync("/auth/register", registerRequest);
+
+        // Then
+        loginResponse.EnsureSuccessStatusCode();
+        Assert.Equal(HttpStatusCode.BadRequest, registerResponse.StatusCode);
+    }
+
+    [Trait(Category, Category_Web)]
+    [Theory]
+    [InlineData(["admin", "admin"])]
+    [InlineData(["user", "user"])]
+    public async Task Auth_Login_Success(string login, string password)
+    {
+        // Given
+        UserRequest loginRequest = new()
+        {
+            Login = login,
+            Password = password,
+        };
+
+        // When
+        var response = await PostAsync("/auth/login", loginRequest);
+        var authResult = await response.Content.ReadFromJsonAsync<AuthResult>();
+
+        // Then
+        response.EnsureSuccessStatusCode();
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.NotNull(authResult?.AccessToken);
+    }
+
+    [Trait(Category, Category_Web)]
+    [Theory]
+    [InlineData(["unknown", "pass"])]
+    [InlineData(["user", "123"])]
+    public async Task Auth_Login_Unauthorized(string login, string password)
+    {
+        // Given
+        UserRequest loginRequest = new()
+        {
+            Login = login,
+            Password = password,
+        };
+
+        // When
+        var response = await PostAsync("/auth/login", loginRequest);
+        var authResult = await response.Content.ReadFromJsonAsync<AuthResult>();
+
+        // Then
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        Assert.Null(authResult?.AccessToken);
+    }
+
+    [Trait(Category, Category_Web)]
+    [Fact]
+    public async Task Auth_Register_OnlyUserRole()
+    {
+        // Given
+        UserRequest request = new()
+        {
+            Login = "Test2",
+            Password = "123",
+        };
+        var userResponse = await PostAsync("/auth/register", request);
+        userResponse.EnsureSuccessStatusCode();
+
+        // When
+        string accessToken = await LoginUser(request.Login, request.Password);
+        EventInputData eventData = new EventDataBuilder().Build();
+        var eventResponse = await PostAsync("/events", eventData, accessToken);
+
+        // Then
+        Assert.Equal(HttpStatusCode.Forbidden, eventResponse.StatusCode);
+    }
+}

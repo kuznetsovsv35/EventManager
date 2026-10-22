@@ -1,13 +1,17 @@
+using System.Text.Json.Serialization;
+
 namespace EventManager.Application.DataTransferObjects;
 
 /// <summary>
 /// Выходные данные запросов GET.
 /// </summary>
 /// <param name="source"></param>
-public class EventOutputData : EventInputData
+public class EventOutputData() : EventInputData()
 {
+    [JsonInclude]
     public Guid Id { get; internal init; }
 
+    [JsonInclude]
     public int AvailableSeats { get; internal set; }
 
     public override bool Equals(object? obj)

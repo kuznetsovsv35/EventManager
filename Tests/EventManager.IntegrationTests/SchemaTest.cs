@@ -4,6 +4,8 @@ using EventManager.Domain.ValueObjects;
 using EventManager.Application.DataTransferObjects;
 using EventManager.Database;
 using Npgsql;
+using EventManager.Application.Cryptography;
+using EventManager.Infrastructure.Services;
 
 namespace EventManager.IntegrationTests;
 
@@ -38,6 +40,7 @@ public class SchemaTest(TestContainerWrapper<AppDbContext> testContainer) : Data
         var actualMigrations = await query
             .AsAsyncEnumerable()
             .Select(m => m.MigrationId.Split('_').Last())
+            .Order()
             .ToListAsync();
 
         // Then
@@ -101,6 +104,8 @@ public class SchemaTest(TestContainerWrapper<AppDbContext> testContainer) : Data
         // Given
         await ResetDatabase();
 
+        var userId = await GetAdminUser();
+
         Event @event = new(10)
         {
             Title = "Event",
@@ -110,7 +115,7 @@ public class SchemaTest(TestContainerWrapper<AppDbContext> testContainer) : Data
         };
         var infoEvent = @event.ToOutputData();
 
-        var booking = new Booking(@event.Id);
+        var booking = new Booking(@event.Id, userId);
         var infoBooking = booking.ToInfo();
 
         // When
@@ -123,17 +128,21 @@ public class SchemaTest(TestContainerWrapper<AppDbContext> testContainer) : Data
         await using var verify = CreateDbContext();
         var bookingFound = await verify
             .Bookings.FromSqlInterpolated($@"
-                SELECT b.""Id"", b.""EventId"", b.""Status"", b.""CreatedAt"", b.""ProcessedAt""
+                SELECT b.""Id"", b.""EventId"", b.""UserId"", b.""Status"", b.""CreatedAt"", b.""ProcessedAt""
                 FROM ""Events"" e
                 INNER JOIN ""Bookings"" b ON b.""EventId"" = e.""Id""
+                INNER JOIN ""Users"" u ON b.""UserId"" = u.""Id""
                 WHERE b.""Id"" = {booking.Id}
             ")
             .AsNoTracking()
             .Include(b => b.Event)
+            .Include(b => b.User)
             .SingleOrDefaultAsync();
 
         Assert.NotNull(bookingFound?.Event);
         Assert.Equal(infoEvent.Id, bookingFound.EventId);
+        Assert.NotNull(bookingFound.User);
+        Assert.Equal(userId, bookingFound.UserId);
         Assert.Equal(infoBooking, bookingFound.ToInfo());
     }
 
@@ -265,6 +274,7 @@ public class SchemaTest(TestContainerWrapper<AppDbContext> testContainer) : Data
         await ResetDatabase();
         await using var context = CreateDbContext();
         var db = context.Database;
+        var userId = await GetAdminUser();
         var eventId = Guid.NewGuid();
         var title = "Simple event";
         var startAt = DateTime.UtcNow;
@@ -280,15 +290,15 @@ public class SchemaTest(TestContainerWrapper<AppDbContext> testContainer) : Data
 
         // When
         await db.ExecuteSqlInterpolatedAsync($@"
-            INSERT INTO ""Bookings""(""Id"", ""EventId"", ""Status"", ""CreatedAt"")
-            VALUES({bookingId}, {eventId}, {status}, {createdAt})
+            INSERT INTO ""Bookings""(""Id"", ""EventId"", ""UserId"", ""Status"", ""CreatedAt"")
+            VALUES({bookingId}, {eventId}, {userId}, {status}, {createdAt})
         ");
 
         // Then
         var ex = await Assert.ThrowsAnyAsync<PostgresException>(
             async () => await db.ExecuteSqlInterpolatedAsync($@"
-                INSERT INTO ""Bookings""(""Id"", ""EventId"", ""Status"", ""CreatedAt"")
-                VALUES({bookingId}, {eventId}, {status}, {createdAt})
+                INSERT INTO ""Bookings""(""Id"", ""EventId"", ""UserId"", ""Status"", ""CreatedAt"")
+                VALUES({bookingId}, {eventId}, {userId}, {status}, {createdAt})
             "));
         CheckUniqueConstraint(ex, "Bookings", "Id");
     }
@@ -300,6 +310,8 @@ public class SchemaTest(TestContainerWrapper<AppDbContext> testContainer) : Data
         // Given
         await ResetDatabase();
 
+        var userId = await GetAdminUser();
+
         Event @event = new(10)
         {
             Title = "Event",
@@ -308,7 +320,7 @@ public class SchemaTest(TestContainerWrapper<AppDbContext> testContainer) : Data
             EndAt = DateTime.UtcNow.AddHours(1)
         };
 
-        var booking = new Booking(@event.Id);
+        var booking = new Booking(@event.Id, userId);
 
         await using var context = CreateDbContext();
         context.Events.Add(@event);
@@ -355,6 +367,8 @@ public class SchemaTest(TestContainerWrapper<AppDbContext> testContainer) : Data
         // Given
         await ResetDatabase();
 
+        var userId = await GetAdminUser();
+
         Event @event = new(10)
         {
             Title = "Event",
@@ -364,9 +378,9 @@ public class SchemaTest(TestContainerWrapper<AppDbContext> testContainer) : Data
         };
         var infoEvent = @event.ToOutputData();
 
-        var booking = new Booking(@event.Id);
+        var booking = new Booking(@event.Id, userId);
         var infoBooking = booking.ToInfo();
-        var booking2 = new Booking(Guid.NewGuid());
+        var booking2 = new Booking(Guid.NewGuid(), userId);
 
         await using var context = CreateDbContext();
         context.Events.Add(@event);
@@ -401,6 +415,190 @@ public class SchemaTest(TestContainerWrapper<AppDbContext> testContainer) : Data
         CheckForeignKey(exBook2?.InnerException as PostgresException, "Booking", "FK_Bookings_Events_EventId");
     }
 
+    [Trait(Category, Category_Database)]
+    [Fact]
+    public async Task UsersColumnsTest_Success()
+    {
+        // Given
+        await ResetDatabase();
+
+        const string password = nameof(password);
+        IPasswordHasher hasher = new PasswordHasher();
+
+        User user = new("test")
+        {
+            Role = UserRole.Admin,
+            Password = hasher.Hash(password),
+        };
+
+        UserInfo info = user.ToInfo();
+
+        // When
+        await using var workContext = CreateDbContext();
+        workContext.Users.Add(user);
+        await workContext.SaveChangesAsync();
+
+        // Then
+        await using var verifyContext = CreateDbContext();
+        var userFound = await verifyContext.Users
+            .FromSqlInterpolated($@"
+                SELECT * FROM ""Users""
+                WHERE ""Id"" = {user.Id}
+                ")
+            .AsNoTracking()
+            .SingleOrDefaultAsync();
+
+        var infoFound = userFound?.ToInfo();
+
+        Assert.NotNull(infoFound);
+        Assert.Equal(info, infoFound);
+        Assert.True(userFound is { Password: string p } && hasher.Verify(p, password));
+    }
+
+    [Trait(Category, Category_Database)]
+    [Fact]
+    public async Task UsersPrimaryKeyTest()
+    {
+        // Given
+        await ResetDatabase();
+
+        var id = Guid.NewGuid();
+        const string login1 = "test-1";
+        const string login2 = "test-2";
+        const UserRole role = default;
+        var createdAt = DateTime.UtcNow;
+        const bool isActive = default;
+        await using var context = CreateDbContext();
+        var db = context.Database;
+
+        // When
+        await db.ExecuteSqlInterpolatedAsync($@"
+            INSERT INTO ""Users"" (""Id"", ""Login"", ""Role"", ""IsActive"", ""CreatedAt"")
+            VALUES ({id}, {login1}, {role}, {isActive}, {createdAt})
+        ");
+
+        // Then
+        var ex = await Assert.ThrowsAnyAsync<PostgresException>(async () =>
+        {
+            await db.ExecuteSqlInterpolatedAsync($@"
+                INSERT INTO ""Users"" (""Id"", ""Login"", ""Role"", ""IsActive"", ""CreatedAt"")
+                VALUES ({id}, {login2}, {role}, {isActive}, {createdAt})
+            ");
+        });
+
+        CheckUniqueConstraint(ex, "Users", "Id");
+    }
+
+    [Trait(Category, Category_Database)]
+    [Fact]
+    public async Task UsersConstraintsTest()
+    {
+        // Given
+        await ResetDatabase();
+
+        const string password = nameof(password);
+        string loginMinLength = string.Empty;
+        string loginMaxLength = new('l', 33);
+        const string invalidPassword = "123";
+
+        IPasswordHasher hasher = new PasswordHasher();
+
+        User user = new("test")
+        {
+            Role = UserRole.Admin,
+            Password = hasher.Hash(password),
+        };
+        await using var context = CreateDbContext();
+        context.Users.Add(user);
+        await context.SaveChangesAsync();
+
+        // When
+        var verify = CreateDbContext();
+
+        var exIdNull = await Assert.ThrowsAnyAsync<PostgresException>(async () =>
+        {
+            await verify.Database.ExecuteSqlInterpolatedAsync($@"
+                UPDATE ""Users"" 
+                SET ""Id"" = NULL
+                WHERE ""Id"" = {user.Id}
+            ");
+        });
+
+        var exLoginNull = await Assert.ThrowsAnyAsync<PostgresException>(async () =>
+        {
+            await verify.Database.ExecuteSqlInterpolatedAsync($@"
+                UPDATE ""Users""
+                SET ""Login"" = NULL
+                WHERE ""Id"" = {user.Id}
+            ");
+        });
+
+        var exLoginMinLength = await Assert.ThrowsAnyAsync<PostgresException>(async () =>
+        {
+            await verify.Database.ExecuteSqlInterpolatedAsync($@"
+                UPDATE ""Users""
+                SET ""Login"" = {loginMinLength}
+                WHERE ""Id"" = {user.Id}
+            ");
+        });
+        var exLoginMaxLength = await Assert.ThrowsAnyAsync<PostgresException>(async () =>
+        {
+            await verify.Database.ExecuteSqlInterpolatedAsync($@"
+                UPDATE ""Users""
+                SET ""Login"" = {loginMaxLength}
+                WHERE ""Id"" = {user.Id}
+            ");
+        });
+
+        var exPassword = await Assert.ThrowsAnyAsync<PostgresException>(async () =>
+        {
+            await verify.Database.ExecuteSqlInterpolatedAsync($@"
+                UPDATE ""Users""
+                SET ""Password"" = {invalidPassword}
+                WHERE ""Id"" = {user.Id}
+            ");
+        });
+
+        var exRoleNull = await Assert.ThrowsAnyAsync<PostgresException>(async () =>
+        {
+            await verify.Database.ExecuteSqlInterpolatedAsync($@"
+                UPDATE ""Users""
+                SET ""Role"" = NULL
+                WHERE ""Id"" = {user.Id}
+            ");
+        });
+
+        var exIsActiveNull = await Assert.ThrowsAnyAsync<PostgresException>(async () =>
+        {
+            await verify.Database.ExecuteSqlInterpolatedAsync($@"
+                UPDATE ""Users""
+                SET ""IsActive"" = NULL
+                WHERE ""Id"" = {user.Id}
+            ");
+        });
+
+        var exCreatedAtNull = await Assert.ThrowsAnyAsync<PostgresException>(async () =>
+        {
+            await verify.Database.ExecuteSqlInterpolatedAsync($@"
+                UPDATE ""Users""
+                SET ""CreatedAt"" = NULL
+            ");
+        });
+
+        // Then
+        CheckNullConstraint(exIdNull, "Users", "Id");
+
+        CheckNullConstraint(exLoginNull, "Users", "Login");
+        CheckValueConstraint(exLoginMinLength, "Users", "CK_Users_Login");
+        CheckMaxLengthConstraint(exLoginMaxLength, "Users");
+
+        CheckValueConstraint(exPassword, "Users", "CK_Users_Password");
+
+        CheckNullConstraint(exRoleNull, "Users", "Role");
+        CheckNullConstraint(exIsActiveNull, "Users", "IsActive");
+        CheckNullConstraint(exCreatedAtNull, "Users", "CreatedAt");
+    }
+
     void CheckUniqueConstraint(PostgresException? exception, string table, string column)
     {
         Assert.Equal(PostgresErrorCodes.UniqueViolation, exception?.SqlState);
@@ -420,6 +618,11 @@ public class SchemaTest(TestContainerWrapper<AppDbContext> testContainer) : Data
         Assert.Equal(PostgresErrorCodes.CheckViolation, exception?.SqlState);
         Assert.Contains(table, exception?.TableName);
         Assert.Equal(name, exception?.ConstraintName);
+    }
+
+    void CheckMaxLengthConstraint(PostgresException? exception, string table)
+    {
+        Assert.Equal(PostgresErrorCodes.StringDataRightTruncation, exception?.SqlState);
     }
 
     void CheckForeignKey(PostgresException? exception, string table, string name)

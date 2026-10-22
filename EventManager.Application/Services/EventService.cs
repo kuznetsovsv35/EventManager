@@ -3,6 +3,7 @@ using EventManager.Domain.Exceptions;
 using EventManager.Common.Interfaces;
 using EventManager.Application.Interfaces;
 using EventManager.Application.DataTransferObjects;
+using EventManager.Application.Authorization;
 
 namespace EventManager.Application.Services;
 
@@ -11,13 +12,16 @@ namespace EventManager.Application.Services;
 /// </summary>
 /// <param name="dbContext"></param>
 public class EventService(
+    IAppAuthorizationService appAuthorization,
     ISyncContextFactory syncContextFactory,
     IEventRepository repository,
     IFilter<Event> filter,
-    IPaginator<Event> paginator) : IEventService
+    IPaginator<Event> paginator) : AppAuthorizeService<EventService>(appAuthorization), IEventService
 {
     async Task<EventOutputData> IEventService.CreateEventAsync(EventInputData data, CancellationToken cancellation)
     {
+        await AuthorizeAsync(Policies.EventService.CreateEvent, cancellation);
+
         if (data == null)
             throw new ArgumentNullException(nameof(data));
 
@@ -28,22 +32,32 @@ public class EventService(
 
     async Task<EventOutputData> IEventService.DeleteEventAsync(Guid id, CancellationToken cancellation)
     {
+        await AuthorizeAsync(Policies.EventService.DeleteEvent, cancellation);
+
         if (await repository.DeleteEventAsync(id, cancellation) is Event e)
             return e.ToOutputData();
 
         throw new EventNotFoundException(id, nameof(id));
     }
 
-    Task<PaginateResult<EventOutputData>> IEventService.GetEvents(FilterParams? filterParams, PageParams pageParams, CancellationToken cancellation)
-        => paginator.PaginateAsync(
+    async Task<PaginateResult<EventOutputData>> IEventService.GetEvents(FilterParams? filterParams, PageParams pageParams, CancellationToken cancellation)
+    {
+        await AuthorizeAsync(Policies.EventService.GetEvents, cancellation);
+
+        return await paginator.PaginateAsync(
             FilterEvents(filterParams),
             pageParams.CurrentPage, pageParams.PageSize,
             e => e.ToOutputData(), cancellation);
+    }
 
-    IEnumerable<EventOutputData> IEventService.GetEvents(FilterParams? filterParams)
-        => FilterEvents(filterParams)
+    async Task<IEnumerable<EventOutputData>> IEventService.GetEvents(FilterParams? filterParams)
+    {
+        await AuthorizeAsync(Policies.EventService.GetEvents, CancellationToken.None);
+
+        return FilterEvents(filterParams)
             .Select(e => e.ToOutputData())
             .AsEnumerable();
+    }
 
     IQueryable<Event> FilterEvents(FilterParams? filterParams)
     {
@@ -72,6 +86,8 @@ public class EventService(
 
     async Task<EventOutputData> IEventService.GetEventAsync(Guid id, CancellationToken cancellation)
     {
+        await AuthorizeAsync(Policies.EventService.GetEvents, cancellation);
+
         if (await repository.GetEventAsync(id, cancellation) is Event e)
             return e.ToOutputData();
 
@@ -80,6 +96,8 @@ public class EventService(
 
     async Task<EventOutputData> IEventService.UpdateEventAsync(Guid id, EventInputData data, CancellationToken cancellation)
     {
+        await AuthorizeAsync(Policies.EventService.ModifyEvent, cancellation);
+
         var e = await syncContextFactory.CreateContext<Booking>().ExecuteActionAsync(
             async () =>
             {

@@ -1,3 +1,4 @@
+using EventManager.Application.Cryptography;
 using EventManager.Database;
 using Microsoft.EntityFrameworkCore;
 
@@ -31,5 +32,6 @@ public static partial class DependencyInjection
         await using var scope = serviceProvider.CreateAsyncScope();
         using var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         await dbContext.Database.MigrateAsync(cancellation);
+        await dbContext.SeedAsync(serviceProvider.GetRequiredService<IPasswordHasher>().Hash, cancellation);
     }
 }
