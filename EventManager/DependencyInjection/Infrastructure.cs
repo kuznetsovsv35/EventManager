@@ -1,6 +1,7 @@
 using EventManager.Common.Interfaces;
 using EventManager.Common.Services;
 using EventManager.Application.Interfaces;
+using EventManager.Application.Cryptography;
 using EventManager.Infrastructure.Services;
 using EventManager.Infrastructure.Repositories;
 using EventManager.Domain.ValueObjects;
@@ -21,7 +22,9 @@ public static partial class DependencyInjection
         services.AddScoped<IPaginator<Event>, PaginateService<Event>>();
         services.AddScoped<IEventRepository, EventRepository>();
         services.AddScoped<IBookingRepository, BookingRepository>();
+        services.AddScoped<IUserRepository, UserRepository>();
         services.AddHostedService<AppBackgroundService>();
+        services.AddSingleton<IPasswordHasher, PasswordHasher>();
 
         return services;
     }

@@ -8,4 +8,5 @@
   <Project Path="EventManager.Presentation/EventManager.Presentation.csproj" />
   <Project Path="Tests/EventManager.IntegrationTests/EventManager.IntegrationTests.csproj" />
   <Project Path="Tests/EventManager.Tests/EventManager.Tests.csproj" />
+  <Project Path="Tests/EventManager.WebTests/EventManager.WebTests.csproj" />
 </Solution>

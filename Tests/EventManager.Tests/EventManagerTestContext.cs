@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -9,7 +8,9 @@ using EventManager.Application.Interfaces;
 using EventManager.Application.Services;
 using EventManager.Infrastructure.Services;
 using EventManager.Infrastructure.Repositories;
-using EventManager.Database;
+using EventManager.Infrastructure.Background;
+using EventManager.Application.Authorization;
+using EventManager.Application.Cryptography;
 
 namespace EventManager.Tests;
 
@@ -18,20 +19,12 @@ namespace EventManager.Tests;
 /// </summary>
 public class EventManagerTestContext
 {
-    public IServiceProvider ServiceProvider { get; }
-
-    public async Task<Guid> GetRandomEventId(CancellationToken cancellation)
-    {
-        await using var scope = ServiceProvider.CreateAsyncScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        int eventCount = await dbContext.Events.AsNoTracking().CountAsync<Event>(cancellation);
-        var eventIndex = Random.Shared.Next(eventCount);
-        return (await dbContext.Events.AsNoTracking().Skip(eventIndex).FirstAsync(cancellation)).Id;
-    }
     readonly IServiceCollection _services;
 
     public EventManagerTestContext()
     {
+        var currentUser = new Mock<ICurrentUser>();
+
         _services = new ServiceCollection()
             .AddSingleton<IBookingServiceNotifier, BookingServiceNotifier>()
             .AddSingleton(_ => new TestAppDbContext($"Test_{Guid.NewGuid()}"))
@@ -50,10 +43,17 @@ public class EventManagerTestContext
                 return mock.Object;
             })
             .AddSingleton<IAppBackgroundService, AppBackgroundService>()
-            .AddSingleton<ISyncContextFactory, SyncContextFactory>();
-        ServiceProvider = CreateServiceProvider();
+            .AddSingleton<ISyncContextFactory, SyncContextFactory>()
+            .AddScoped(provider =>
+            {
+                var mock = new Mock<IAppAuthorizationService>();
+                mock.SetupGet(x => x.CurrentUser).Returns(currentUser.Object);
+                return mock.Object;
+            })
+            .AddScoped<IUserRepository, UserRepository>()
+            .AddScoped<IUserService, UserService>()
+            .AddSingleton<IPasswordHasher, PasswordHasher>();
     }
 
-    internal IServiceProvider CreateServiceProvider() => _services.BuildServiceProvider();
-    internal AsyncServiceScope CreateAsyncScope() => ServiceProvider.CreateAsyncScope();
+    public IServiceProvider CreateServiceProvider() => _services.BuildServiceProvider();
 }

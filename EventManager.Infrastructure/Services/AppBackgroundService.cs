@@ -5,6 +5,7 @@ using EventManager.Domain.ValueObjects;
 using EventManager.Domain.Exceptions;
 using EventManager.Common.Interfaces;
 using EventManager.Application.Interfaces;
+using EventManager.Infrastructure.Background;
 
 namespace EventManager.Infrastructure.Services;
 

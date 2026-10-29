@@ -35,4 +35,11 @@ public interface IBookingRepository
     /// <param name="cancellation"</param>
     /// <returns></returns>
     IAsyncEnumerable<IEnumerable<Booking>> GetPendingBookingsAsync(int chunkSize, CancellationToken cancellation);
+    /// <summary>
+    /// Возвращает количество активных броней для пользователя.
+    /// </summary>
+    /// <param name="userId"></param>
+    /// <param name="cancellation"></param>
+    /// <returns></returns>
+    Task<int> GetUserActiveBookingCountAsync(Guid userId, CancellationToken cancellation);
 }

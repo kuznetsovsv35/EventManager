@@ -23,7 +23,7 @@ public class BookingRepository(AppDbContext dbContext) : IBookingRepository
     async Task IBookingRepository.UpdateBookingStatusAsync(Booking booking, CancellationToken cancellation)
     {
         dbContext.Bookings.Update(booking);
-        if (booking.Status == BookingStatus.Rejected && booking.Event is not null)
+        if (booking is { Status: BookingStatus.Rejected or BookingStatus.Cancelled } && booking.Event is not null)
         {
             booking.Event.ReleaseSeats();
             dbContext.Events.Update(booking.Event);
@@ -57,5 +57,12 @@ public class BookingRepository(AppDbContext dbContext) : IBookingRepository
 
         if (chunk.Count > 0)
             yield return chunk;
+    }
+
+    Task<int> IBookingRepository.GetUserActiveBookingCountAsync(Guid userId, CancellationToken cancellation)
+    {
+        return dbContext.Bookings
+            .Where(b => b.UserId == userId && b.Status == BookingStatus.Pending)
+            .CountAsync(cancellation);
     }
 }

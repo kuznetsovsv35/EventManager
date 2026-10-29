@@ -19,7 +19,8 @@ public class FilterEventTest(EventManagerTestContext context) : TestObjectBase, 
     public async Task Reset_Success()
     {
         // Given
-        await using var scope = context.CreateAsyncScope();
+        var serviceProvider = context.CreateServiceProvider();
+        await using var scope = serviceProvider.CreateAsyncScope();
         var filterService = scope.ServiceProvider.GetRequiredService<IFilter<Event>>();
 
         // When
@@ -34,7 +35,8 @@ public class FilterEventTest(EventManagerTestContext context) : TestObjectBase, 
     public async Task AddNullCondition_Fail()
     {
         // Given
-        await using var scope = context.CreateAsyncScope();
+        var serviceProvider = context.CreateServiceProvider();
+        await using var scope = serviceProvider.CreateAsyncScope();
         var filterService = scope.ServiceProvider.GetRequiredService<IFilter<Event>>();
 
         // Then
@@ -48,7 +50,8 @@ public class FilterEventTest(EventManagerTestContext context) : TestObjectBase, 
     public async Task SimpleFilterByTitle_Success()
     {
         // Given
-        await using var scope = context.CreateAsyncScope();
+        var serviceProvider = context.CreateServiceProvider();
+        await using var scope = serviceProvider.CreateAsyncScope();
         var filterService = scope.ServiceProvider.GetRequiredService<IFilter<Event>>();
         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
@@ -95,7 +98,8 @@ public class FilterEventTest(EventManagerTestContext context) : TestObjectBase, 
     public async Task PartialFilterByTitle_Success(string title)
     {
         // Given
-        await using var scope = context.CreateAsyncScope();
+        var serviceProvider = context.CreateServiceProvider();
+        await using var scope = serviceProvider.CreateAsyncScope();
         var filterService = scope.ServiceProvider.GetRequiredService<IFilter<Event>>();
         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
@@ -128,7 +132,8 @@ public class FilterEventTest(EventManagerTestContext context) : TestObjectBase, 
     public async Task IterationFilterByTitle_Success(string title)
     {
         // Given
-        await using var scope = context.CreateAsyncScope();
+        var serviceProvider = context.CreateServiceProvider();
+        await using var scope = serviceProvider.CreateAsyncScope();
         var filterService = scope.ServiceProvider.GetRequiredService<IFilter<Event>>();
         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
@@ -167,7 +172,8 @@ public class FilterEventTest(EventManagerTestContext context) : TestObjectBase, 
     public async Task FilterByStartDate_Success(DateTime startAt)
     {
         // Given
-        await using var scope = context.CreateAsyncScope();
+        var serviceProvider = context.CreateServiceProvider();
+        await using var scope = serviceProvider.CreateAsyncScope();
         var filterService = scope.ServiceProvider.GetRequiredService<IFilter<Event>>();
         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
@@ -207,7 +213,8 @@ public class FilterEventTest(EventManagerTestContext context) : TestObjectBase, 
     public async Task FilterByEndDate_Success(DateTime endAt)
     {
         // Given
-        await using var scope = context.CreateAsyncScope();
+        var serviceProvider = context.CreateServiceProvider();
+        await using var scope = serviceProvider.CreateAsyncScope();
         var filterService = scope.ServiceProvider.GetRequiredService<IFilter<Event>>();
         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
@@ -249,7 +256,8 @@ public class FilterEventTest(EventManagerTestContext context) : TestObjectBase, 
     public async Task CombinedFilter_Success(string? title, DateTime? startAt, DateTime? endAt)
     {
         // Given
-        await using var scope = context.CreateAsyncScope();
+        var serviceProvider = context.CreateServiceProvider();
+        await using var scope = serviceProvider.CreateAsyncScope();
         var filterService = scope.ServiceProvider.GetRequiredService<IFilter<Event>>();
         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 

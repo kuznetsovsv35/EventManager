@@ -21,4 +21,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     #region  Bookings
     public DbSet<Booking> Bookings => Set<Booking>();
     #endregion
+
+    #region Users
+    public DbSet<User> Users => Set<User>();
+    #endregion
 }
