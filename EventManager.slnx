@@ -1,12 +1,11 @@
 <Solution>
-  <Project Path="EventManager/EventManager.csproj" />
-  <Project Path="EventManager.Domain/EventManager.Domain.csproj" />
-  <Project Path="EventManager.Common/EventManager.Common.csproj" />
-  <Project Path="EventManager.Application/EventManager.Application.csproj" />
-  <Project Path="EventManager.Database/EventManager.Database.csproj" />
-  <Project Path="EventManager.Infrastructure/EventManager.Infrastructure.csproj" />
-  <Project Path="EventManager.Presentation/EventManager.Presentation.csproj" />
-  <Project Path="Tests/EventManager.IntegrationTests/EventManager.IntegrationTests.csproj" />
-  <Project Path="Tests/EventManager.Tests/EventManager.Tests.csproj" />
-  <Project Path="Tests/EventManager.WebTests/EventManager.WebTests.csproj" />
+  <Folder Name="/src/" />
+  <Folder Name="/src/Common/">
+    <Project Path="src/Common/Authorization.AspNetCore/Authorization.AspNetCore.csproj" />
+    <Project Path="src/Common/Authorization/Authorization.csproj" />
+  </Folder>
+  <Folder Name="/src/UsersService/">
+    <Project Path="src/UsersService/UsersService.Domain/UsersService.Domain.csproj" />
+    <Project Path="src/UsersService/UsersService/UsersService.csproj" />
+  </Folder>
 </Solution>
