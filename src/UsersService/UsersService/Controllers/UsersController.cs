@@ -1,5 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using UsersService.Application;
+using UsersService.Application.DTO;
+using UsersService.Application.Security;
 
 namespace UsersService.Controllers;
 
@@ -21,7 +24,7 @@ public class UsersController(IUserService userService) : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
-    [Authorize(Policy = Policies.UserService.RegisterUser)]
+    [Authorize(Policy = Policy.RegisterUser)]
     public async Task<ActionResult> Register([FromBody] RegisterUserRequest request, CancellationToken cancellation)
     {
         await userService.RegisterUserAsync(request, cancellation);
@@ -34,7 +37,7 @@ public class UsersController(IUserService userService) : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
-    [Authorize(Policy = Policies.UserService.ModifyUser)]
+    [Authorize(Policy = Policy.ModifyUser)]
     public async Task<ActionResult> ChangeRole(
         [FromRoute] string login,
         [FromQuery] string role,
@@ -54,7 +57,7 @@ public class UsersController(IUserService userService) : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
-    [Authorize(Policy = Policies.UserService.ChangePassword)]
+    [Authorize(Policy = Policy.ChangePassword)]
     public async Task<ActionResult> ChangePassword(
         [FromRoute] string login,
         [FromBody] string? password,
@@ -74,7 +77,7 @@ public class UsersController(IUserService userService) : ControllerBase
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
-    [Authorize(Policy = Policies.UserService.DeleteUser)]
+    [Authorize(Policy = Policy.DeleteUser)]
     public async Task<ActionResult> Unregister([FromRoute] string login, CancellationToken cancellation)
     {
         var request = new RegisterUserRequest().SetLogin(login);
