@@ -1,10 +1,10 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using Authorization.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using UsersService.Application;
 using UsersService.Application.DTO;
-using UsersService.Configuration;
 using UsersService.Extensions;
 
 namespace UsersService.Services;

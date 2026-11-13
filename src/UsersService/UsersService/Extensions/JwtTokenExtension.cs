@@ -1,6 +1,6 @@
 using System.Text;
+using Authorization.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using UsersService.Configuration;
 
 namespace UsersService.Extensions;
 

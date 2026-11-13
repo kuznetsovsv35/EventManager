@@ -1,4 +1,4 @@
-namespace UsersService.Configuration;
+namespace Authorization.Configuration;
 
 public class JwtSettings
 {

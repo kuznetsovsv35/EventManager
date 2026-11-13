@@ -6,7 +6,7 @@ using Authorization.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 
-namespace Authorization.Services;
+namespace Authorization.AspNetCore.Services;
 
 public class AppAuthorizationService : IAppAuthorizationService
 {

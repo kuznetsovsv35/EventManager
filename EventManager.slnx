@@ -1,14 +1,16 @@
 <Solution>
   <Folder Name="/src/" />
   <Folder Name="/src/Common/">
-    <Project Path="src/Common/Authorization.AspNetCore/Authorization.AspNetCore.csproj" />
-    <Project Path="src/Common/Authorization/Authorization.csproj" />
     <Project Path="src/Common/Common/Common.csproj" />
+    <Project Path="src/Common/Common.Swagger/Common.Swagger.csproj" />
+    <Project Path="src/Common/Authorization/Authorization.csproj" />
+    <Project Path="src/Common/Authorization.AspNetCore/Authorization.AspNetCore.csproj" />
+    <Project Path="src/Common/Database.Postgres/Database.Postgres.csproj" />
   </Folder>
   <Folder Name="/src/UsersService/">
+    <Project Path="src/UsersService/UsersService.Domain/UsersService.Domain.csproj" />
     <Project Path="src/UsersService/UsersService.Application/UsersService.Application.csproj" />
     <Project Path="src/UsersService/UsersService.Database/UsersService.Database.csproj" />
-    <Project Path="src/UsersService/UsersService.Domain/UsersService.Domain.csproj" />
     <Project Path="src/UsersService/UsersService/UsersService.csproj" />
   </Folder>
 </Solution>

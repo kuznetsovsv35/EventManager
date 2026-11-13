@@ -11,7 +11,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="../../Common/Authorization.AspNetCore/Authorization.AspNetCore.csproj" />
+    <ProjectReference Include="../../Common/Common.Swagger/Common.Swagger.csproj" />
+    <ProjectReference Include="../../Common/Database.Postgres/Database.Postgres.csproj" />
     <ProjectReference Include="../UsersService.Application/UsersService.Application.csproj" />
+    <ProjectReference Include="../UsersService.Database/UsersService.Database.csproj" />
   </ItemGroup>
 
   <ItemGroup>
