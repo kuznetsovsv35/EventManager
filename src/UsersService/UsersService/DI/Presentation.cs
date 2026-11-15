@@ -1,7 +1,9 @@
 using Authorization.AspNetCore.DI;
 using Authorization.Domain;
+using Common.Middleware.DI;
 using Common.Swagger;
 using UsersService.Application.Security;
+using UsersService.Middleware;
 
 namespace UsersService.DI;
 
@@ -9,6 +11,7 @@ public static partial class DependencyInjection
 {
     public static IServiceCollection ConfigurePresentation(this IServiceCollection services, IConfiguration configuration)
     {
+        services.UseProblemDetailsMapper<UsersProblemDetailsMapper>();
         services.ConfigureUserAuthentication(configuration);
         services.ConfigureJwtAuthorization(configuration, options =>
         {
@@ -25,28 +28,28 @@ public static partial class DependencyInjection
         return services;
     }
 
-    public static WebApplication ConfigureMiddleware(this WebApplication app)
+    public static IApplicationBuilder ConfigureMiddleware(this IApplicationBuilder application)
     {
-        // app.UseMiddleware<ErrorHandler>();
-        return app;
+        application.RegisterErrorHandler();
+        return application;
     }
 
-    public static WebApplication RunPresentation(this WebApplication app)
+    public static IApplicationBuilder RunPresentation(this IApplicationBuilder application)
     {
-        app.ConfigureMiddleware();
+        application.ConfigureMiddleware();
 
         // Редирект
-        app.UseHttpsRedirection();
+        application.UseHttpsRedirection();
         // Аутентификация
-        app.UseAuthentication();
+        application.UseAuthentication();
         // Авторизация
-        app.UseAuthorization();
+        application.UseAuthorization();
         // Контролеры.
-        app.MapControllers();
+        (application as IEndpointRouteBuilder)?.MapControllers();
 
         // API в веб-интерфейсе.
-        app.RunSwagger();
+        application.RunSwagger();
 
-        return app;
+        return application;
     }
 }    

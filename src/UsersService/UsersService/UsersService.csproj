@@ -8,18 +8,17 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.14" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.13"/>
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="../../Common/Authorization.AspNetCore/Authorization.AspNetCore.csproj" />
+    <ProjectReference Include="../../Common/Common.Middleware/Common.Middleware.csproj" />
     <ProjectReference Include="../../Common/Common.Swagger/Common.Swagger.csproj" />
     <ProjectReference Include="../../Common/Database.Postgres/Database.Postgres.csproj" />
     <ProjectReference Include="../UsersService.Application/UsersService.Application.csproj" />
     <ProjectReference Include="../UsersService.Database/UsersService.Database.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.23.0" />
+    <ProjectReference Include="../UsersService.Domain/UsersService.Domain.csproj" />
   </ItemGroup>
 
 </Project>

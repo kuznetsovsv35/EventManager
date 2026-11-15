@@ -3,7 +3,7 @@ using UsersService.Domain;
 
 namespace UsersService.Database;
 
-public class UsersDbContext : DbContext
+public class UsersDbContext(DbContextOptions<UsersDbContext> options) : DbContext(options)
 {
     public DbSet<User> Users => Set<User>();
 }

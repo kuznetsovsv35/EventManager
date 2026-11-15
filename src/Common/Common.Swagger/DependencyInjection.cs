@@ -38,7 +38,7 @@ public static partial class DependencyInjection
         return services;
     }
 
-    public static WebApplication RunSwagger(this WebApplication application)
+    public static IApplicationBuilder RunSwagger(this IApplicationBuilder application)
     {
         application.UseSwagger();
         application.UseSwaggerUI();

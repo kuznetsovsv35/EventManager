@@ -2,6 +2,7 @@
   <Folder Name="/src/" />
   <Folder Name="/src/Common/">
     <Project Path="src/Common/Common/Common.csproj" />
+    <Project Path="src/Common/Common.Middleware/Common.Middleware.csproj" />
     <Project Path="src/Common/Common.Swagger/Common.Swagger.csproj" />
     <Project Path="src/Common/Authorization/Authorization.csproj" />
     <Project Path="src/Common/Authorization.AspNetCore/Authorization.AspNetCore.csproj" />
