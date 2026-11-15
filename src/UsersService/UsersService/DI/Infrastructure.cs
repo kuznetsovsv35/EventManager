@@ -22,8 +22,6 @@ public static partial class DependencyInjection
     }
 
     public static Task RunInfrastructure(this IServiceProvider serviceProvider, CancellationToken cancellation)
-        => serviceProvider.PrepareDatabase<UsersDbContext>(cancellation, (dbContext, cancellation) =>
-        {
-            return Task.CompletedTask;
-        });    
+        => serviceProvider.PrepareDatabase<UsersDbContext>(cancellation, async (dbContext, cancellation) 
+            => await dbContext.SeedAsync(new PasswordHasher().Hash, cancellation));    
 }

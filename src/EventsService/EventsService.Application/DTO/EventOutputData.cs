@@ -1,0 +1,31 @@
+using System.Text.Json.Serialization;
+
+namespace EventsService.Application.DTO;
+
+/// <summary>
+/// Выходные данные запросов GET.
+/// </summary>
+/// <param name="source"></param>
+public class EventOutputData() : EventInputData()
+{
+    [JsonInclude]
+    public Guid Id { get; internal init; }
+
+    [JsonInclude]
+    public int AvailableSeats { get; internal set; }
+
+    public override bool Equals(object? obj)
+    {
+        if (ReferenceEquals(this, obj))
+            return true;
+
+        if (obj is EventOutputData outputData)
+            return Id == outputData.Id
+                && AvailableSeats == outputData.AvailableSeats
+                && base.Equals((EventInputData)obj);
+
+        return base.Equals(obj);
+    }
+
+    public override int GetHashCode() => Id.GetHashCode();
+}

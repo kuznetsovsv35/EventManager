@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="../../Common/Authorization/Authorization.csproj" />
     <ProjectReference Include="../../Common/Common/Common.csproj" />
     <ProjectReference Include="../UsersService.Domain/UsersService.Domain.csproj" />
   </ItemGroup>

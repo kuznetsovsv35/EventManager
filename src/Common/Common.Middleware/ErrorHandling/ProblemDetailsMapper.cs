@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using Authorization.Exceptions;
+using Common.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Common.Middleware.ErrorHandling;
@@ -21,6 +22,7 @@ public class ProblemDetailsMapper<T> : IProblemDetailsMapper where T : class, IP
         {
             ValidationException ve => ProblemDetailsFactory.ValidationProblem(ve.ValidationResult, ve.Message),
             ForbiddenException forbidden => ProblemDetailsFactory.Forbid(forbidden.Message),
+            ObjectNotFoundException<Guid> notFound => ProblemDetailsFactory.NotFound($"{notFound.Message}: (ID={notFound.ObjectKey})."),
             _ => ProblemDetailsFactory.InternalServiceError(exception.Message)        
         };
 }

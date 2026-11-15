@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.15" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../Common/Authorization.AspNetCore/Authorization.AspNetCore.csproj" />
+    <ProjectReference Include="../../Common/Common.Middleware/Common.Middleware.csproj" />
+    <ProjectReference Include="../../Common/Common.Swagger/Common.Swagger.csproj" />
+    <ProjectReference Include="../../Common/Common/Common.csproj" />
+    <ProjectReference Include="../../Common/Database.Postgres/Database.Postgres.csproj" />
+    <ProjectReference Include="../EventsService.Application/EventsService.Application.csproj" />
+    <ProjectReference Include="../EventsService.Database/EventsService.Database.csproj" />
+    <ProjectReference Include="../EventsService.Domain/EventsService.Domain.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -16,10 +16,10 @@ public static partial class DependencyInjection
         services.ConfigureJwtAuthorization(configuration, options =>
         {
             options
-            .AddPolicy(Policy.RegisterUser, UserRole.Admin)
-            .AddPolicy(Policy.ModifyUser, UserRole.Admin)
-            .AddPolicy(Policy.ChangePassword, UserRole.Admin, UserRole.User)
-            .AddPolicy(Policy.DeleteUser, UserRole.Admin);
+                .AddPolicy(Policy.RegisterUser, UserRole.Admin)
+                .AddPolicy(Policy.ModifyUser, UserRole.Admin)
+                .AddPolicy(Policy.ChangePassword, UserRole.Admin, UserRole.User)
+                .AddPolicy(Policy.DeleteUser, UserRole.Admin);
         });
 
         services.AddControllers();
