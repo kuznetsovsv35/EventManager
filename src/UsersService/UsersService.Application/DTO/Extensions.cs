@@ -1,5 +1,5 @@
+using Authorization;
 using Authorization.Domain;
-using Authorization.Interfaces;
 using Common.Validation;
 using UsersService.Domain;
 
@@ -18,14 +18,6 @@ public static class Extensions
         };
     }
     public static UserInfo ToInfo(this User user)
-        => new()
-        {
-            Id = user.Id,
-            Login = user.Login,
-            Role = user.Role,
-        };
-
-    public static UserInfo ToInfo(this ICurrentUser user)
         => new()
         {
             Id = user.Id,

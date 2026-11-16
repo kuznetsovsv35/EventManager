@@ -1,4 +1,4 @@
-using Authorization.Domain;
+using Authorization;
 using Authorization.Exceptions;
 
 namespace UsersService.Domain.Exceptions;
@@ -8,9 +8,9 @@ namespace UsersService.Domain.Exceptions;
 /// </summary>
 public class UserRegisterException : UserOperationException
 {
-    public UserRegisterException(string login, UserRole role)
-        : this(login, role, null) { }
+    public UserRegisterException(ICurrentUser user)
+        : this(user, null) { }
 
-    public UserRegisterException(string login, UserRole role, Exception? innerException)
-        : base("Ошибка регистрации пользователя", login, role, innerException) { }
+    public UserRegisterException(ICurrentUser user, Exception? innerException)
+        : base("Ошибка регистрации пользователя", user, innerException) { }
 }

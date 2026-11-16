@@ -1,4 +1,4 @@
-using Authorization.Interfaces;
+using Authorization;
 using Authorization.Services;
 using Common.Data;
 using EventsService.Application.DTO;

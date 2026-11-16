@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.15" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.13" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../Common/Authorization.AspNetCore/Authorization.AspNetCore.csproj" />
+    <ProjectReference Include="../../Common/Common.Middleware/Common.Middleware.csproj" />
+    <ProjectReference Include="../../Common/Common.Swagger/Common.Swagger.csproj" />
+    <ProjectReference Include="../../Common/Database.Postgres/Database.Postgres.csproj" />
+    <ProjectReference Include="../BookingService.Application/BookingService.Application.csproj" />
+    <ProjectReference Include="../BookingService.Database/BookingService.Database.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,6 +1,6 @@
+using Authorization;
 using Authorization.Domain;
 using Authorization.Exceptions;
-using Authorization.Interfaces;
 using Authorization.Services;
 using Common.Validation;
 using UsersService.Application.Cryptography;
@@ -26,10 +26,8 @@ public class UserService(
         if (user is null)
             throw new UserNotFoundException(request.Login);
 
-        var currentUser = CurrentUser.ToInfo();
-
-        if (currentUser.Login != request.Login && user.Role == UserRole.Admin && currentUser.Role != UserRole.Admin)
-            throw new ForbiddenException(this, Policy.ChangePassword, currentUser.Login, currentUser.Role);
+        if (CurrentUser.Login != request.Login && user.Role == UserRole.Admin && CurrentUser.Role != UserRole.Admin)
+            throw new ForbiddenException(this, Policy.ChangePassword, CurrentUser);
 
         user = await users.UpdateUserAsync(
             request.Login,
@@ -91,8 +89,7 @@ public class UserService(
         }
         catch (Exception ex)
         {
-            var userInfo = CurrentUser.ToInfo();
-            throw new UserRegisterException(userInfo.Login, userInfo.Role, ex);
+            throw new UserRegisterException(CurrentUser, ex);
         }
     }
 }

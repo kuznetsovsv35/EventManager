@@ -22,8 +22,6 @@ public static partial class DependencyInjection
         
     }
     public static Task RunInfrastructure(this IServiceProvider serviceProvider, CancellationToken cancellation)
-        => serviceProvider.PrepareDatabase<EventsDbContext>(cancellation, (dbContext, cancellation) =>
-        {
-            return Task.CompletedTask;
-        });    
+        => serviceProvider.PrepareDatabase<EventsDbContext>(cancellation, (dbContext, cancellation)
+            => Task.CompletedTask);    
 }
