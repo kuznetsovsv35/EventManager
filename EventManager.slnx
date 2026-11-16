@@ -1,5 +1,11 @@
 <Solution>
   <Folder Name="/src/" />
+  <Folder Name="/src/BookingService/">
+    <Project Path="src/BookingService/BookingService.Application/BookingService.Application.csproj" />
+    <Project Path="src/BookingService/BookingService.Database/BookingService.Database.csproj" />
+    <Project Path="src/BookingService/BookingService.Domain/BookingService.Domain.csproj" />
+    <Project Path="src/BookingService/BookingService/BookingService.csproj" />
+  </Folder>
   <Folder Name="/src/Common/">
     <Project Path="src/Common/Common/Common.csproj" />
     <Project Path="src/Common/Common.Middleware/Common.Middleware.csproj" />
