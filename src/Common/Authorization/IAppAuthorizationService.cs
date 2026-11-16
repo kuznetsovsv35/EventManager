@@ -1,4 +1,4 @@
-namespace Authorization.Interfaces;
+namespace Authorization;
 
 /// <summary>
 /// Интерфейс авторизации на ресурсе.

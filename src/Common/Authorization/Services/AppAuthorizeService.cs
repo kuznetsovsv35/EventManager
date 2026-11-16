@@ -1,5 +1,3 @@
-using Authorization.Interfaces;
-
 namespace Authorization.Services;
 
 /// <summary>

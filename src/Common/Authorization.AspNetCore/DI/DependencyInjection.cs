@@ -2,7 +2,6 @@ using Authorization.AspNetCore.Extensions;
 using Authorization.AspNetCore.Services;
 using Authorization.Configuration;
 using Authorization.Domain;
-using Authorization.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Configuration;

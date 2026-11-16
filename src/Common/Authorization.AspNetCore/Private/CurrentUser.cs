@@ -1,20 +1,26 @@
 using System.Security.Claims;
 using Authorization.Domain;
-using Authorization.Interfaces;
 
 namespace Authorization.AspNetCore.Private;
 
-class CurrentUser(ClaimsPrincipal? principal) : ICurrentUser
+class CurrentUser : ICurrentUser
 {
-    public Guid Id => GetClaim(ClaimTypes.NameIdentifier) is string id ? Guid.Parse(id) : Guid.Empty;
-
-    public string Login => GetClaim(ClaimTypes.Name) ?? string.Empty;
-
-    public UserRole Role => GetClaim(ClaimTypes.Role) is string role ? Enum.Parse<UserRole>(role) : UserRole.User;
-
-    public bool IsAuthenticated => principal?.Identity?.IsAuthenticated ?? false;
+    public Guid Id {get; }
+    public string Login { get; }
+    public UserRole Role { get; }
+    public bool IsAuthenticated => _principal?.Identity?.IsAuthenticated ?? false;
+    
+    readonly ClaimsPrincipal? _principal;
+    
+    internal CurrentUser(ClaimsPrincipal? principal)
+    {
+        _principal = principal;
+        Id  = GetClaim(ClaimTypes.NameIdentifier) is string id ? Guid.Parse(id) : Guid.Empty;
+        Login = GetClaim(ClaimTypes.Name) ?? string.Empty;
+        Role = GetClaim(ClaimTypes.Role) is string role ? Enum.Parse<UserRole>(role) : UserRole.User;
+    }
 
     public bool InRole(UserRole role) => Role == role;
 
-    string? GetClaim(string type) => principal?.FindFirstValue(type);
+    string? GetClaim(string type) => _principal?.FindFirstValue(type);
 }

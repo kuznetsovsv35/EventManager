@@ -12,11 +12,14 @@ public class UserOperationException : ApplicationException
 
     public UserOperationException(string message, string login, UserRole role) : this(message, login, role, null) { }
 
-    public UserOperationException(string message, string login, UserRole role, Exception? innerException) : base(message, innerException)
+    public UserOperationException(string message, ICurrentUser? user) : this(message, user?.Login, user?.Role, null) { }
+
+    public UserOperationException(string message, string? login, UserRole? role, Exception? innerException) : base(message, innerException)
     {
-        Login = login;
-        Role = role.ToString();
+        Login = login ?? Login;
+        Role = role.ToString() ?? Role;
     }
+    public UserOperationException(string message, ICurrentUser? user, Exception? innerException) : this(message, user?.Login, user?.Role, innerException ) { }
 
     static readonly string DefaultRole = UserRole.User.ToString();
 }

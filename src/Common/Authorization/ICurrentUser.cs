@@ -1,6 +1,6 @@
 using Authorization.Domain;
 
-namespace Authorization.Interfaces;
+namespace Authorization;
 
 /// <summary>
 /// Предоставляет доступ к текущему пользователю.
