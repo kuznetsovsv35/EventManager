@@ -2,6 +2,7 @@ using BookingService.Application;
 using BookingService.Application.Services;
 using BookingService.Database;
 using BookingService.Database.Repositories;
+using BookingService.Services;
 using Common.Services;
 using Common.Synchronization;
 using Database.Postgres.DI;
@@ -18,6 +19,7 @@ public static partial class DependencyInjection
         services.AddScoped<IBookingRepository, BookingRepository>();
         services.AddSingleton<ISyncContextFactory, SyncContextFactory>();
         services.AddSingleton<IBookingServiceNotifier, BookingServiceNotifier>();
+        services.AddHostedService<AppBackgroundService>();
         return services;        
     }
 
