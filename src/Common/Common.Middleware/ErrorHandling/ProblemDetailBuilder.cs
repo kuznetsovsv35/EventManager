@@ -10,7 +10,7 @@ public class ProblemDetailsBuilder
 
     public static ProblemDetailsBuilder Create<T>(int status, Action<T>? builder = null) where T: ProblemDetails, new()
     {
-        var details = new T();
+        var details = new T() { Status = status };
         ProblemDetailsBuilder b = new(details);
         builder?.Invoke(details);
         return b;
