@@ -8,6 +8,7 @@
   </Folder>
   <Folder Name="/src/Common/">
     <Project Path="src/Common/Common/Common.csproj" />
+    <Project Path="src/Common/Common.Contracts/Common.Contracts.csproj" />
     <Project Path="src/Common/Common.Kafka/Common.Kafka.csproj" />
     <Project Path="src/Common/Common.Middleware/Common.Middleware.csproj" />
     <Project Path="src/Common/Common.Swagger/Common.Swagger.csproj" />
@@ -19,6 +20,7 @@
     <Project Path="src/EventsService/EventsService.Application/EventsService.Application.csproj" />
     <Project Path="src/EventsService/EventsService.Database/EventsService.Database.csproj" />
     <Project Path="src/EventsService/EventsService.Domain/EventsService.Domain.csproj" />
+    <Project Path="src/EventsService/EventsService.Kafka/EventsService.Kafka.csproj" />
     <Project Path="src/EventsService/EventsService/EventsService.csproj" />
   </Folder>
   <Folder Name="/src/UsersService/">

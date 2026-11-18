@@ -1,6 +1,7 @@
-namespace Common.Kafka.Topics;
+namespace Common.Contracts.Kafka;
 
-public static partial class Topics
+public static class Topics
 {
     public const string BookingConfirmed = "booking-confirmed";
+
 }

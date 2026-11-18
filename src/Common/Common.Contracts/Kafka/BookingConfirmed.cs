@@ -1,4 +1,4 @@
-namespace Common.Kafka.Contracts;
+namespace Common.Contracts.Kafka;
 
 public record BookingConfirmed(
     Guid BookingId,

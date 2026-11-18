@@ -1,6 +1,6 @@
 namespace Common.Kafka;
 
-public interface IMessageSubscriber<T>
+public interface IEventSubscriber<T>
 {
     Task HandleMessage(T message, CancellationToken cancellation);
 }
