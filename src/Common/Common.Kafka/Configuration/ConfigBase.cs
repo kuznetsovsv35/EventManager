@@ -8,6 +8,4 @@ public class ConfigBase(IConfiguration config)
     
     public string BootstrapServers { get; set; } = config[_serversKey]
         ?? throw new InvalidOperationException($@"""{_serversKey}"" configuration key is required");
-
-    public string Topic { get; set; } = "default-topic";
 }
