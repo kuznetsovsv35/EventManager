@@ -10,7 +10,7 @@ public static class DependencyInjection
 {
     public static IServiceCollection ConfigureKafka(this IServiceCollection services, IConfiguration config)
     {
-        services.AddEventPublisher(config)
+        services.AddEventPublisher(config);
         services.AddSingleton<IEventsServiceNotifier, EventsServiceNotifier>();
         return services;
     }
