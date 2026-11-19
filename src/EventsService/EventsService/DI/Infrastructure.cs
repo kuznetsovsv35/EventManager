@@ -3,6 +3,7 @@ using EventsService.Application;
 using EventsService.Database;
 using EventsService.Database.Repositories;
 using EventsService.Domain;
+using EventsService.Kafka.DI;
 using EventsService.Services;
 
 namespace EventsService.DI;
@@ -10,13 +11,15 @@ namespace EventsService.DI;
 public static partial class DependencyInjection
 {
     public static IServiceCollection ConfigureInfrastructure(this IServiceCollection services,
-        IConfiguration configuration,
+        IConfiguration config,
         IWebHostEnvironment environment)
     {
-        services.ConfigureDatabase<EventsDbContext>(configuration!, environment.IsDevelopment());
+        services.ConfigureDatabase<EventsDbContext>(config, environment.IsDevelopment());
 
         services.AddScoped<IPaginator<Event>, PaginateService<Event>>();
         services.AddScoped<IEventRepository, EventRepository>();
+
+        services.ConfigureKafka(config);
 
         return services;
         

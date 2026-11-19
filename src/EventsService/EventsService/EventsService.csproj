@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.15" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.13"/>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.13" />
   </ItemGroup>
 
   <ItemGroup>
@@ -20,6 +20,7 @@
     <ProjectReference Include="../EventsService.Application/EventsService.Application.csproj" />
     <ProjectReference Include="../EventsService.Database/EventsService.Database.csproj" />
     <ProjectReference Include="../EventsService.Domain/EventsService.Domain.csproj" />
+    <ProjectReference Include="../EventsService.Kafka/EventsService.Kafka.csproj" />
   </ItemGroup>
 
 </Project>

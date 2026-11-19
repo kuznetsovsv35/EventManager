@@ -2,6 +2,7 @@ using BookingService.Application;
 using BookingService.Application.Services;
 using BookingService.Database;
 using BookingService.Database.Repositories;
+using BookingService.Kafka.DI;
 using BookingService.Services;
 using Common.Services;
 using Common.Synchronization;
@@ -12,14 +13,15 @@ namespace BookingService.DI;
 public static partial class DependencyInjection
 {
     public static IServiceCollection ConfigureInfrastructure(this IServiceCollection services,
-        IConfiguration configuration, 
+        IConfiguration config, 
         IWebHostEnvironment environment)
     {
-        services.ConfigureDatabase<BookingsDbContext>(configuration!, environment.IsDevelopment());
+        services.ConfigureDatabase<BookingsDbContext>(config, environment.IsDevelopment());
         services.AddScoped<IBookingRepository, BookingRepository>();
         services.AddSingleton<ISyncContextFactory, SyncContextFactory>();
         services.AddSingleton<IBookingServiceNotifier, BookingServiceNotifier>();
         services.AddHostedService<AppBackgroundService>();
+        services.ConfigureKafka(config);
         return services;        
     }
 

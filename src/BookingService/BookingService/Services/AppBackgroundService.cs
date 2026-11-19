@@ -8,7 +8,8 @@ namespace BookingService.Services;
 public class AppBackgroundService(
     IServiceScopeFactory scopeFactory,
     ISyncContextFactory syncContextFactory,
-    IBookingServiceNotifier notifier,
+    IBookingServiceNotifier bookingServiceNotifier,
+    IEventsServiceNotifier eventsServiceNotifier,
     ILogger<AppBackgroundService> logger) : BackgroundService, IAppBackgroundService
 {
     /// <summary>
@@ -108,7 +109,7 @@ public class AppBackgroundService(
 
     async Task ProcessTriggerEvent(CancellationToken cancellation)
     {
-        if (await notifier.WaitBookingCreationAsync(cancellation) is null)
+        if (await bookingServiceNotifier.WaitBookingCreationAsync(cancellation) is null)
             return;
 
         cancellation.ThrowIfCancellationRequested();
@@ -155,6 +156,8 @@ public class AppBackgroundService(
 
         await syncContextFactory.CreateContext<Booking>().ExecuteActionAsync(async ()
             => await bookings.UpdateBookingStatusAsync(booking, cancellation), cancellation);
+
+        await eventsServiceNotifier.BookingConfirmedAsync(booking, cancellation);
 
         switch (booking.Status)
         {
