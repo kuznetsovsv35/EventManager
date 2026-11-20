@@ -1,21 +1,36 @@
 using Common.Contracts.Kafka;
 using Common.Kafka;
 using EventsService.Application;
-using EventsService.Domain;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace EventsService.Kafka.Services;
 
-public class BookingConfirmSubscriber(IServiceScopeFactory scopeFactory) : IEventSubscriber<BookingConfirmed>
+public class BookingConfirmSubscriber(
+    IServiceScopeFactory scopeFactory,
+    ILogger<BookingConfirmSubscriber> logger) : IEventSubscriber<BookingConfirmed>
 {
     public async Task HandleMessage(BookingConfirmed message, CancellationToken cancellation)
     {
         await using var scope = scopeFactory.CreateAsyncScope();
         var events = scope.ServiceProvider.GetRequiredService<IEventRepository>();
-        if (await events.GetEventAsync(message.EventId, cancellation) is Event @event)
+        await events.ExecuteEventBookingAsync(message.BookingId, message.EventId, (eventBooking) => 
         {
-            @event.ReleaseSeats(message.ReservedSeats);
-            await events.UpdateEventAsync(@event, cancellation);
-        }
+            if (!eventBooking.IsProcessed)
+            {                
+                eventBooking.UserId = message.UserId;
+
+                if (!eventBooking.IsEventValid)
+                    logger.LogWarning("Событие {eventId} не найдено", message.EventId);
+
+                var confirmResult = eventBooking.Confirm(message.ReservedSeats);
+                
+                if (confirmResult == false)
+                    ;
+
+                return true;
+            }
+            return false;
+        }, cancellation);
     }
 }

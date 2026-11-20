@@ -42,4 +42,11 @@ public interface IEventRepository
     /// <param name="cancellation"></param>
     /// <returns></returns>
     Task<Event?> DeleteEventAsync(Guid id, CancellationToken cancellation);
+    /// <summary>
+    /// Выполнить действия с элементом журнала бронирования в контексте одной транзакции.
+    /// </summary>
+    /// <param name="action"></param>
+    /// <param name="cancellation"></param>
+    /// <returns></returns>
+    Task ExecuteEventBookingAsync(Guid bookingId, Guid EventId, Func<EventBooking, bool> action, CancellationToken cancellation);
 }

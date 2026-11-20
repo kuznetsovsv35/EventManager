@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using EventsService.Application;
 using EventsService.Domain;
+using EventsService.Domain.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
 namespace EventsService.Database.Repositories;
@@ -18,6 +19,7 @@ public class EventRepository(EventsDbContext dbContext) : IEventRepository
     Task<Event?> IEventRepository.GetEventAsync(Guid id, CancellationToken cancellation)
         => dbContext.Events.AsNoTracking().SingleOrDefaultAsync(e => e.Id == id, cancellation);
 
+    
     async Task<Event> IEventRepository.AddEventAsync(Event @event, CancellationToken cancellation)
     {
         dbContext.Events.Add(@event);
@@ -31,7 +33,7 @@ public class EventRepository(EventsDbContext dbContext) : IEventRepository
         return (await dbContext.SaveChangesAsync(cancellation) > 0) ? @event : null;
     }
 
-    async Task<Event?> IEventRepository.DeleteEventAsync(Guid id, CancellationToken cancellation)
+    public async Task<Event?> DeleteEventAsync(Guid id, CancellationToken cancellation)
     {
         if (await dbContext.Events.FindAsync(id, cancellation) is Event @event)
         {
@@ -39,5 +41,22 @@ public class EventRepository(EventsDbContext dbContext) : IEventRepository
             return (await dbContext.SaveChangesAsync(cancellation) > 0) ? @event : null;
         }
         return null;
+    }
+    
+    async Task IEventRepository.ExecuteEventBookingAsync(Guid bookingId, Guid eventId, Func<EventBooking, bool> action, CancellationToken cancellation)
+    {
+        var eventBooking = await dbContext.EventBookings.FindAsync([bookingId], cancellation);
+
+        if (eventBooking is null)
+        {
+            var @event = await dbContext.Events.FindAsync([eventId], cancellation);            
+            eventBooking = @event is not null ? new EventBooking(@event, bookingId) : new EventBooking(eventId, bookingId);
+            dbContext.EventBookings.Add(eventBooking);
+        }
+        else
+            await dbContext.Entry(eventBooking).Reference(ev => ev.Event).LoadAsync(cancellation);
+
+        if (action(eventBooking))
+            await dbContext.SaveChangesAsync(cancellation);
     }
 }
