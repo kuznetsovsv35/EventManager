@@ -13,7 +13,7 @@ public class EventBooking
     /// <summary>
     /// Идентификатор события
     /// </summary>
-    public Guid EventId { get; private set; }
+    public Guid? EventId { get; private set; }
     /// <summary>
     /// Ссылка на событие.
     /// </summary>
@@ -26,10 +26,6 @@ public class EventBooking
     /// Идентификатор пользователя.
     /// </summary>
     public Guid? UserId {get; set; }
-    /// <summary>
-    /// Момент времени создания (для дальнейшего)
-    /// </summary>
-    public DateTime? RequestedAt { get; private set; }
     /// <summary>
     /// Момент времени подтверждения.
     /// </summary>

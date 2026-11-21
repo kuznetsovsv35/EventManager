@@ -20,14 +20,18 @@ public class BookingConfirmSubscriber(
             {                
                 eventBooking.UserId = message.UserId;
 
-                if (!eventBooking.IsEventValid)
-                    logger.LogWarning("Событие {eventId} не найдено", message.EventId);
-
-                var confirmResult = eventBooking.Confirm(message.ReservedSeats);
+                if (eventBooking.IsEventValid)
+                {
+                    var confirmResult = eventBooking.Confirm(message.ReservedSeats);
                 
-                if (confirmResult == false)
-                    ;
-
+                    if (confirmResult == false)
+                        logger.LogWarning("На событии {eventId} нет достаточно свободных мест", message.EventId);
+                }
+                else
+                {
+                    eventBooking.Cancel();
+                    logger.LogWarning("Событие {eventId} не найдено", message.EventId);
+                }
                 return true;
             }
             return false;
