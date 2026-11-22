@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace BookingService.Database.Migrations
 {
     [DbContext(typeof(BookingsDbContext))]
-    [Migration("20261116130929_InitialCreate")]
+    [Migration("20261122195541_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -28,7 +28,6 @@ namespace BookingService.Database.Migrations
             modelBuilder.Entity("BookingService.Domain.Booking", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
@@ -40,15 +39,26 @@ namespace BookingService.Database.Migrations
                     b.Property<DateTime?>("ProcessedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(9)
+                        .HasColumnType("character varying(9)");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Bookings");
+                    b.HasIndex("CreatedAt")
+                        .HasDatabaseName("IX_Bookings_CreatedAt");
+
+                    b.HasIndex("EventId")
+                        .HasDatabaseName("IX_Bookings_EventId");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("IX_Bookings_UserId");
+
+                    b.ToTable("Bookings", (string)null);
                 });
 #pragma warning restore 612, 618
         }

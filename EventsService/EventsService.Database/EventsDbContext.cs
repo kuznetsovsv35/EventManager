@@ -7,4 +7,7 @@ public class EventsDbContext(DbContextOptions<EventsDbContext> options) : DbCont
 {
     public DbSet<Event> Events => Set<Event>();
     public DbSet<EventBooking> EventBookings => Set<EventBooking>();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+        => modelBuilder.ApplyConfigurationsFromAssembly(typeof(EventsDbContext).Assembly);
 }

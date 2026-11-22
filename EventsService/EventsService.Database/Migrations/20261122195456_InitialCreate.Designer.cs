@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EventsService.Database.Migrations
 {
     [DbContext(typeof(EventsDbContext))]
-    [Migration("20261122084237_InitialCreate")]
+    [Migration("20261122195456_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -28,7 +28,6 @@ namespace EventsService.Database.Migrations
             modelBuilder.Entity("EventsService.Domain.Event", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<string>("Description")
@@ -38,21 +37,33 @@ namespace EventsService.Database.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("ReservedSeats")
-                        .HasColumnType("integer");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0);
 
                     b.Property<DateTime>("StartAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.Property<int>("TotalSeats")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Events");
+                    b.HasIndex("StartAt")
+                        .IsDescending()
+                        .HasDatabaseName("IX_Events_StartAt_Desc");
+
+                    b.ToTable("Events", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Events_Seats", "\"TotalSeats\" > 0 and \"ReservedSeats\" >= 0");
+
+                            t.HasCheckConstraint("CK_Events_StartEnd", "\"StartAt\" < \"EndAt\"");
+                        });
                 });
 
             modelBuilder.Entity("EventsService.Domain.EventBooking", b =>
@@ -67,27 +78,35 @@ namespace EventsService.Database.Migrations
                     b.Property<DateTime?>("ConfirmedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid?>("EventId")
+                    b.Property<Guid>("EventId")
                         .HasColumnType("uuid");
 
                     b.Property<int>("ReservedSeats")
-                        .HasColumnType("integer");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0);
 
                     b.Property<Guid?>("UserId")
                         .HasColumnType("uuid");
 
                     b.HasKey("BookingId");
 
-                    b.HasIndex("EventId");
+                    b.HasIndex("EventId")
+                        .HasDatabaseName("IX_EventBookings_EventId");
 
-                    b.ToTable("EventBookings");
+                    b.ToTable("event-bookings", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_ReservedSeats", "\"ReservedSeats\" >= 0");
+                        });
                 });
 
             modelBuilder.Entity("EventsService.Domain.EventBooking", b =>
                 {
                     b.HasOne("EventsService.Domain.Event", "Event")
                         .WithMany()
-                        .HasForeignKey("EventId");
+                        .HasForeignKey("EventId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .IsRequired();
 
                     b.Navigation("Event");
                 });

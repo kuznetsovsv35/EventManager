@@ -25,7 +25,6 @@ namespace UsersService.Database.Migrations
             modelBuilder.Entity("UsersService.Domain.User", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
@@ -39,17 +38,29 @@ namespace UsersService.Database.Migrations
 
                     b.Property<string>("Login")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
 
                     b.Property<string>("Password")
-                        .HasColumnType("text");
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
 
-                    b.Property<int>("Role")
-                        .HasColumnType("integer");
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(5)
+                        .HasColumnType("character varying(5)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.HasIndex("Login")
+                        .IsUnique();
+
+                    b.ToTable("Users", null, t =>
+                        {
+                            t.HasCheckConstraint("CK_Users_Login", "LENGTH(\"Login\") BETWEEN 1 AND 32");
+
+                            t.HasCheckConstraint("CK_Users_Password", "\"Password\" IS NULL OR LENGTH(\"Password\") = 64");
+                        });
                 });
 #pragma warning restore 612, 618
         }

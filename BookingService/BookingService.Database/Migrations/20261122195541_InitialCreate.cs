@@ -18,7 +18,7 @@ namespace BookingService.Database.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     EventId = table.Column<Guid>(type: "uuid", nullable: false),
                     UserId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Status = table.Column<int>(type: "integer", nullable: false),
+                    Status = table.Column<string>(type: "character varying(9)", maxLength: 9, nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     ProcessedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
@@ -26,6 +26,21 @@ namespace BookingService.Database.Migrations
                 {
                     table.PrimaryKey("PK_Bookings", x => x.Id);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Bookings_CreatedAt",
+                table: "Bookings",
+                column: "CreatedAt");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Bookings_EventId",
+                table: "Bookings",
+                column: "EventId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Bookings_UserId",
+                table: "Bookings",
+                column: "UserId");
         }
 
         /// <inheritdoc />
