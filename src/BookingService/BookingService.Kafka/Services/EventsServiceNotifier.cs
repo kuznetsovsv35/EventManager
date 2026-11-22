@@ -7,10 +7,21 @@ namespace BookingService.Kafka.Services;
 
 public class EventsServiceNotifier(IEventPublisher publisher) : IEventsServiceNotifier
 {
-    public Task BookingConfirmedAsync(Booking booking, CancellationToken cancellation)
+    public Task BookingConfirmedAsync(Booking booking, Guid? userId, CancellationToken cancellation)
         => publisher.PublishAsync(
-            Topics.BookingConfirmed, 
-            new BookingConfirmed(booking.Id, booking.EventId, 1, booking.UserId, booking.ProcessedAt!.Value), 
+            Topics.BookingAction, 
+            new BookingActionMessage(
+                booking.Id, booking.EventId, 1, 
+                userId ?? booking.UserId, BookingAction.Confirm), 
+            () => booking.EventId.ToString(),
+            cancellation);
+
+    public Task BookingCancelledAsync(Booking booking, Guid? userId, CancellationToken cancellation)
+        => publisher.PublishAsync(
+            Topics.BookingAction,
+            new BookingActionMessage(
+                booking.Id, booking.EventId, 1,  
+                userId ?? booking.UserId, BookingAction.Cancel),
             () => booking.EventId.ToString(),
             cancellation);
 }

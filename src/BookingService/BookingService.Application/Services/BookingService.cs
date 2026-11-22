@@ -14,7 +14,8 @@ public class BookingService(
     IAppAuthorizationService appAuthorization,
     ISyncContextFactory syncContextFactory,
     IBookingRepository bookings,
-    IBookingServiceNotifier notifier) : AppAuthorizeService<BookingService>(appAuthorization), IBookingService
+    IBookingServiceNotifier bookingServiceNotifier,
+    IEventsServiceNotifier eventsServiceNotifier) : AppAuthorizeService<BookingService>(appAuthorization), IBookingService
 {
     const int AvailableBookingsPerUser = 10;
 
@@ -32,7 +33,7 @@ public class BookingService(
                 return booking;
         }, cancellation);
 
-        await notifier.BookingCreatedAsync(booking.Id, cancellation);
+        await bookingServiceNotifier.BookingCreatedAsync(booking.Id, cancellation);
         return booking.ToInfo();
     }
 
@@ -59,6 +60,7 @@ public class BookingService(
             throw new InvalidBookingOperation("Неверный статус брони для операции отмены", booking, CurrentUser);
 
         await bookings.UpdateBookingStatusAsync(booking, cancellation);
+        await eventsServiceNotifier.BookingCancelledAsync(booking, CurrentUser.Id, cancellation);
         return booking.ToInfo();
     }
 

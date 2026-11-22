@@ -10,9 +10,9 @@ public static class DependencyInjection
 {
     public static IServiceCollection ConfigureKafka(this IServiceCollection services, IConfiguration config)
     {
-        services.AddEventConsumer<BookingConfirmed, BookingConfirmSubscriber>(config, config =>
+        services.AddEventConsumer<BookingActionMessage, BookingActionSubscriber>(config, config =>
         {
-           config.Topic = Topics.BookingConfirmed;
+           config.Topic = Topics.BookingAction;
            config.GroupId = "events-service";
         });
 

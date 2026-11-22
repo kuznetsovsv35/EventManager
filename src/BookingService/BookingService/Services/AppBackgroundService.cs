@@ -157,11 +157,10 @@ public class AppBackgroundService(
         await syncContextFactory.CreateContext<Booking>().ExecuteActionAsync(async ()
             => await bookings.UpdateBookingStatusAsync(booking, cancellation), cancellation);
 
-        await eventsServiceNotifier.BookingConfirmedAsync(booking, cancellation);
-
         switch (booking.Status)
         {
             case BookingStatus.Confirmed:
+                await eventsServiceNotifier.BookingConfirmedAsync(booking, null, cancellation);
                 logger.LogInformation("Бронь {Booking} для события {Event} подтверждена.", booking.Id, booking.EventId);
                 break;
             case BookingStatus.Rejected:
