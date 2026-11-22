@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace EventsService.Domain;
 
 /// <summary>
@@ -9,6 +11,7 @@ public class EventBooking
     /// <summary>
     /// Идентификатор бронирования
     /// </summary>
+    [Key]
     public Guid BookingId { get; private set; }
     /// <summary>
     /// Идентификатор события

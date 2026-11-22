@@ -27,11 +27,40 @@ namespace EventsService.Database.Migrations
                 {
                     table.PrimaryKey("PK_Events", x => x.Id);
                 });
+
+            migrationBuilder.CreateTable(
+                name: "EventBookings",
+                columns: table => new
+                {
+                    BookingId = table.Column<Guid>(type: "uuid", nullable: false),
+                    EventId = table.Column<Guid>(type: "uuid", nullable: true),
+                    ReservedSeats = table.Column<int>(type: "integer", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: true),
+                    ConfirmedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    CancelledAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EventBookings", x => x.BookingId);
+                    table.ForeignKey(
+                        name: "FK_EventBookings_Events_EventId",
+                        column: x => x.EventId,
+                        principalTable: "Events",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_EventBookings_EventId",
+                table: "EventBookings",
+                column: "EventId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "EventBookings");
+
             migrationBuilder.DropTable(
                 name: "Events");
         }

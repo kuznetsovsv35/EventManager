@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EventsService.Database.Migrations
 {
     [DbContext(typeof(EventsDbContext))]
-    [Migration("20261116062727_InitialCreate")]
+    [Migration("20261122084237_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -53,6 +53,43 @@ namespace EventsService.Database.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Events");
+                });
+
+            modelBuilder.Entity("EventsService.Domain.EventBooking", b =>
+                {
+                    b.Property<Guid>("BookingId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("CancelledAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("ConfirmedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("EventId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("ReservedSeats")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("BookingId");
+
+                    b.HasIndex("EventId");
+
+                    b.ToTable("EventBookings");
+                });
+
+            modelBuilder.Entity("EventsService.Domain.EventBooking", b =>
+                {
+                    b.HasOne("EventsService.Domain.Event", "Event")
+                        .WithMany()
+                        .HasForeignKey("EventId");
+
+                    b.Navigation("Event");
                 });
 #pragma warning restore 612, 618
         }
