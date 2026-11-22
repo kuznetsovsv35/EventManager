@@ -6,19 +6,13 @@ namespace BookingService.Domain.Exceptions;
 /// <summary>
 /// Исключение - неверная операция с бронирования.
 /// </summary>
-public class InvalidBookingOperation : UserOperationException
+public class InvalidBookingOperationException(string message, Booking booking, ICurrentUser user, Exception? innerException) 
+    : UserOperationException(message, user, innerException)
 {
-    public Guid BookingId { get; }
+    public Guid BookingId { get; } = booking.Id;
 
-    public string Status { get; }
+    public string Status { get; } = booking.Status.ToString();
 
-    public InvalidBookingOperation(string message, Booking booking, ICurrentUser user)
+    public InvalidBookingOperationException(string message, Booking booking, ICurrentUser user)
         : this(message, booking, user, null) { }
-
-    public InvalidBookingOperation(string message, Booking booking, ICurrentUser user, Exception? innerException)
-        : base(message, user, innerException)
-    {
-        BookingId = booking.Id;
-        Status = booking.Status.ToString();
-    }
 }

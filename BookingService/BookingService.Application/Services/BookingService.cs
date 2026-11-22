@@ -57,7 +57,7 @@ public class BookingService(
         CheckUserRole(booking);
 
         if (!booking.Cancel())
-            throw new InvalidBookingOperation("Неверный статус брони для операции отмены", booking, CurrentUser);
+            throw new InvalidBookingOperationException("Неверный статус брони для операции отмены", booking, CurrentUser);
 
         await bookings.UpdateBookingStatusAsync(booking, cancellation);
         await eventsServiceNotifier.BookingCancelledAsync(booking, CurrentUser.Id, cancellation);

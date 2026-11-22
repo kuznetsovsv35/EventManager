@@ -4,14 +4,10 @@ namespace Common.Exceptions;
 /// Абстрактное исключение - объект по идентификатору не найдено.
 /// </summary>
 /// <typeparam name="TKey"></typeparam>
-public abstract class ObjectNotFoundException<TKey> : ArgumentException where TKey : struct
+public abstract class ObjectNotFoundException<TKey>(string message, string paramName, TKey key, Exception? innerException) : ArgumentException(message, paramName, innerException) where TKey : struct
 {
-    public TKey ObjectKey { get; }
+    public TKey ObjectKey { get; } = key;
 
     protected ObjectNotFoundException(string message, string paramName, TKey key)
         : this(message, paramName, key, null) { }
-
-    protected ObjectNotFoundException(string message, string paramName, TKey key, Exception? innerException)
-        : base(message, paramName, innerException) => ObjectKey = key;
-
 }

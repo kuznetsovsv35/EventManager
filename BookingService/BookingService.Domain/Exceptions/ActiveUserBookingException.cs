@@ -6,11 +6,8 @@ namespace BookingService.Domain.Exceptions;
 /// <summary>
 /// Исключение - ошибка превышения максимального числа активных броней.
 /// </summary>
-public class ActiveUserBookingException : UserOperationException
+public class ActiveUserBookingException(ICurrentUser user, Exception? innerException) : UserOperationException("Превышение максимального числа активных броней для одного пользователя", user, innerException)
 {
     public ActiveUserBookingException(ICurrentUser user)
         : this(user, null) { }
-
-    public ActiveUserBookingException(ICurrentUser user, Exception? innerException)
-        : base("Превышение максимального числа активных броней для одного пользователя", user, innerException) { }
 }

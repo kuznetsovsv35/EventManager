@@ -10,7 +10,7 @@ public class BookingsProblemDetailsMapper : IProblemDetailsMapper
         => exception switch
         {
             ActiveUserBookingException activeUserBooking => ProblemDetailsFactory.Conflict(activeUserBooking.Message),
-
+            InvalidBookingOperationException invalidBookingOperation => ProblemDetailsFactory.Conflict(invalidBookingOperation.Message),
             _ => null
         
         };

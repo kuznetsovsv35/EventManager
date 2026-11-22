@@ -3,10 +3,7 @@ namespace UsersService.Domain.Exceptions;
 /// <summary>
 /// Исключение ошибка входа в приложении.
 /// </summary>
-public class UserLoginException : ApplicationException
+public class UserLoginException(Exception? innerException) : ApplicationException("Логин или пароль указан неверно", innerException)
 {
     public UserLoginException() : this(null) { }
-
-    public UserLoginException(Exception? innerException)
-        : base("Логин или пароль указан неверно", innerException) { }
 }
