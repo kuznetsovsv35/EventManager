@@ -1,33 +1,32 @@
 <Solution>
-  <Folder Name="/src/" />
-  <Folder Name="/src/BookingService/">
-    <Project Path="src/BookingService/BookingService.Application/BookingService.Application.csproj" />
-    <Project Path="src/BookingService/BookingService.Database/BookingService.Database.csproj" />
-    <Project Path="src/BookingService/BookingService.Domain/BookingService.Domain.csproj" />
-    <Project Path="src/BookingService/BookingService.Kafka/BookingService.Kafka.csproj" />
-    <Project Path="src/BookingService/BookingService/BookingService.csproj" />
+  <Folder Name="/BookingService/">
+    <Project Path="BookingService/BookingService.Application/BookingService.Application.csproj" />
+    <Project Path="BookingService/BookingService.Database/BookingService.Database.csproj" />
+    <Project Path="BookingService/BookingService.Domain/BookingService.Domain.csproj" />
+    <Project Path="BookingService/BookingService.Kafka/BookingService.Kafka.csproj" />
+    <Project Path="BookingService/BookingService/BookingService.csproj" />
   </Folder>
-  <Folder Name="/src/Common/">
-    <Project Path="src/Common/Common/Common.csproj" />
-    <Project Path="src/Common/Common.Contracts/Common.Contracts.csproj" />
-    <Project Path="src/Common/Common.Kafka/Common.Kafka.csproj" />
-    <Project Path="src/Common/Common.Middleware/Common.Middleware.csproj" />
-    <Project Path="src/Common/Common.Swagger/Common.Swagger.csproj" />
-    <Project Path="src/Common/Authorization/Authorization.csproj" />
-    <Project Path="src/Common/Authorization.AspNetCore/Authorization.AspNetCore.csproj" />
-    <Project Path="src/Common/Database.Postgres/Database.Postgres.csproj" />
+  <Folder Name="/Common/">
+    <Project Path="Common/Authorization.AspNetCore/Authorization.AspNetCore.csproj" />
+    <Project Path="Common/Authorization/Authorization.csproj" />
+    <Project Path="Common/Common.Contracts/Common.Contracts.csproj" />
+    <Project Path="Common/Common.Kafka/Common.Kafka.csproj" />
+    <Project Path="Common/Common.Middleware/Common.Middleware.csproj" />
+    <Project Path="Common/Common.Swagger/Common.Swagger.csproj" />
+    <Project Path="Common/Common/Common.csproj" />
+    <Project Path="Common/Database.Postgres/Database.Postgres.csproj" />
   </Folder>
-  <Folder Name="/src/EventsService/">
-    <Project Path="src/EventsService/EventsService.Application/EventsService.Application.csproj" />
-    <Project Path="src/EventsService/EventsService.Database/EventsService.Database.csproj" />
-    <Project Path="src/EventsService/EventsService.Domain/EventsService.Domain.csproj" />
-    <Project Path="src/EventsService/EventsService.Kafka/EventsService.Kafka.csproj" />
-    <Project Path="src/EventsService/EventsService/EventsService.csproj" />
+  <Folder Name="/EventsService/">
+    <Project Path="EventsService/EventsService.Application/EventsService.Application.csproj" />
+    <Project Path="EventsService/EventsService.Database/EventsService.Database.csproj" />
+    <Project Path="EventsService/EventsService.Domain/EventsService.Domain.csproj" />
+    <Project Path="EventsService/EventsService.Kafka/EventsService.Kafka.csproj" />
+    <Project Path="EventsService/EventsService/EventsService.csproj" />
   </Folder>
-  <Folder Name="/src/UsersService/">
-    <Project Path="src/UsersService/UsersService.Domain/UsersService.Domain.csproj" />
-    <Project Path="src/UsersService/UsersService.Application/UsersService.Application.csproj" />
-    <Project Path="src/UsersService/UsersService.Database/UsersService.Database.csproj" />
-    <Project Path="src/UsersService/UsersService/UsersService.csproj" />
+  <Folder Name="/UsersService/">
+    <Project Path="UsersService/UsersService.Application/UsersService.Application.csproj" />
+    <Project Path="UsersService/UsersService.Database/UsersService.Database.csproj" />
+    <Project Path="UsersService/UsersService.Domain/UsersService.Domain.csproj" />
+    <Project Path="UsersService/UsersService/UsersService.csproj" />
   </Folder>
 </Solution>
