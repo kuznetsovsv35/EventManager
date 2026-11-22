@@ -17,7 +17,14 @@ public class BookingActionSubscriber(
         var events = scope.ServiceProvider.GetRequiredService<IEventRepository>();
         await events.ExecuteEventBookingAsync(message.BookingId, message.EventId, (eventBooking) =>
         {
-            if (eventBooking.IsProcessed)
+            var done = message.Action switch
+            { 
+                BookingAction.Confirm  => eventBooking.IsProcessed,
+                BookingAction.Cancel => eventBooking.IsCancelled,
+                _ => true 
+            };
+
+            if (done)
                 return false;
             
             eventBooking.UserId = message.UserId;
