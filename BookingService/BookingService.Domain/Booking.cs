@@ -83,35 +83,53 @@ public class Booking
     /// Подтверждает бронь.
     /// </summary>
     /// <returns></returns>
-    public bool Confirm() => TryChangeStatus(BookingStatus.Confirmed);
+    public bool Confirm()
+    { 
+        if (Status == BookingStatus.Pending)
+        {
+            ChangeStatus(BookingStatus.Confirmed);
+            return true;
+        }
+        return false;
+    }
 
     /// <summary>
     /// Отклоняет бронь.
     /// </summary>
     /// <returns></returns>
-    public bool Reject() => TryChangeStatus(BookingStatus.Rejected);
+    public bool Reject() 
+    { 
+        if (Status == BookingStatus.Pending)
+        {
+            ChangeStatus(BookingStatus.Rejected);
+            return true;
+        }
+        return false;
+    }
 
     /// <summary>
     /// Отменяет бронь.
     /// </summary>
     /// <returns></returns>
-    public bool Cancel() => TryChangeStatus(BookingStatus.Cancelled);
+    public bool Cancel() 
+    {
+        if (this is { Status: BookingStatus.Pending or BookingStatus.Confirmed } ) 
+        {
+            ChangeStatus(BookingStatus.Cancelled);
+            return true;
+        }
+        return false;
+    }
 
     /// <summary>
     /// Попытка изменить статус брони.
     /// </summary>
     /// <param name="status"></param>
-    /// <returns></returns>
-    bool TryChangeStatus(BookingStatus status)
+    void ChangeStatus(BookingStatus status)
     {
-        if (this is { Status: BookingStatus.Pending or BookingStatus.Cancelled })
-        {
-            if (Status == BookingStatus.Pending)
-                ProcessedAt = DateTime.UtcNow;
+        if (Status == BookingStatus.Pending)
+            ProcessedAt = DateTime.UtcNow;
 
-            Status = status;
-            return true;
-        }
-        return false;
+        Status = status;
     }
 }
