@@ -1,12 +1,4 @@
-using System.ComponentModel.DataAnnotations;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using EventManager.Domain.Exceptions;
-using EventManager.Application.DataTransferObjects;
-using EventManager.Application.Interfaces;
-using EventManager.Database;
-
-namespace EventManager.Tests;
+namespace UnitTests;
 
 public class EventServiceTest(EventManagerTestContext context) : TestObjectBase, IClassFixture<EventManagerTestContext>
 {
