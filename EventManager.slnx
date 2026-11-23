@@ -13,6 +13,7 @@
     <Project Path="Common/Common.Kafka/Common.Kafka.csproj" />
     <Project Path="Common/Common.Middleware/Common.Middleware.csproj" />
     <Project Path="Common/Common.Swagger/Common.Swagger.csproj" />
+    <Project Path="Common/Common.Tests/Common.Tests.csproj" />
     <Project Path="Common/Common/Common.csproj" />
     <Project Path="Common/Database.Postgres/Database.Postgres.csproj" />
   </Folder>
@@ -28,5 +29,8 @@
     <Project Path="UsersService/UsersService.Database/UsersService.Database.csproj" />
     <Project Path="UsersService/UsersService.Domain/UsersService.Domain.csproj" />
     <Project Path="UsersService/UsersService/UsersService.csproj" />
+  </Folder>
+  <Folder Name="/UsersService/Tests/">
+    <Project Path="UsersService/Tests/UnitTests/UnitTests.csproj" />
   </Folder>
 </Solution>
