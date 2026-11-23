@@ -20,7 +20,6 @@
     <ProjectReference Include="../../../Common/Authorization/Authorization.csproj" />
     <ProjectReference Include="../../../Common/Common.Tests/Common.Tests.csproj" />
     <ProjectReference Include="../../UsersService.Application/UsersService.Application.csproj" />
-    <ProjectReference Include="../../UsersService.Domain/UsersService.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
