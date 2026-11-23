@@ -1,14 +1,13 @@
 using System.ComponentModel.DataAnnotations;
-using Microsoft.EntityFrameworkCore;
+using Common.Tests;
+using EventsService.Application;
+using EventsService.Application.DTO;
+using EventsService.Domain.Exceptions;
 using Microsoft.Extensions.DependencyInjection;
-using EventManager.Domain.Exceptions;
-using EventManager.Application.DataTransferObjects;
-using EventManager.Application.Interfaces;
-using EventManager.Database;
 
-namespace EventManager.Tests;
+namespace UnitTests;
 
-public class EventServiceTest(EventManagerTestContext context) : TestObjectBase, IClassFixture<EventManagerTestContext>
+public class EventServiceTest(TestContext context) : IClassFixture<TestContext>
 {
     ////////////////////////////////////////////////////////////////////////////////////////////
     /// Тесты управления событиями.
@@ -17,21 +16,20 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
     /// <summary>
     ///  Успешное добавления события.
     /// </summary>
-    [Trait(Category, Category_Service)]
+    [Trait(nameof(Category), Category.Service)]
     [Fact]
     public async Task CreateEvent_Success()
     {
         // Given
         var serviceProvider = context.CreateServiceProvider();
         await using var scope = serviceProvider.CreateAsyncScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
         var title = "Simple event";
         var startAt = new DateTime(2026, 6, 28, 10, 0, 00);
         var endAt = new DateTime(2026, 6, 28, 10, 30, 00);
         var description = "Some event";
-        var expectedCount = await dbContext.Events.AsNoTracking().CountAsync() + 1;
+        var expectedCount = context.Events.Count + 1;
 
         EventInputData inData = new()
         {
@@ -46,7 +44,7 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
         var outData = await eventService.CreateEventAsync(inData, CancellationToken.None);
 
         // Then
-        var actualCount = await dbContext.Events.AsNoTracking().CountAsync();
+        var actualCount = context.Events.Count;
         Assert.Equal(expectedCount, actualCount);
         Assert.Equal(inData, outData);
     }
@@ -54,7 +52,7 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
     /// <summary>
     /// Попытка создать событие по нулевой ссылке на входные данные.
     /// </summary>
-    [Trait(Category, Category_Service)]
+    [Trait(nameof(Category), Category.Service)]
     [Fact]
     public async Task CreateEvent_Null()
     {
@@ -81,7 +79,7 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
     /// Тест неудачных попыток создать/обновить некорректными данными.
     /// </summary>
     /// <param name="inputData"></param>
-    [Trait(Category, Category_Service)]
+    [Trait(nameof(Category), Category.Service)]
     [Theory]
     [MemberData(nameof(InvalidEventInputData))]
     public async Task CreateEvent_Fail(EventInputData inputData)
@@ -89,7 +87,6 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
         // Given
         var serviceProvider = context.CreateServiceProvider();
         await using var scope = serviceProvider.CreateAsyncScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
         // When
@@ -103,21 +100,19 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
     /// <summary>
     /// Получить все события с представлением в DTO (выход).
     /// </summary>
-    [Trait(Category, Category_Service)]
+    [Trait(nameof(Category), Category.Service)]
     [Fact]
     public async Task GetAllEvents_Success()
     {
         // Given
         var serviceProvider = context.CreateServiceProvider();
         await using var scope = serviceProvider.CreateAsyncScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
-        var expected = await dbContext
+        var expected = context
             .Events
-            .AsNoTracking()
             .OrderByDescending(e => e.StartAt)
-            .Select(x => x.ToOutputData()).ToListAsync();
+            .Select(x => x.ToOutputData()).ToList();
 
         // When
         var actual = (await eventService.GetEvents(null)).ToList();
@@ -129,22 +124,20 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
     /// <summary>
     /// Получить событие с существующим ID.
     /// </summary>
-    [Trait(Category, Category_Service)]
+    [Trait(nameof(Category), Category.Service)]
     [Fact]
     public async Task GetEventByID_Success()
     {
         // Given
         var serviceProvider = context.CreateServiceProvider();
         await using var scope = serviceProvider.CreateAsyncScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
-        var requestedId = await serviceProvider.GetRandomEventId(CancellationToken.None);
-        var @event = (await dbContext
+        var requestedId = context.GetRandomEventId();
+        var @event = context
             .Events
-            .AsNoTracking()
-            .Where(x => x.Id == requestedId)
-            .SingleAsync(CancellationToken.None)).ToOutputData();
+            .Single(x => x.Id == requestedId)
+            .ToOutputData();
 
         // When
         var foundEvent = await eventService.GetEventAsync(requestedId, CancellationToken.None);
@@ -157,7 +150,7 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
     /// <summary>
     /// Тест неудачной попытки получить событие по несуществующему ID.
     /// </summary>
-    [Trait(Category, Category_Service)]
+    [Trait(nameof(Category), Category.Service)]
     [Fact]
     public async Task GetEventByID_Fail()
     {
@@ -178,17 +171,16 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
     /// <summary>
     /// Тест успешного обновление события.
     /// </summary>
-    [Trait(Category, Category_Service)]
+    [Trait(nameof(Category), Category.Service)]
     [Fact]
     public async Task UpdateEvent_Success()
     {
         // Given
         var serviceProvider = context.CreateServiceProvider();
         await using var scope = serviceProvider.CreateAsyncScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
-        var requestedId = await serviceProvider.GetRandomEventId(CancellationToken.None);
+        var requestedId = context.GetRandomEventId();
 
         EventInputData inputData = new()
         {
@@ -211,7 +203,7 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
     /// <summary>
     /// Тест неудачного обновление события по несуществующему ID.
     /// </summary>
-    [Trait(Category, Category_Service)]
+    [Trait(nameof(Category), Category.Service)]
     [Fact]
     public async Task UpdateEventByID_Fail()
     {
@@ -240,7 +232,7 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
     /// <summary>
     /// Тест неудачного обновления с некорректными входными данными.
     /// </summary>
-    [Trait(Category, Category_Service)]
+    [Trait(nameof(Category), Category.Service)]
     [Theory]
     [MemberData(nameof(InvalidEventInputData))]
     public async Task UpdateEven_Fail(EventInputData inputData)
@@ -248,10 +240,9 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
         // Given
         var serviceProvider = context.CreateServiceProvider();
         await using var scope = serviceProvider.CreateAsyncScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
-        var requestedId = await serviceProvider.GetRandomEventId(CancellationToken.None);
+        var requestedId = context.GetRandomEventId();
 
         // When
 
@@ -262,33 +253,31 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
     /// <summary>
     /// Тест успешного удаления события.
     /// </summary>
-    [Trait(Category, Category_Service)]
+    [Trait(nameof(Category), Category.Service)]
     [Fact]
     public async Task DeleteEvent_Success()
     {
         // Given
         var serviceProvider = context.CreateServiceProvider();
         await using var scope = serviceProvider.CreateAsyncScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
-        var requestedId = await serviceProvider.GetRandomEventId(CancellationToken.None);
-        var requestedEvent = await dbContext
+        var requestedId = context.GetRandomEventId();
+        
+        var requestedEvent = context
             .Events
-            .AsNoTracking()
-            .Where(x => x.Id == requestedId)
-            .SingleAsync(CancellationToken.None);
+            .Single(x => x.Id == requestedId);
+
         var expectedEvent = requestedEvent.ToOutputData();
 
         // When
         var deletedEvent = await eventService.DeleteEventAsync(requestedId, CancellationToken.None);
 
         // Then
-        var foundEvent = await dbContext
+        var foundEvent = context
             .Events
-            .AsNoTracking()
-            .Where(e => e.Id == requestedId)
-            .SingleOrDefaultAsync(CancellationToken.None);
+            .Single(e => e.Id == requestedId);
+        
         Assert.Equal(expectedEvent, deletedEvent);
         Assert.Null(foundEvent);
     }
@@ -296,14 +285,13 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
     /// <summary>
     /// Тест неуспешного удаления события по несуществующему ID.
     /// </summary>
-    [Trait(Category, Category_Service)]
+    [Trait(nameof(Category), Category.Service)]
     [Fact]
     public async Task DeleteEventByID_Fail()
     {
         // Given
         var serviceProvider = context.CreateServiceProvider();
         await using var scope = serviceProvider.CreateAsyncScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
         var requestedId = Guid.NewGuid();
@@ -322,26 +310,24 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
     /// <summary>
     ///  Тест применения простейшего фильтра по заголовку.
     /// </summary>
-    [Trait(Category, Category_Filters)]
+    [Trait(nameof(Category), Category.Filters)]
     [Fact]
     public async Task SimpleFilterByTitle_Success()
     {
         // Given
         var serviceProvider = context.CreateServiceProvider();
         await using var scope = serviceProvider.CreateAsyncScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
         const string titleAll = "Event title";  // all event expected
         const string titleNone = "AbcDeF";      // No events
 
-        var expectedAll = await dbContext
+        var expectedAll = context
             .Events
-            .AsNoTracking()
             .Where(x => x.Title.Contains(titleAll, StringComparison.OrdinalIgnoreCase))
             .OrderByDescending(e => e.StartAt)
             .Select(x => x.ToOutputData())
-            .ToListAsync();
+            .ToList();
 
         // When
         var actualAll = (await eventService
@@ -360,13 +346,13 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
     }
 
     public static readonly IEnumerable<object[]> Titles
-        = [.. Enumerable.Range(1, TestAppDbContext.EventCount).Select(i => new object[] { $"eVeNt TiTlE {i}" })];
+        = [.. Enumerable.Range(1, TestContext.EventCount).Select(i => new object[] { $"eVeNt TiTlE {i}" })];
 
     /// <summary>
     /// Тест фильтров по заголовку.
     /// </summary>
     /// <param name="title"></param>
-    [Trait(Category, Category_Filters)]
+    [Trait(nameof(Category), Category.Filters)]
     [Theory]
     [MemberData(nameof(Titles))]
     public async Task IterationFilterByTitle_Success(string title)
@@ -374,16 +360,14 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
         // Given
         var serviceProvider = context.CreateServiceProvider();
         await using var scope = serviceProvider.CreateAsyncScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
-        var expected = await dbContext
+        var expected = context
             .Events
-            .AsNoTracking()
             .Where(x => x.Title.Contains(title, StringComparison.OrdinalIgnoreCase))
             .OrderByDescending(e => e.StartAt)
             .Select(x => x.ToOutputData())
-            .ToListAsync();
+            .ToList();
 
         var actual = (await eventService
             .GetEvents(new() { Title = title }))
@@ -412,7 +396,7 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
     /// Тест фильтрации по началу события.
     /// </summary>
     /// <param name="startAt"></param>
-    [Trait(Category, Category_Filters)]
+    [Trait(nameof(Category), Category.Filters)]
     [Theory]
     [MemberData(nameof(StartDates))]
     public async Task FilterByStartDate_Success(DateTime startAt)
@@ -420,16 +404,14 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
         // Given
         var serviceProvider = context.CreateServiceProvider();
         await using var scope = serviceProvider.CreateAsyncScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
-        var expected = await dbContext
+        var expected = context
             .Events
-            .AsNoTracking()
             .Where(x => x.StartAt >= startAt)
             .OrderByDescending(e => e.StartAt)
             .Select(x => x.ToOutputData())
-            .ToListAsync();
+            .ToList();
 
         // When
         var actual = (await eventService
@@ -459,7 +441,7 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
     /// Тест фильтра по окончанию события.
     /// </summary>
     /// <param name="endAt"></param>
-    [Trait(Category, Category_Filters)]
+    [Trait(nameof(Category), Category.Filters)]
     [Theory]
     [MemberData(nameof(EndDates))]
     public async Task FilterByEndDate_Success(DateTime endAt)
@@ -467,17 +449,15 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
         // Given
         var serviceProvider = context.CreateServiceProvider();
         await using var scope = serviceProvider.CreateAsyncScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
         var endDate = endAt.AddDays(1).Date;
-        var expected = await dbContext
+        var expected = context
             .Events
-            .AsNoTracking()
             .Where(x => x.EndAt < endDate)
             .OrderByDescending(e => e.StartAt)
             .Select(x => x.ToOutputData())
-            .ToListAsync();
+            .ToList();
 
         // When
         var actual = (await eventService
@@ -509,7 +489,7 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
     /// <param name="title"></param>
     /// <param name="startAt"></param>
     /// <param name="endAt"></param>
-    [Trait(Category, Category_Filters)]
+    [Trait(nameof(Category), Category.Filters)]
     [Theory]
     [MemberData(nameof(Combined))]
     public async Task CombinedFilter_Success(string? title, DateTime? startAt, DateTime? endAt)
@@ -517,20 +497,18 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
         // Given
         var serviceProvider = context.CreateServiceProvider();
         await using var scope = serviceProvider.CreateAsyncScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
         var endDate = endAt?.AddDays(1).Date;
 
-        var expected = await dbContext
+        var expected = context
             .Events
-            .AsNoTracking()
             .Where(x => (string.IsNullOrEmpty(title) || x.Title.ToLower().Contains(title, StringComparison.OrdinalIgnoreCase))
                 && (startAt == null || x.StartAt >= startAt.Value)
                 && (endDate == null || x.EndAt < endDate.Value))
             .OrderByDescending(e => e.StartAt)
             .Select(x => x.ToOutputData())
-            .ToListAsync();
+            .ToList();
 
         // When
         var actual = (await eventService
@@ -564,7 +542,7 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
     /// <param name="pageSize">Требуемый размер страницы.</param>
     /// <param name="expectedPageCount">Ожидаемое количество страниц.</param>
     /// <param name="expectedPageSize">Ожидаемое выведенных элементов на запрашиваемой страницы.</param>
-    [Trait(Category, Category_Paginator)]
+    [Trait(nameof(Category), Category.Paginator)]
     [Theory]
     [InlineData([1, 10, 3, 10])]
     [InlineData([3, 10, 3, 10])]
@@ -577,7 +555,6 @@ public class EventServiceTest(EventManagerTestContext context) : TestObjectBase,
         // Given
         var serviceProvider = context.CreateServiceProvider();
         await using var scope = serviceProvider.CreateAsyncScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         var eventService = scope.ServiceProvider.GetRequiredService<IEventService>();
 
         var allValues = (await eventService

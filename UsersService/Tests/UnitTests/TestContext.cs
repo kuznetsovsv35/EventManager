@@ -51,7 +51,7 @@ public class TestContext
                     });
                 return mock.Object;
             })
-            .AddScoped(_ => new UserRepository().Object)
+            .AddScoped(_ => new UserRepository(_users).Object)
             .AddScoped<IUserService, UserService>()
             .AddSingleton(_ =>
             {
@@ -67,7 +67,7 @@ public class TestContext
 
     public IServiceProvider CreateServiceProvider() => _services.BuildServiceProvider();
 
-    static readonly List<User> _users = [new(AdminLogin)
+    readonly List<User> _users = [new(AdminLogin)
             {
                 Role = UserRole.Admin,
                 Password = AdminPassword,
@@ -79,15 +79,19 @@ public class TestContext
             }
         ];
     
-    public static UserInfo GetUserInfo(string login, UserRole role)
+    public UserInfo GetUserInfo(string login, UserRole role)
         => _users
             .Single(u => u.Login == login && u.Role == role && u.IsActive)
             .ToInfo();
 
     class UserRepository : Mock<IUserRepository>
     {
-        internal UserRepository()
+        readonly List<User> _users;
+
+        internal UserRepository(List<User> users)
         {
+            _users = users;
+
             Setup(x => x.AddUserAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()))
                 .Returns<User, CancellationToken>((user, _) => 
                 {

@@ -1,12 +1,19 @@
+using System.Linq.Expressions;
+using Common.Data;
+using Common.Tests;
+using EventsService.Application.DTO;
+using EventsService.Domain;
+using Microsoft.Extensions.DependencyInjection;
+
 namespace UnitTests;
 
 /// <summary>
 /// Модульные тесты сервиса фильтрации.
 /// </summary>
 /// <param name="fixture"></param>
-public class FilterEventTest(EventManagerTestContext context) : TestObjectBase, IClassFixture<EventManagerTestContext>
+public class FilterEventTest(TestContext context) : IClassFixture<TestContext>
 {
-    [Trait(Category, Category_Filters)]
+    [Trait(nameof(Category), Category.Filters)]
     [Fact]
     public async Task Reset_Success()
     {
@@ -22,7 +29,7 @@ public class FilterEventTest(EventManagerTestContext context) : TestObjectBase, 
         Assert.Null(filter.Expression);
     }
 
-    [Trait(Category, Category_Filters)]
+    [Trait(nameof(Category), Category.Filters)]
     [Fact]
     public async Task AddNullCondition_Fail()
     {
@@ -37,7 +44,7 @@ public class FilterEventTest(EventManagerTestContext context) : TestObjectBase, 
         Assert.NotEmpty(ex.ParamName);
     }
 
-    [Trait(Category, Category_Filters)]
+    [Trait(nameof(Category), Category.Filters)]
     [Fact]
     public async Task SimpleFilterByTitle_Success()
     {
@@ -45,7 +52,6 @@ public class FilterEventTest(EventManagerTestContext context) : TestObjectBase, 
         var serviceProvider = context.CreateServiceProvider();
         await using var scope = serviceProvider.CreateAsyncScope();
         var filterService = scope.ServiceProvider.GetRequiredService<IFilter<Event>>();
-        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
         const string titleAll = "Event title";
         const string titleNone = "AbcDeF";
@@ -53,28 +59,28 @@ public class FilterEventTest(EventManagerTestContext context) : TestObjectBase, 
         Expression<Func<Event, bool>> exprTitleAll = x => x.Title.Contains(titleAll, StringComparison.OrdinalIgnoreCase);  // all event expected
         Expression<Func<Event, bool>> exprTitleNone = x => x.Title.Contains(titleNone, StringComparison.OrdinalIgnoreCase);      // No events        
 
-        var expectedAll = await dbContext
+        var expectedAll = context
             .Events
-            .AsNoTracking()
+            .AsQueryable()
             .Where(exprTitleAll)
             .Select(x => x.ToOutputData())
-            .ToListAsync();
+            .ToList();
 
         // When
-        var actualAll = await filterService
+        var actualAll = filterService
             .Reset()
             .AddCondition(exprTitleAll)
-            .ApplyFilter(dbContext.Events.AsNoTracking())
+            .ApplyFilter(context.Events.AsQueryable())
             .Select(x => x.ToOutputData())
-            .ToListAsync();
+            .ToList();
 
 
-        var actualNone = await filterService
+        var actualNone = filterService
             .Reset()
             .AddCondition(exprTitleNone)
-            .ApplyFilter(dbContext.Events.AsNoTracking())
+            .ApplyFilter(context.Events.AsQueryable())
             .Select(x => x.ToOutputData())
-            .ToListAsync();
+            .ToList();
 
         // Then
         Assert.Equal(expectedAll, actualAll);
@@ -82,7 +88,7 @@ public class FilterEventTest(EventManagerTestContext context) : TestObjectBase, 
         Assert.Empty(actualNone);
     }
 
-    [Trait(Category, Category_Filters)]
+    [Trait(nameof(Category), Category.Filters)]
     [Theory]
     [InlineData(["event Title 1"])]
     [InlineData(["Event title 2"])]
@@ -93,22 +99,21 @@ public class FilterEventTest(EventManagerTestContext context) : TestObjectBase, 
         var serviceProvider = context.CreateServiceProvider();
         await using var scope = serviceProvider.CreateAsyncScope();
         var filterService = scope.ServiceProvider.GetRequiredService<IFilter<Event>>();
-        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
         Expression<Func<Event, bool>> expr = x => x.Title.Contains(title, StringComparison.OrdinalIgnoreCase);
-        var expected = await dbContext
+        var expected = context
             .Events
-            .AsNoTracking()
+            .AsQueryable()
             .Where(expr)
             .Select(x => x.ToOutputData())
-            .ToListAsync();
+            .ToList();
 
         // When        
-        var actual = await filterService.Reset()
+        var actual = filterService.Reset()
             .AddCondition(expr)
-            .ApplyFilter(dbContext.Events.AsNoTracking())
+            .ApplyFilter(context.Events.AsQueryable())
             .Select(x => x.ToOutputData())
-            .ToListAsync();
+            .ToList();
 
         // Then
         Assert.All(actual, (item) => Assert.Contains(title, item.Title, StringComparison.OrdinalIgnoreCase));
@@ -116,9 +121,9 @@ public class FilterEventTest(EventManagerTestContext context) : TestObjectBase, 
     }
 
     public static readonly IEnumerable<object[]> Titles
-        = [.. Enumerable.Range(1, TestAppDbContext.EventCount).Select(i => new object[] { $"Event Title {i}" })];
+        = [.. Enumerable.Range(1, TestContext.EventCount).Select(i => new object[] { $"Event Title {i}" })];
 
-    [Trait(Category, Category_Filters)]
+    [Trait(nameof(Category), Category.Filters)]
     [Theory]
     [MemberData(nameof(Titles))]
     public async Task IterationFilterByTitle_Success(string title)
@@ -127,22 +132,21 @@ public class FilterEventTest(EventManagerTestContext context) : TestObjectBase, 
         var serviceProvider = context.CreateServiceProvider();
         await using var scope = serviceProvider.CreateAsyncScope();
         var filterService = scope.ServiceProvider.GetRequiredService<IFilter<Event>>();
-        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
         Expression<Func<Event, bool>> expression = x => x.Title.Contains(title, StringComparison.OrdinalIgnoreCase);
-        var expected = await dbContext
+        var expected = context
             .Events
-            .AsNoTracking()
+            .AsQueryable()
             .Where(expression)
             .Select(x => x.ToOutputData())
-            .ToListAsync();
+            .ToList();
 
         // When
-        var actual = await filterService.Reset()
+        var actual = filterService.Reset()
             .AddCondition(expression)
-            .ApplyFilter(dbContext.Events.AsNoTracking())
+            .ApplyFilter(context.Events.AsQueryable())
             .Select(x => x.ToOutputData())
-            .ToListAsync();
+            .ToList();
 
         Assert.Equal(expected, actual);
         Assert.All(actual, item => Assert.Contains(title, item.Title, StringComparison.OrdinalIgnoreCase));
@@ -158,7 +162,7 @@ public class FilterEventTest(EventManagerTestContext context) : TestObjectBase, 
             [new DateTime(2026, 7, 28)],
             [new DateTime(2026, 8, 10)],
         ];
-    [Trait(Category, Category_Filters)]
+    [Trait(nameof(Category), Category.Filters)]
     [Theory]
     [MemberData(nameof(StartDates))]
     public async Task FilterByStartDate_Success(DateTime startAt)
@@ -167,22 +171,21 @@ public class FilterEventTest(EventManagerTestContext context) : TestObjectBase, 
         var serviceProvider = context.CreateServiceProvider();
         await using var scope = serviceProvider.CreateAsyncScope();
         var filterService = scope.ServiceProvider.GetRequiredService<IFilter<Event>>();
-        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
         Expression<Func<Event, bool>> expression = x => x.StartAt >= startAt;
-        var expected = await dbContext
+        var expected = context
             .Events
-            .AsNoTracking()
+            .AsQueryable()
             .Where(expression)
             .Select(x => x.ToOutputData())
-            .ToListAsync();
+            .ToList();
 
         // When
-        var actual = await filterService.Reset()
+        var actual = filterService.Reset()
             .AddCondition(expression)
-            .ApplyFilter(dbContext.Events.AsNoTracking())
+            .ApplyFilter(context.Events.AsQueryable())
             .Select(x => x.ToOutputData())
-            .ToListAsync();
+            .ToList();
 
         // Then
         Assert.Equal(expected, actual);
@@ -199,7 +202,7 @@ public class FilterEventTest(EventManagerTestContext context) : TestObjectBase, 
             [new DateTime(2026, 7, 28)],
             [new DateTime(2026, 8, 10)],
         ];
-    [Trait(Category, Category_Filters)]
+    [Trait(nameof(Category), Category.Filters)]
     [Theory]
     [MemberData(nameof(EndDates))]
     public async Task FilterByEndDate_Success(DateTime endAt)
@@ -208,23 +211,22 @@ public class FilterEventTest(EventManagerTestContext context) : TestObjectBase, 
         var serviceProvider = context.CreateServiceProvider();
         await using var scope = serviceProvider.CreateAsyncScope();
         var filterService = scope.ServiceProvider.GetRequiredService<IFilter<Event>>();
-        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
         endAt = endAt.AddDays(1).Date;
         Expression<Func<Event, bool>> expression = x => x.EndAt < endAt;
-        var expected = await dbContext
+        var expected = context
             .Events
-            .AsNoTracking()
+            .AsQueryable()
             .Where(expression)
             .Select(x => x.ToOutputData())
-            .ToListAsync();
+            .ToList();
 
         // When
-        var actual = await filterService.Reset()
+        var actual = filterService.Reset()
             .AddCondition(expression)
-            .ApplyFilter(dbContext.Events.AsNoTracking())
+            .ApplyFilter(context.Events.AsQueryable())
             .Select(x => x.ToOutputData())
-            .ToListAsync();
+            .ToList();
 
         // Then
         Assert.Equal(expected, actual);
@@ -242,7 +244,7 @@ public class FilterEventTest(EventManagerTestContext context) : TestObjectBase, 
             ["nt Ti", new DateTime(2026, 8, 10), new DateTime(2026, 8, 10)],
         ];
 
-    [Trait(Category, Category_Filters)]
+    [Trait(nameof(Category), Category.Filters)]
     [Theory]
     [MemberData(nameof(Combined))]
     public async Task CombinedFilter_Success(string? title, DateTime? startAt, DateTime? endAt)
@@ -251,18 +253,17 @@ public class FilterEventTest(EventManagerTestContext context) : TestObjectBase, 
         var serviceProvider = context.CreateServiceProvider();
         await using var scope = serviceProvider.CreateAsyncScope();
         var filterService = scope.ServiceProvider.GetRequiredService<IFilter<Event>>();
-        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
         endAt = endAt?.AddDays(1).Date;
-        var expected = await dbContext
+        var expected = context
             .Events
-            .AsNoTracking()
+            .AsQueryable()
             .Where(
                 x => (string.IsNullOrEmpty(title) || x.Title.Contains(title, StringComparison.OrdinalIgnoreCase))
                 && (startAt == null || x.StartAt >= startAt.Value)
                 && (endAt == null || x.EndAt < endAt.Value))
             .Select(x => x.ToOutputData())
-            .ToListAsync();
+            .ToList();
 
         Expression<Func<Event, bool>>? exprTitle = title is null ? null : x => x.Title.Contains(title, StringComparison.OrdinalIgnoreCase);
         Expression<Func<Event, bool>>? exprStartAt = startAt is null ? null : x => x.StartAt >= startAt.Value;
@@ -280,10 +281,10 @@ public class FilterEventTest(EventManagerTestContext context) : TestObjectBase, 
         if (exprEndAt != null)
             filter.AddCondition(exprEndAt);
 
-        var actual = await filter
-            .ApplyFilter(dbContext.Events.AsNoTracking())
+        var actual = filter
+            .ApplyFilter(context.Events.AsQueryable())
             .Select(x => x.ToOutputData())
-            .ToListAsync();
+            .ToList();
 
         // Then
         Assert.Equal(expected, actual);
