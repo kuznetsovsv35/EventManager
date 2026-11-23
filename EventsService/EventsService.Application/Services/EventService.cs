@@ -1,5 +1,4 @@
 using Authorization;
-using Authorization.Services;
 using Common.Data;
 using EventsService.Application.DTO;
 using EventsService.Application.Security;
@@ -16,11 +15,11 @@ public class EventService(
     IAppAuthorizationService appAuthorization,
     IEventRepository repository,
     IFilter<Event> filter,
-    IPaginator<Event> paginator) : AppAuthorizeService<EventService>(appAuthorization), IEventService
+    IPaginator<Event> paginator) : IEventService
 {
     async Task<EventOutputData> IEventService.CreateEventAsync(EventInputData data, CancellationToken cancellation)
     {
-        await AuthorizeAsync(Policy.CreateEvent, cancellation);
+        await appAuthorization.AuthorizeAsync(this, Policy.CreateEvent, cancellation);
 
         if (data == null)
             throw new ArgumentNullException(nameof(data));
@@ -32,7 +31,7 @@ public class EventService(
 
     async Task<EventOutputData> IEventService.DeleteEventAsync(Guid id, CancellationToken cancellation)
     {
-        await AuthorizeAsync(Policy.DeleteEvent, cancellation);
+        await appAuthorization.AuthorizeAsync(this, Policy.DeleteEvent, cancellation);
 
         if (await repository.DeleteEventAsync(id, cancellation) is Event e)
             return e.ToOutputData();
@@ -42,7 +41,7 @@ public class EventService(
 
     async Task<PaginateResult<EventOutputData>> IEventService.GetEvents(FilterParams? filterParams, PageParams pageParams, CancellationToken cancellation)
     {
-        await AuthorizeAsync(Policy.GetEvents, cancellation);
+        await appAuthorization.AuthorizeAsync(this, Policy.GetEvents, cancellation);
 
         return await paginator.PaginateAsync(
             FilterEvents(filterParams),
@@ -52,7 +51,7 @@ public class EventService(
 
     async Task<IEnumerable<EventOutputData>> IEventService.GetEvents(FilterParams? filterParams)
     {
-        await AuthorizeAsync(Policy.GetEvents, CancellationToken.None);
+        await appAuthorization.AuthorizeAsync(this, Policy.GetEvents, CancellationToken.None);
 
         return FilterEvents(filterParams)
             .Select(e => e.ToOutputData())
@@ -86,7 +85,7 @@ public class EventService(
 
     async Task<EventOutputData> IEventService.GetEventAsync(Guid id, CancellationToken cancellation)
     {
-        await AuthorizeAsync(Policy.GetEvents, cancellation);
+        await appAuthorization.AuthorizeAsync(this, Policy.GetEvents, cancellation);
 
         if (await repository.GetEventAsync(id, cancellation) is Event e)
             return e.ToOutputData();
@@ -96,7 +95,7 @@ public class EventService(
 
     async Task<EventOutputData> IEventService.UpdateEventAsync(Guid id, EventInputData data, CancellationToken cancellation)
     {
-        await AuthorizeAsync(Policy.ModifyEvent, cancellation);
+        await appAuthorization.AuthorizeAsync(this, Policy.ModifyEvent, cancellation);
 
         if (await repository.GetEventAsync(id, cancellation) is Event e)
         {

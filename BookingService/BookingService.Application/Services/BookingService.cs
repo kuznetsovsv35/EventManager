@@ -1,7 +1,6 @@
 using Authorization.Domain;
 using Authorization;
 using Authorization.Exceptions;
-using Authorization.Services;
 using BookingService.Application.DTO;
 using BookingService.Application.Security;
 using BookingService.Domain;
@@ -15,20 +14,20 @@ public class BookingService(
     ISyncContextFactory syncContextFactory,
     IBookingRepository bookings,
     IBookingServiceNotifier bookingServiceNotifier,
-    IEventsServiceNotifier eventsServiceNotifier) : AppAuthorizeService<BookingService>(appAuthorization), IBookingService
+    IEventsServiceNotifier eventsServiceNotifier) : IBookingService
 {
     const int AvailableBookingsPerUser = 10;
 
     public async Task<BookingInfo> CreateBookingAsync(Guid eventId, CancellationToken cancellation)
     {
-        await AuthorizeAsync(Policy.CreateBooking, cancellation);
+        await appAuthorization.AuthorizeAsync(this, Policy.CreateBooking, cancellation);
         var booking = await syncContextFactory.CreateContext<Booking>().ExecuteActionAsync<Booking>(async () =>
         {
             await CheckUserActiveBookingsAsync(cancellation);
 
             cancellation.ThrowIfCancellationRequested();
 
-                var booking = new Booking(eventId, CurrentUser.Id);
+                var booking = new Booking(eventId, appAuthorization.CurrentUser.Id);
                 await bookings.AddBookingAsync(booking, cancellation);
                 return booking;
         }, cancellation);
@@ -39,7 +38,7 @@ public class BookingService(
 
     public async Task<BookingInfo> GetBookingByIdAsync(Guid bookingId, CancellationToken cancellation)
     {
-        await AuthorizeAsync(Policy.GetBooking, cancellation);
+        await appAuthorization.AuthorizeAsync(this, Policy.GetBooking, cancellation);
 
         if (await bookings.GetBookingAsync(bookingId, cancellation) is Booking booking)
             return booking.ToInfo();
@@ -49,7 +48,7 @@ public class BookingService(
 
     public async Task<BookingInfo> CancelBookingAsync(Guid bookingId, CancellationToken cancellation)
     {
-        await AuthorizeAsync(Policy.CancelBooking, cancellation);
+        await appAuthorization.AuthorizeAsync(this, Policy.CancelBooking, cancellation);
 
         if (await bookings.GetBookingAsync(bookingId, cancellation) is not Booking booking)
             throw new BookingNotFoundException(bookingId, nameof(bookingId));
@@ -57,24 +56,24 @@ public class BookingService(
         CheckUserRole(booking);
 
         if (!booking.Cancel())
-            throw new InvalidBookingOperationException("Неверный статус брони для операции отмены", booking, CurrentUser);
+            throw new InvalidBookingOperationException("Неверный статус брони для операции отмены", booking, appAuthorization.CurrentUser);
 
         await bookings.UpdateBookingStatusAsync(booking, cancellation);
-        await eventsServiceNotifier.BookingCancelledAsync(booking, CurrentUser.Id, cancellation);
+        await eventsServiceNotifier.BookingCancelledAsync(booking, appAuthorization.CurrentUser.Id, cancellation);
         return booking.ToInfo();
     }
 
     async Task CheckUserActiveBookingsAsync(CancellationToken cancellation)
     {
-        if (await bookings.GetUserActiveBookingCountAsync(CurrentUser.Id, cancellation) is int activeBookings && activeBookings >= AvailableBookingsPerUser)
-            throw new ActiveUserBookingException(CurrentUser);
+        if (await bookings.GetUserActiveBookingCountAsync(appAuthorization.CurrentUser.Id, cancellation) is int activeBookings && activeBookings >= AvailableBookingsPerUser)
+            throw new ActiveUserBookingException(appAuthorization.CurrentUser);
     }
 
     void CheckUserRole(Booking booking)
     {
-        if (CurrentUser.Role == UserRole.Admin || booking.UserId == CurrentUser.Id)
+        if (appAuthorization.CurrentUser.Role == UserRole.Admin || booking.UserId == appAuthorization.CurrentUser.Id)
             return;
 
-        throw new ForbiddenException(this, Policy.CancelBooking, CurrentUser);
+        throw new ForbiddenException(this, Policy.CancelBooking, appAuthorization.CurrentUser);
     }
 }

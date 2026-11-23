@@ -1,7 +1,6 @@
 using Authorization;
 using Authorization.Domain;
 using Authorization.Exceptions;
-using Authorization.Services;
 using Common.Validation;
 using UsersService.Application.Cryptography;
 using UsersService.Application.DTO;
@@ -14,20 +13,20 @@ public class UserService(
     IAppAuthorizationService appAuthorization,
     IUserRepository users,
     IPasswordHasher hasher
-    ) : AppAuthorizeService<UserService>(appAuthorization), IUserService
+    ) : IUserService
 {
     public async Task<UserInfo> ChangePasswordAsync(UserRequest request, CancellationToken cancellation)
     {
         request.Check();
 
-        await AuthorizeAsync(Policy.ChangePassword, cancellation);
+        await appAuthorization.AuthorizeAsync(this, Policy.ChangePassword, cancellation);
         var user = await users.GetUserAsync(request.Login, cancellation);
 
         if (user is null)
             throw new UserNotFoundException(request.Login);
 
-        if (CurrentUser.Login != request.Login && user.Role == UserRole.Admin && CurrentUser.Role != UserRole.Admin)
-            throw new ForbiddenException(this, Policy.ChangePassword, CurrentUser);
+        if (appAuthorization.CurrentUser.Login != request.Login && user.Role == UserRole.Admin && appAuthorization.CurrentUser.Role != UserRole.Admin)
+            throw new ForbiddenException(this, Policy.ChangePassword, appAuthorization.CurrentUser);
 
         user = await users.UpdateUserAsync(
             request.Login,
@@ -44,7 +43,7 @@ public class UserService(
     {
         request.Check();
 
-        await AuthorizeAsync(Policy.ModifyUser, cancellation);
+        await appAuthorization.AuthorizeAsync(this, Policy.ModifyUser, cancellation);
         var user = await users.UpdateUserAsync(request.Login, u => u.Role = request.Role, cancellation);
 
         if (user is null)
@@ -57,7 +56,7 @@ public class UserService(
     {
         request.Check();
 
-        await AuthorizeAsync(Policy.DeleteUser, cancellation);
+        await appAuthorization.AuthorizeAsync(this, Policy.DeleteUser, cancellation);
         var user = await users.DeleteUserAsync(request.Login, cancellation);
 
         if (user is null)
@@ -80,7 +79,7 @@ public class UserService(
     public async Task<UserInfo> RegisterUserAsync(UserRequest request, CancellationToken cancellation)
     {
         if (request is RegisterUserRequest)
-            await AuthorizeAsync(Policy.RegisterUser, cancellation);
+            await appAuthorization.AuthorizeAsync(this, Policy.RegisterUser, cancellation);
 
         try
         {
@@ -89,7 +88,7 @@ public class UserService(
         }
         catch (Exception ex)
         {
-            throw new UserRegisterException(CurrentUser, ex);
+            throw new UserRegisterException(appAuthorization.CurrentUser, ex);
         }
     }
 }
