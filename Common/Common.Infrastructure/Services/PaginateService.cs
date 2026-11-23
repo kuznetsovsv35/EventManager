@@ -1,9 +1,8 @@
+using Common.Data;
+using Common.Exceptions;
 using Microsoft.EntityFrameworkCore;
-using EventsService.Application;
-using EventsService.Application.DTO;
-using EventsService.Domain.Exceptions;
 
-namespace EventsService.Services;
+namespace Common.Infrastructure.Services;
 
 public class PaginateService<T> : IPaginator<T>
 {

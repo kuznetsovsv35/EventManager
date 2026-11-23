@@ -1,4 +1,4 @@
-namespace EventsService.Domain.Exceptions;
+namespace Common.Exceptions;
 
 /// <summary>
 /// Исключение - ошибка валидации параметров разбивки на страницы.

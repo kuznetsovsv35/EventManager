@@ -1,4 +1,4 @@
-namespace EventsService.Application.DTO;
+namespace Common.Data;
 
 /// <summary>
 /// Структура результата разбивки по страницам.

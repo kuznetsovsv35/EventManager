@@ -1,10 +1,11 @@
+using Common.Data;
+using Common.Infrastructure.Services;
 using Database.Postgres.DI;
 using EventsService.Application;
 using EventsService.Database;
 using EventsService.Database.Repositories;
 using EventsService.Domain;
 using EventsService.Kafka.DI;
-using EventsService.Services;
 
 namespace EventsService.DI;
 

@@ -1,6 +1,4 @@
-using EventsService.Application.DTO;
-
-namespace EventsService.Application;
+namespace Common.Data;
 
 public interface IPaginator<T>
 {

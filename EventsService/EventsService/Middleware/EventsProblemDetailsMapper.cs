@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
+using Common.Exceptions;
 using Common.Middleware.ErrorHandling;
-using EventsService.Domain.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EventsService.Middleware;

@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../../Common/Authorization.AspNetCore/Authorization.AspNetCore.csproj" />
+    <ProjectReference Include="../../Common/Common.Infrastructure/Common.Infrastructure.csproj" />
     <ProjectReference Include="../../Common/Common.Middleware/Common.Middleware.csproj" />
     <ProjectReference Include="../../Common/Common.Swagger/Common.Swagger.csproj" />
     <ProjectReference Include="../../Common/Common/Common.csproj" />

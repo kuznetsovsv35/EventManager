@@ -13,6 +13,7 @@
     <Project Path="Common/Authorization.AspNetCore/Authorization.AspNetCore.csproj" />
     <Project Path="Common/Authorization/Authorization.csproj" />
     <Project Path="Common/Common.Contracts/Common.Contracts.csproj" />
+    <Project Path="Common/Common.Infrastructure/Common.Infrastructure.csproj" />
     <Project Path="Common/Common.Kafka/Common.Kafka.csproj" />
     <Project Path="Common/Common.Middleware/Common.Middleware.csproj" />
     <Project Path="Common/Common.Swagger/Common.Swagger.csproj" />

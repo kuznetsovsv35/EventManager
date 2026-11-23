@@ -1,3 +1,4 @@
+using Common.Data;
 using EventsService.Application;
 using EventsService.Application.DTO;
 using EventsService.Application.Security;
