@@ -1,7 +1,7 @@
 using Common.Tests;
 using EventsService.Domain;
 
-namespace UnitTests;
+namespace EventsService.UnitTests;
 
 /// <summary>
 /// Тесты логики управления местами на событиях.
@@ -14,7 +14,7 @@ public class ManageSeatsTest
         [new Event(30) { Title = "Third Event Title", StartAt = new DateTime(2026, 01, 23), EndAt = new DateTime(2027, 01, 23)}],
     ];
 
-    [Trait(nameof(Category), Category.Seats)]
+    [Trait(Category.Name, Category.Seats)]
     [Theory]
     [MemberData(nameof(ReserveSeats_Data))]
     public async Task ReserveSeats_Success(Event @event)
@@ -33,7 +33,7 @@ public class ManageSeatsTest
         Assert.Equal(expectedAvailableSeats, @event.AvailableSeats);
     }
 
-    [Trait(nameof(Category), Category.Seats)]
+    [Trait(Category.Name, Category.Seats)]
     [Theory]
     [MemberData(nameof(ReserveSeats_Data))]
     public async Task ReserveSeats_Fail(Event @event)
@@ -52,7 +52,7 @@ public class ManageSeatsTest
         Assert.Equal(expectedAvailableSeats, @event.AvailableSeats);
     }
 
-    [Trait(nameof(Category), Category.Seats)]
+    [Trait(Category.Name, Category.Seats)]
     [Theory]
     [MemberData(nameof(ReserveSeats_Data))]
     public async Task ReserveReleaseSets_Success(Event @event)
@@ -88,7 +88,7 @@ public class ManageSeatsTest
         [new Event(30) { Title = "Third Event Title", StartAt = new DateTime(2026, 01, 23), EndAt = new DateTime(2027, 01, 23)}],
     ];
 
-    [Trait(nameof(Category), Category.Seats)]
+    [Trait(Category.Name, Category.Seats)]
     [Theory]
     [MemberData(nameof(UpdateSeats_Data))]
     public async Task UpdateTotalSeats_Success(Event @event)

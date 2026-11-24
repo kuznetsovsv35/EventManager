@@ -3,7 +3,7 @@ using Common.Tests;
 using EventsService.Application.DTO;
 using EventsService.Domain;
 
-namespace UnitTests;
+namespace EventsService.UnitTests;
 
 /// <summary>
 /// Тесты DTO.
@@ -21,7 +21,7 @@ public class DataTransferTest
     /// </summary>
     /// <param name="inputData"></param>
     /// <returns></returns>
-    [Trait(nameof(Category), Category.DTO)]
+    [Trait(Category.Name, Category.DTO)]
     [Theory]
     [MemberData(nameof(ValidEventInputData))]
     public async Task InputData_Event_Success(EventInputData inputData)
@@ -50,7 +50,7 @@ public class DataTransferTest
     /// <param name="inputData"></param>
     /// <param name="expectedMembers"></param>
     /// <returns></returns>
-    [Trait(nameof(Category), Category.DTO)]
+    [Trait(Category.Name, Category.DTO)]
     [Theory]
     [MemberData(nameof(InvalidEventInputData))]
     public async Task InputData_Event_Fail(EventInputData inputData, params string[] expectedMembers)
@@ -77,7 +77,7 @@ public class DataTransferTest
     /// </summary>
     /// <param name="event"></param>
     /// <returns></returns>
-    [Trait(nameof(Category), Category.DTO)]
+    [Trait(Category.Name, Category.DTO)]
     [Theory]
     [MemberData(nameof(ValidEventIs))]
     public async Task Event_OutputData_Success(Event @event)

@@ -1,17 +1,26 @@
-namespace UnitTests;
+using Common.Data;
+using Common.Exceptions;
+using Common.Tests;
+using EventsService.Application.DTO;
+using EventsService.Database;
+using EventsService.Domain;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace EventsService.UnitTests;
 
 /// <summary>
 /// Тест разбивки на страницы.
 /// </summary>
 /// <param name="fixture"></param>
-public class PaginatorTest(EventManagerTestContext context) : TestObjectBase, IClassFixture<EventManagerTestContext>
+public class PaginatorTest(TestContext context) : IClassFixture<TestContext>
 {
     /// <summary>
     /// Тест валидации параметров на страницы.
     /// </summary>
     /// <param name="page"></param>
     /// <param name="pageSize"></param>
-    [Trait(Category, Category_Paginator)]
+    [Trait(Category.Name, Category.Paginator)]
     [Theory]
     [InlineData([-1, 10])]
     [InlineData([0, 10])]
@@ -23,7 +32,7 @@ public class PaginatorTest(EventManagerTestContext context) : TestObjectBase, IC
         var serviceProvider = context.CreateServiceProvider();
         await using var scope = serviceProvider.CreateAsyncScope();
         var paginator = scope.ServiceProvider.GetRequiredService<IPaginator<Event>>();
-        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<EventsDbContext>();
         // When
 
         // Then
@@ -38,7 +47,7 @@ public class PaginatorTest(EventManagerTestContext context) : TestObjectBase, IC
     /// <param name="pageSize">Требуемый размер страницы.</param>
     /// <param name="expectedPageCount">Ожидаемое количество страниц.</param>
     /// <param name="expectedPageSize">Ожидаемое выведенных элементов на запрашиваемой страницы.</param>
-    [Trait(Category, Category_Paginator)]
+    [Trait(Category.Name, Category.Paginator)]
     [Theory]
     [InlineData([1, 10, 3, 10])]
     [InlineData([3, 10, 3, 10])]
@@ -51,7 +60,7 @@ public class PaginatorTest(EventManagerTestContext context) : TestObjectBase, IC
         // Given
         var serviceProvider = context.CreateServiceProvider();
         await using var scope = serviceProvider.CreateAsyncScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<EventsDbContext>();
         var paginator = scope.ServiceProvider.GetRequiredService<IPaginator<Event>>();
 
         var expectedTotalCount = await dbContext.Events.AsNoTracking().CountAsync();

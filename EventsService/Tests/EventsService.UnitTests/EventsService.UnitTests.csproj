@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.15" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="11.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageReference Include="Moq" Version="4.20.72" />
@@ -19,7 +20,7 @@
   <ItemGroup>
     <ProjectReference Include="../../../Common/Common.Infrastructure/Common.Infrastructure.csproj" />
     <ProjectReference Include="../../../Common/Common.Tests/Common.Tests.csproj" />
-    <ProjectReference Include="../../EventsService.Application/EventsService.Application.csproj" />
+    <ProjectReference Include="../../EventsService.Database/EventsService.Database.csproj" />
   </ItemGroup>
 
   <ItemGroup>
