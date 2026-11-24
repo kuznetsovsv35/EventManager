@@ -1,12 +1,15 @@
 using Authorization;
+using Common.Contracts.Kafka;
 using Common.Data;
 using Common.Infrastructure.Services;
+using Common.Kafka;
 using Common.Services;
 using Common.Synchronization;
 using EventsService.Application;
 using EventsService.Application.Services;
 using EventsService.Database.Repositories;
 using EventsService.Domain;
+using EventsService.Kafka.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -32,6 +35,7 @@ public class TestContext
             .AddScoped<IPaginator<Event>, PaginateService<Event>>()
             .AddScoped<IEventService, EventService>()
             .AddSingleton(_ => LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<TestContext>())
+            .AddSingleton(_ => LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<BookingActionSubscriber>())
             .AddSingleton(provider =>
             {
                 var mock = new Mock<IServiceScopeFactory>();
@@ -44,7 +48,8 @@ public class TestContext
                 var mock = new Mock<IAppAuthorizationService>();
                 mock.SetupGet(x => x.CurrentUser).Returns(currentUser.Object);
                 return mock.Object;
-            });
+            })
+            .AddSingleton<IEventSubscriber<BookingActionMessage>, BookingActionSubscriber>();
     }
 
     public IServiceProvider CreateServiceProvider() => _services.BuildServiceProvider();

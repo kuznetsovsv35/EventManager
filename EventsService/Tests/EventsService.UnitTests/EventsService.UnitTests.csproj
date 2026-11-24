@@ -21,6 +21,7 @@
     <ProjectReference Include="../../../Common/Common.Infrastructure/Common.Infrastructure.csproj" />
     <ProjectReference Include="../../../Common/Common.Tests/Common.Tests.csproj" />
     <ProjectReference Include="../../EventsService.Database/EventsService.Database.csproj" />
+    <ProjectReference Include="../../EventsService.Kafka/EventsService.Kafka.csproj" />
   </ItemGroup>
 
   <ItemGroup>

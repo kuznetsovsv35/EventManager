@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using EventsService.Domain.Exceptions;
 
 namespace EventsService.Domain;
 
@@ -81,13 +82,13 @@ public class EventBooking
         var eventId = EventId.HasValue ? EventId.Value : Guid.Empty;
 
         if (Event is null)
-            throw new InvalidOperationException($"Событие не найдено (Id = {eventId})");
+            throw new InvalidEventOperationException("Событие не найдено", eventId);
 
         if (bookedAt > Event.StartAt)
-            throw new InvalidOperationException($"Событие уже началось (Id = {eventId})");
+            throw new InvalidEventOperationException("Событие уже началось", eventId);
 
         if (reservedSeats > Event.AvailableSeats)
-            throw new InvalidOperationException($"Недостаточно свободных мест на событии (Id = {eventId})");
+            throw new InvalidEventOperationException("Недостаточно свободных мест на событии", eventId);
 
         ReservedSeats = reservedSeats;
         
