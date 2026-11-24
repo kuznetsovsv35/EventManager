@@ -1,11 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using Testcontainers.PostgreSql;
-using Xunit;
 
 namespace Common.Tests.Postgres;
 
-public class TestContainerWrapper<T> : IAsyncLifetime where T : DbContext
+public class TestContainerWrapper<T> where T : DbContext
 {
     static readonly string PostgresImage = "postgres:16-alpine";
     static readonly string DatabaseName = "test-db";

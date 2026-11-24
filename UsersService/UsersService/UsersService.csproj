@@ -16,9 +16,8 @@
     <ProjectReference Include="../../Common/Common.Middleware/Common.Middleware.csproj" />
     <ProjectReference Include="../../Common/Common.Swagger/Common.Swagger.csproj" />
     <ProjectReference Include="../../Common/Database.Postgres/Database.Postgres.csproj" />
-    <ProjectReference Include="../UsersService.Application/UsersService.Application.csproj" />
     <ProjectReference Include="../UsersService.Database/UsersService.Database.csproj" />
-    <ProjectReference Include="../UsersService.Domain/UsersService.Domain.csproj" />
+    <ProjectReference Include="../UsersService.Infrastructure/UsersService.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

@@ -2,7 +2,7 @@ using System.Text;
 using Authorization.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
-namespace UsersService.Extensions;
+namespace UsersService.Infrastructure.Extensions;
 
 public static class JwtTokenExtension
 {

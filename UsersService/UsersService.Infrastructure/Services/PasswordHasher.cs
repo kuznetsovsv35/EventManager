@@ -2,7 +2,7 @@ using System.Security.Cryptography;
 using System.Text;
 using UsersService.Application.Cryptography;
 
-namespace UsersService.Services;
+namespace UsersService.Infrastructure.Services;
 
 public class PasswordHasher : IPasswordHasher
 {

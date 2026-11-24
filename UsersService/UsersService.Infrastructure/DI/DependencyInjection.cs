@@ -1,8 +1,10 @@
 using Authorization.AspNetCore.DI;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using UsersService.Application;
-using UsersService.Services;
+using UsersService.Infrastructure.Services;
 
-namespace UsersService.DI;
+namespace UsersService.Infrastructure.DI;
 
 public static partial class DependencyInjection
 {

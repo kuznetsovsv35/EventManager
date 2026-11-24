@@ -37,9 +37,11 @@
     <Project Path="UsersService/UsersService.Application/UsersService.Application.csproj" />
     <Project Path="UsersService/UsersService.Database/UsersService.Database.csproj" />
     <Project Path="UsersService/UsersService.Domain/UsersService.Domain.csproj" />
+    <Project Path="UsersService/UsersService.Infrastructure/UsersService.Infrastructure.csproj" />
     <Project Path="UsersService/UsersService/UsersService.csproj" />
   </Folder>
   <Folder Name="/UsersService/Tests/">
+    <Project Path="UsersService/Tests/UsersService.IntegrationTests/UsersService.IntegrationTests.csproj" />
     <Project Path="UsersService/Tests/UsersService.UnitTests/UsersService.UnitTests.csproj" />
   </Folder>
 </Solution>

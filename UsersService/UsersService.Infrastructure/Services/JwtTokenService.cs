@@ -5,9 +5,9 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using UsersService.Application;
 using UsersService.Application.DTO;
-using UsersService.Extensions;
+using UsersService.Infrastructure.Extensions;
 
-namespace UsersService.Services;
+namespace UsersService.Infrastructure.Services;
 
 public class JwtTokenService(IOptions<JwtSettings> options) : ITokenService
 {

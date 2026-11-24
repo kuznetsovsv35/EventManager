@@ -1,7 +1,7 @@
 using UsersService.Application;
 using UsersService.Application.DTO;
 
-namespace UsersService.Services;
+namespace UsersService.Infrastructure.Services;
 
 public class AuthenticationService(
     IUserService userService,

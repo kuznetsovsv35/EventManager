@@ -3,7 +3,7 @@ using UsersService.Application;
 using UsersService.Application.Cryptography;
 using UsersService.Database;
 using UsersService.Database.Repositories;
-using UsersService.Services;
+using UsersService.Infrastructure.Services;
 
 namespace UsersService.DI;
 

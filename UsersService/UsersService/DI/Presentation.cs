@@ -3,6 +3,7 @@ using Authorization.Domain;
 using Common.Middleware.DI;
 using Common.Swagger;
 using UsersService.Application.Security;
+using UsersService.Infrastructure.DI;
 using UsersService.Middleware;
 
 namespace UsersService.DI;

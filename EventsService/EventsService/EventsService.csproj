@@ -20,7 +20,6 @@
     <ProjectReference Include="../../Common/Database.Postgres/Database.Postgres.csproj" />
     <ProjectReference Include="../EventsService.Application/EventsService.Application.csproj" />
     <ProjectReference Include="../EventsService.Database/EventsService.Database.csproj" />
-    <ProjectReference Include="../EventsService.Domain/EventsService.Domain.csproj" />
     <ProjectReference Include="../EventsService.Kafka/EventsService.Kafka.csproj" />
   </ItemGroup>
 
