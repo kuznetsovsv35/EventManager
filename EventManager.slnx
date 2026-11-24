@@ -38,6 +38,6 @@
     <Project Path="UsersService/UsersService/UsersService.csproj" />
   </Folder>
   <Folder Name="/UsersService/Tests/">
-    <Project Path="UsersService/Tests/UnitTests/UnitTests.csproj" />
+    <Project Path="UsersService/Tests/UsersService.UnitTests/UsersService.UnitTests.csproj" />
   </Folder>
 </Solution>

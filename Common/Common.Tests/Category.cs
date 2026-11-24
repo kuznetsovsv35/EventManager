@@ -2,6 +2,7 @@ namespace Common.Tests;
 
 public static class Category
 {
+    public const string Name = "Category";
     public const string Filters = nameof(Filters);
     public const string Paginator = nameof(Paginator);
     public const string Service = nameof(Service);

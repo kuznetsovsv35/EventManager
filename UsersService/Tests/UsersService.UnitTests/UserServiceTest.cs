@@ -5,7 +5,7 @@ using UsersService.Application;
 using UsersService.Application.DTO;
 using UsersService.Domain.Exceptions;
 
-namespace UnitTests;
+namespace UsersService.UnitTests;
 
 /// <summary>
 /// Тесты сервиса пользователей.
@@ -13,7 +13,7 @@ namespace UnitTests;
 /// <param name="context"></param>
 public class UserServiceTest(TestContext context) : IClassFixture<TestContext>
 {
-    [Trait(nameof(Category), Category.Users)]
+    [Trait(Category.Name, Category.Users)]
     [Fact]
     public async Task LoginUser_Success()
     {
@@ -21,13 +21,13 @@ public class UserServiceTest(TestContext context) : IClassFixture<TestContext>
         var serviceProvider = context.CreateServiceProvider();
         await using var scope = serviceProvider.CreateAsyncScope();
         var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
-        var expectedInfo = TestContext.GetUserInfo(TestContext.AdminLogin, UserRole.Admin);
+        var expectedInfo = await serviceProvider.GetUserInfo(TestDbContext.AdminLogin, UserRole.Admin);
 
         // When
         var loginRequest = new UserRequest
         {
-            Login = TestContext.AdminLogin,
-            Password = TestContext.AdminPassword
+            Login = TestDbContext.AdminLogin,
+            Password = TestDbContext.AdminPassword
         };
 
         var userInfo = await userService.LoginUserAsync(loginRequest, CancellationToken.None);
@@ -36,7 +36,7 @@ public class UserServiceTest(TestContext context) : IClassFixture<TestContext>
         Assert.Equal(expectedInfo, userInfo);
     }
 
-    [Trait(nameof(Category), Category.Users)]
+    [Trait(Category.Name, Category.Users)]
     [Theory]
     [InlineData(["unknown", "password"])]
     [InlineData(["test-admin", "123"])]
@@ -59,7 +59,7 @@ public class UserServiceTest(TestContext context) : IClassFixture<TestContext>
             => await userService.LoginUserAsync(loginRequest, CancellationToken.None));
     }
 
-    [Trait(nameof(Category), Category.Users)]
+    [Trait(Category.Name, Category.Users)]
     [Fact]
     public async Task RegisterUser_Success()
     {
@@ -84,7 +84,7 @@ public class UserServiceTest(TestContext context) : IClassFixture<TestContext>
         Assert.Equal(UserRole.User, userInfo.Role);
     }
 
-    [Trait(nameof(Category), Category.Users)]
+    [Trait(Category.Name, Category.Users)]
     [Fact]
     public async Task RegisterUser_Fail()
     {
@@ -92,14 +92,13 @@ public class UserServiceTest(TestContext context) : IClassFixture<TestContext>
         var serviceProvider = context.CreateServiceProvider();
         await using var scope = serviceProvider.CreateAsyncScope();
         var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
-        string login = TestContext.UserLogin;
+        string login = TestDbContext.UserLogin;
         const string password = "123";
 
-        RegisterUserRequest request = new()
+        UserRequest request = new()
         {
             Login = login,
             Password = password,
-            Role = UserRole.User,
         };
 
         // When
@@ -109,7 +108,7 @@ public class UserServiceTest(TestContext context) : IClassFixture<TestContext>
         Assert.IsType<UserRegisterException>(ex);
     }
 
-    [Trait(nameof(Category), Category.Users)]
+    [Trait(Category.Name, Category.Users)]
     [Fact]
     public async Task ChangePassword_Success()
     {
@@ -166,7 +165,7 @@ public class UserServiceTest(TestContext context) : IClassFixture<TestContext>
         Assert.Equal(registered, logged);
     }
 
-    [Trait(nameof(Category), Category.Users)]
+    [Trait(Category.Name, Category.Users)]
     [Fact]
     public async Task ChangeRole_Success()
     {
