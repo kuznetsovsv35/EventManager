@@ -18,6 +18,7 @@
     <ProjectReference Include="../../Common/Database.Postgres/Database.Postgres.csproj" />
     <ProjectReference Include="../BookingService.Application/BookingService.Application.csproj" />
     <ProjectReference Include="../BookingService.Database/BookingService.Database.csproj" />
+    <ProjectReference Include="../BookingService.Infrastructure/BookingService.Infrastructure.csproj" />
     <ProjectReference Include="../BookingService.Kafka/BookingService.Kafka.csproj" />
   </ItemGroup>
 

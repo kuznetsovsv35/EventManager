@@ -43,7 +43,9 @@ public class EventRepository(EventsDbContext dbContext) : IEventRepository
         return null;
     }
     
-    async Task IEventRepository.ExecuteEventBookingAsync(Guid bookingId, Guid eventId, Func<EventBooking, bool> action, CancellationToken cancellation)
+    async Task IEventRepository.ExecuteEventBookingAsync(
+        Guid bookingId, Guid eventId, Guid userId,
+        Func<EventBooking, bool> action, CancellationToken cancellation)
     {
         var eventBooking = await dbContext.EventBookings.FindAsync([bookingId], cancellation);
 
@@ -57,6 +59,9 @@ public class EventRepository(EventsDbContext dbContext) : IEventRepository
             await dbContext.Entry(eventBooking).Reference(ev => ev.Event).LoadAsync(cancellation);
 
         if (action(eventBooking))
+        {
+            eventBooking.UserId = userId;
             await dbContext.SaveChangesAsync(cancellation);
+        }
     }
 }

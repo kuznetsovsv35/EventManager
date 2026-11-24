@@ -3,11 +3,12 @@
     <Project Path="BookingService/BookingService.Application/BookingService.Application.csproj" />
     <Project Path="BookingService/BookingService.Database/BookingService.Database.csproj" />
     <Project Path="BookingService/BookingService.Domain/BookingService.Domain.csproj" />
+    <Project Path="BookingService/BookingService.Infrastructure/BookingService.Infrastructure.csproj" />
     <Project Path="BookingService/BookingService.Kafka/BookingService.Kafka.csproj" />
     <Project Path="BookingService/BookingService/BookingService.csproj" />
   </Folder>
   <Folder Name="/BookingService/Tests/">
-    <Project Path="BookingService/Tests/UnitTests/UnitTests.csproj" />
+    <Project Path="BookingService/Tests/BookingService.UnitTests/BookingService.UnitTests.csproj" />
   </Folder>
   <Folder Name="/Common/">
     <Project Path="Common/Authorization.AspNetCore/Authorization.AspNetCore.csproj" />

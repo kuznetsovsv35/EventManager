@@ -1,6 +1,7 @@
 using BookingService.Domain;
+using Microsoft.Extensions.Hosting;
 
-namespace BookingService.Background;
+namespace BookingService.Infrastructure;
 
 public enum BackgroundServiceStatus
 {

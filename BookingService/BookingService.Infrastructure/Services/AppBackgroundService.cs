@@ -1,9 +1,11 @@
 using BookingService.Application;
-using BookingService.Background;
 using BookingService.Domain;
 using Common.Synchronization;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
-namespace BookingService.Services;
+namespace BookingService.Infrastructure.Services;
 
 public class AppBackgroundService(
     IServiceScopeFactory scopeFactory,

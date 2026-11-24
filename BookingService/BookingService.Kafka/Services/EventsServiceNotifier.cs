@@ -12,7 +12,7 @@ public class EventsServiceNotifier(IEventPublisher publisher) : IEventsServiceNo
             Topics.BookingAction, 
             new BookingActionMessage(
                 booking.Id, booking.EventId, 1, 
-                userId ?? booking.UserId, BookingAction.Confirm), 
+                userId ?? booking.UserId, booking.CreatedAt, BookingAction.Confirm), 
             () => booking.EventId.ToString(),
             cancellation);
 
@@ -21,7 +21,7 @@ public class EventsServiceNotifier(IEventPublisher publisher) : IEventsServiceNo
             Topics.BookingAction,
             new BookingActionMessage(
                 booking.Id, booking.EventId, 1,  
-                userId ?? booking.UserId, BookingAction.Cancel),
+                userId ?? booking.UserId, booking.CreatedAt, BookingAction.Cancel),
             () => booking.EventId.ToString(),
             cancellation);
 }

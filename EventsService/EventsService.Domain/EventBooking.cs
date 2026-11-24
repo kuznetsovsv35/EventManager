@@ -73,38 +73,41 @@ public class EventBooking
     /// Попытка подтвердить бронирование (зарезервировать места).
     /// </summary>
     /// <returns>null - состояние не изменилось, true - места зарезервированы, false - нельзя зарезервировать</returns>
-    public bool? Confirm(int reservedSeats)
+    public bool Confirm(int reservedSeats, DateTime bookedAt)
     {
         if (IsProcessed)
-            return null;
+            return false;
+
+        var eventId = EventId.HasValue ? EventId.Value : Guid.Empty;
+
+        if (Event is null)
+            throw new InvalidOperationException($"Событие не найдено (Id = {eventId})");
+
+        if (bookedAt > Event.StartAt)
+            throw new InvalidOperationException($"Событие уже началось (Id = {eventId})");
+
+        if (reservedSeats > Event.AvailableSeats)
+            throw new InvalidOperationException($"Недостаточно свободных мест на событии (Id = {eventId})");
 
         ReservedSeats = reservedSeats;
-        if (Event?.TryReserveSeats(ReservedSeats) == true)
-        {
-            ConfirmedAt = DateTime.UtcNow;
-            return true;
-        }
-
-        CancelledAt = DateTime.UtcNow;
-        return false;
+        
+        Event.TryReserveSeats(ReservedSeats);
+        ConfirmedAt = DateTime.UtcNow;
+        return true;
     }
     /// <summary>
     /// Попытка отменить бронирование
     /// </summary>
     /// <returns>null - состояние не изменилось, true - места возвращены, false - пометка об отменен. </returns>
-    public bool? Cancel()
+    public bool Cancel()
     {
         if (IsCancelled)
-            return null;
+            return false;
 
         if (IsConfirmed)
-        {
             Event?.ReleaseSeats(ReservedSeats);
-            CancelledAt = DateTime.UtcNow;
-            return true;
-        }
         
         CancelledAt = DateTime.UtcNow;
-        return false;
+        return true;
     }
 }

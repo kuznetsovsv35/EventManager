@@ -11,5 +11,6 @@ public record BookingActionMessage(
     Guid EventId,
     int Seats,
     Guid UserId,
+    DateTime CreatedAt,
     BookingAction Action
 );
