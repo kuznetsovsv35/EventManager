@@ -18,6 +18,7 @@
     <Project Path="Common/Common.Kafka/Common.Kafka.csproj" />
     <Project Path="Common/Common.Middleware/Common.Middleware.csproj" />
     <Project Path="Common/Common.Swagger/Common.Swagger.csproj" />
+    <Project Path="Common/Common.Tests.Postgres/Common.Tests.Postgres.csproj" />
     <Project Path="Common/Common.Tests/Common.Tests.csproj" />
     <Project Path="Common/Common/Common.csproj" />
     <Project Path="Common/Database.Postgres/Database.Postgres.csproj" />
