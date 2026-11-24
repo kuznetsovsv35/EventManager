@@ -2,7 +2,7 @@ using BookingService.Application.DTO;
 using BookingService.Domain;
 using Common.Tests;
 
-namespace UnitTests;
+namespace BookingService.UnitTests;
 
 /// <summary>
 /// Тесты DTO.
@@ -20,7 +20,7 @@ public class DataTransferTest
     /// </summary>
     /// <param name="booking"></param>
     /// <returns></returns>
-    [Trait(nameof(Category), Category.DTO)]
+    [Trait(Category.Name, Category.DTO)]
     [Theory]
     [MemberData(nameof(Bookings))]
     public async Task Booking_Info_Success(Booking booking)
