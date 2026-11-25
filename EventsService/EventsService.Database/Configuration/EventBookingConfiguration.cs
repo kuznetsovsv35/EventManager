@@ -13,7 +13,7 @@ public class EventBookingConfiguration : IEntityTypeConfiguration<EventBooking>
         });
         
         builder.Property(eb => eb.BookingId).IsRequired();
-        builder.Property(eb => eb.EventId).IsRequired();
+        builder.Property(eb => eb.EventId);
         builder.Property(eb => eb.ReservedSeats).IsRequired().HasDefaultValue(0);
         builder.Property(eb => eb.UserId);
         builder.Property(eb => eb.ConfirmedAt);
