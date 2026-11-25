@@ -31,6 +31,7 @@
     <Project Path="EventsService/EventsService/EventsService.csproj" />
   </Folder>
   <Folder Name="/EventsService/Tests/">
+    <Project Path="EventsService/Tests/EventsService.IntegrationTests/EventsService.IntegrationTests.csproj" />
     <Project Path="EventsService/Tests/EventsService.UnitTests/EventsService.UnitTests.csproj" />
   </Folder>
   <Folder Name="/UsersService/">

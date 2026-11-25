@@ -1,0 +1,56 @@
+using Common.Data;
+using Common.Infrastructure.Services;
+using Common.Tests;
+using EventsService.Application.DTO;
+using EventsService.Domain;
+using Microsoft.EntityFrameworkCore;
+
+namespace EventsService.IntegrationTests;
+
+public class PaginatorTest(ContainerWrapper testContainer) : DataTest(testContainer)
+{
+    /// <summary>
+    /// Тест разбивки на страницы.
+    /// </summary>
+    /// <param name="page">Запрашиваемая страница.</param>
+    /// <param name="pageSize">Требуемый размер страницы.</param>
+    /// <param name="expectedPageCount">Ожидаемое количество страниц.</param>
+    /// <param name="expectedPageSize">Ожидаемое выведенных элементов на запрашиваемой страницы.</param>
+    [Trait(Category.Name, Category.Paginator)]
+    [Theory]
+    [InlineData([1, 10, 3, 10])]
+    [InlineData([3, 10, 3, 10])]
+    [InlineData([4, 10, 3, 0])]
+    [InlineData([2, 7, 5, 7])]
+    [InlineData([5, 7, 5, 2])]
+    [InlineData([1, 30, 1, 30])]
+    public async Task PaginateResult_Success(int page, int pageSize, int expectedPageCount, int expectedPageSize)
+    {
+        // Given
+        await using var dbContext = CreateDbContext();
+        IPaginator<Event> paginator = new PaginateService<Event>();
+
+        var expectedTotalCount = await dbContext.Events.CountAsync();
+        var expectedValues = await dbContext
+            .Events
+            .AsNoTracking()
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .Select(x => x.ToOutputData())
+            .ToListAsync();
+
+        // When
+        var pageResult = await paginator.PaginateAsync(
+            dbContext.Events.AsNoTracking(),
+            page, pageSize, x => x.ToOutputData(),
+            CancellationToken.None);
+
+        // Then
+        Assert.Equal(expectedPageCount, pageResult.PageCount);
+        Assert.Equal(page, pageResult.PageNumber);
+        Assert.Equal(expectedPageSize, pageResult.PageSize);
+        Assert.Equal(expectedTotalCount, pageResult.TotalCount);
+        Assert.Equal(expectedPageSize, pageResult.Values.Count());
+        Assert.Equal(expectedValues, pageResult.Values);
+    }
+}

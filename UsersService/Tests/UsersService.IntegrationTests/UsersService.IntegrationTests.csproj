@@ -16,7 +16,6 @@
 
   <ItemGroup>
     <ProjectReference Include="../../../Common/Common.Tests.Postgres/Common.Tests.Postgres.csproj" />
-    <ProjectReference Include="../../../Common/Common.Tests/Common.Tests.csproj" />
     <ProjectReference Include="../../UsersService.Database/UsersService.Database.csproj" />
     <ProjectReference Include="../../UsersService.Infrastructure/UsersService.Infrastructure.csproj" />
   </ItemGroup>
