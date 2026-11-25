@@ -3,12 +3,12 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Common.Tests.Postgres;
 
-public abstract class DatabaseTestBase<TDbContext>(TestContainerWrapper<TDbContext> testContainer) where TDbContext : DbContext
+public abstract class DatabaseTestBase<TDbContext>(ContainerWrapper<TDbContext> testContainer) where TDbContext : DbContext
 {
     protected TDbContext CreateDbContext() => testContainer.CreateDbContext();
     protected Task ResetDatabase() => testContainer.ResetDatabase();
 
-    protected async Task<bool> MigrationTest()
+    protected async Task ExecuteTestMigrations(Action<ICollection<string>, ICollection<string>> assert)
     {
         // Given
         await ResetDatabase();
@@ -39,10 +39,10 @@ public abstract class DatabaseTestBase<TDbContext>(TestContainerWrapper<TDbConte
             .ToListAsync();
 
         // Then
-        return expectedMigrations.Count == actualMigrations.Count;
+        assert(expectedMigrations, actualMigrations);
     }
 
-    protected async Task<bool> DatabaseConnect_Success()
+    protected async Task ExecuteTestConnection(Action<bool> assert)
     {
         // Given
         await ResetDatabase();
@@ -51,6 +51,6 @@ public abstract class DatabaseTestBase<TDbContext>(TestContainerWrapper<TDbConte
         await using var context = CreateDbContext();
 
         // Then
-        return context.Database.CanConnect();
+        assert(context.Database.CanConnect());
     }
 }

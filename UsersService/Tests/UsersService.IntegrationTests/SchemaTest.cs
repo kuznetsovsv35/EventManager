@@ -1,27 +1,24 @@
 ﻿using Authorization.Domain;
 using Common.Tests;
-using Common.Tests.Postgres;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using UsersService.Application.Cryptography;
 using UsersService.Application.DTO;
-using UsersService.Database;
 using UsersService.Domain;
 using UsersService.Infrastructure.Services;
 
 namespace UsersService.IntegrationTests;
 
-[Collection(nameof(TestContainersCollection))]
-public class SchemaTest(ContainerWrapper testContainer) 
-    : DatabaseTestBase<UsersDbContext>(testContainer), IClassFixture<ContainerWrapper>
+[Collection(nameof(ContainersCollection))]
+public class SchemaTest(ContainerWrapper testContainer) : DatabaseTestBase(testContainer)
 {
     [Trait(Category.Name, Category.Database)]
     [Fact]
-    public async Task UsersService_MigrationTest() => Assert.True(await MigrationTest());
+    public Task TestConnection() => ExecuteTestConnection(Assert.True);
 
     [Trait(Category.Name, Category.Database)]
     [Fact]
-    public async Task UsersService_DatabaseConnect() => Assert.True(await DatabaseConnect_Success());
+    public Task TestMigrations() => ExecuteTestMigrations(Assert.Equal);
 
     [Trait(Category.Database, Category.Database)]
     [Fact]
@@ -94,7 +91,7 @@ public class SchemaTest(ContainerWrapper testContainer)
             ");
         });
 
-        CheckUniqueConstraint(ex, "Users", "Id");
+        ex.CheckUniqueConstraint("Users", "Id");
     }
 
     [Trait(Category.Name, Category.Database)]
@@ -194,49 +191,16 @@ public class SchemaTest(ContainerWrapper testContainer)
         });
 
         // Then
-        CheckNullConstraint(exIdNull, "Users", "Id");
+        exIdNull.CheckNullConstraint("Users", "Id");
 
-        CheckNullConstraint(exLoginNull, "Users", "Login");
-        CheckValueConstraint(exLoginMinLength, "Users", "CK_Users_Login");
-        CheckMaxLengthConstraint(exLoginMaxLength, "Users");
+        exLoginNull.CheckNullConstraint("Users", "Login");
+        exLoginMinLength.CheckValueConstraint("Users", "CK_Users_Login");
+        exLoginMaxLength.CheckMaxLengthConstraint("Users");
 
-        CheckValueConstraint(exPassword, "Users", "CK_Users_Password");
+        exPassword.CheckValueConstraint("Users", "CK_Users_Password");
 
-        CheckNullConstraint(exRoleNull, "Users", "Role");
-        CheckNullConstraint(exIsActiveNull, "Users", "IsActive");
-        CheckNullConstraint(exCreatedAtNull, "Users", "CreatedAt");
-    }
-
-    static void CheckUniqueConstraint(PostgresException? exception, string table, string column)
-    {
-        Assert.Equal(PostgresErrorCodes.UniqueViolation, exception?.SqlState);
-        Assert.Contains(table, exception?.TableName);
-        Assert.Equal($"PK_{table}", exception?.ConstraintName);
-    }
-
-    static void CheckNullConstraint(PostgresException? exception, string table, string column)
-    {
-        Assert.Equal(PostgresErrorCodes.NotNullViolation, exception?.SqlState);
-        Assert.Contains(table, exception?.TableName);
-        Assert.Contains(column, exception?.ColumnName);
-    }
-
-    static void CheckValueConstraint(PostgresException? exception, string table, string name)
-    {
-        Assert.Equal(PostgresErrorCodes.CheckViolation, exception?.SqlState);
-        Assert.Contains(table, exception?.TableName);
-        Assert.Equal(name, exception?.ConstraintName);
-    }
-
-    static void CheckMaxLengthConstraint(PostgresException? exception, string table)
-    {
-        Assert.Equal(PostgresErrorCodes.StringDataRightTruncation, exception?.SqlState);
-    }
-
-    static void CheckForeignKey(PostgresException? exception, string table, string name)
-    {
-        Assert.Equal(PostgresErrorCodes.ForeignKeyViolation, exception?.SqlState);
-        Assert.Contains(table, exception?.TableName);
-        Assert.Equal(name, exception?.ConstraintName);
+        exRoleNull.CheckNullConstraint("Users", "Role");
+        exIsActiveNull.CheckNullConstraint("Users", "IsActive");
+        exCreatedAtNull.CheckNullConstraint("Users", "CreatedAt");
     }
 }

@@ -1,19 +1,16 @@
 using Authorization.Domain;
 using Common.Tests;
-using Common.Tests.Postgres;
 using Microsoft.EntityFrameworkCore;
 using UsersService.Application;
 using UsersService.Application.DTO;
-using UsersService.Database;
 using UsersService.Database.Repositories;
 using UsersService.Domain;
 using UsersService.Infrastructure.Services;
 
 namespace UsersService.IntegrationTests;
 
-[Collection(nameof(TestContainersCollection))]
-public class UserRepositoryTest(ContainerWrapper testContainer) 
-    : DatabaseTestBase<UsersDbContext>(testContainer), IClassFixture<ContainerWrapper>
+[Collection(nameof(ContainersCollection))]
+public class UserRepositoryTest(ContainerWrapper testContainer) : DatabaseTestBase(testContainer)
 {
     [Trait(Category.Name, Category.Repositories)]
     [Fact]
