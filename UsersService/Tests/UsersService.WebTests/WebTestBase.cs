@@ -9,9 +9,6 @@ namespace UsersService.WebTests;
 
 public abstract class WebTestBase(WebTestFactory factory) : IClassFixture<WebTestFactory>
 {
-    protected const string Category = nameof(Category);
-    protected const string Category_Web = "web";
-
     protected async Task<HttpResponseMessage> PostAsync<TPayload>(string uri, TPayload? payload, string? token = null) where TPayload : class
     {
         using var client = factory.CreateClient();

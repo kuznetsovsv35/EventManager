@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
+using Common.Tests;
 using Microsoft.AspNetCore.Http;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using UsersService.Application.DTO;
@@ -9,7 +10,7 @@ namespace UsersService.WebTests;
 public class UserServiceTest(WebTestFactory factory) : WebTestBase(factory)
 {
 
-    [Trait(Category, Category_Web)]
+    [Trait(Category.Name, Category.Web)]
     [Fact]
     public async Task Auth_Register_Success()
     {
@@ -28,7 +29,7 @@ public class UserServiceTest(WebTestFactory factory) : WebTestBase(factory)
         Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
     }
 
-    [Trait(Category, Category_Web)]
+    [Trait(Category.Name, Category.Web)]
     [Fact]
     public async Task Auth_Register_InvalidLogin_BadRequest()
     {
@@ -46,7 +47,7 @@ public class UserServiceTest(WebTestFactory factory) : WebTestBase(factory)
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
-    [Trait(Category, Category_Web)]
+    [Trait(Category.Name, Category.Web)]
     [Fact]
     public async Task Auth_Register_DuplicateLogin_BadRequest()
     {
@@ -68,7 +69,7 @@ public class UserServiceTest(WebTestFactory factory) : WebTestBase(factory)
         Assert.Equal(HttpStatusCode.BadRequest, registerResponse.StatusCode);
     }
 
-    [Trait(Category, Category_Web)]
+    [Trait(Category.Name, Category.Web)]
     [Theory]
     [InlineData(["admin", "admin"])]
     [InlineData(["user", "user"])]
@@ -91,7 +92,7 @@ public class UserServiceTest(WebTestFactory factory) : WebTestBase(factory)
         Assert.NotNull(authResult?.AccessToken);
     }
 
-    [Trait(Category, Category_Web)]
+    [Trait(Category.Name, Category.Web)]
     [Theory]
     [InlineData(["unknown", "pass"])]
     [InlineData(["user", "123"])]
