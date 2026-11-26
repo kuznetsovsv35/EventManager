@@ -10,6 +10,9 @@
   <Folder Name="/BookingService/Tests/">
     <Project Path="BookingService/Tests/BookingService.UnitTests/BookingService.UnitTests.csproj" />
   </Folder>
+  <Folder Name="/BookingService/Tests/BookingService.UnitTests/">
+    <Project Path="BookingService/Tests/BookingService.IntegrationTests/BookingService.IntegrationTests.csproj" />
+  </Folder>
   <Folder Name="/Common/">
     <Project Path="Common/Authorization.AspNetCore/Authorization.AspNetCore.csproj" />
     <Project Path="Common/Authorization/Authorization.csproj" />
