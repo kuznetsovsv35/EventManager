@@ -1,11 +1,11 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using Authorization.AspNetCore.Extensions;
 using Authorization.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using UsersService.Application;
 using UsersService.Application.DTO;
-using UsersService.Infrastructure.Extensions;
 
 namespace UsersService.Infrastructure.Services;
 

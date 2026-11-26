@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Net.Mime;
 using System.Text;
 using System.Text.Json;
+using Authorization.Domain;
 
 namespace BookingService.WebTests;
 
@@ -67,15 +68,9 @@ public abstract class WebTestBase(WebTestFactory factory) : IClassFixture<WebTes
     */
 
     protected async Task<string> LoginUser(string login, string? password)
-    {
-        /*
-        UserRequest request = new() { Login = login, Password = password };
-        var response = await PostAsync("/auth/login", request);
-        response.EnsureSuccessStatusCode();
-        var result = await response.Content.ReadFromJsonAsync<AuthResult>();
-        Assert.NotNull(result);
-        return result.AccessToken;
-        */
-        return string.Empty;
-    }
+        => login switch
+        { 
+            "admin" => factory.TokenGenerator.GenerateTokens(Guid.Empty, login,  UserRole.Admin),
+            _ => factory.TokenGenerator.GenerateTokens(Guid.Empty, login,  UserRole.User)
+        };
 }

@@ -8,6 +8,8 @@ using EventsService.Database;
 using Common.Kafka;
 using Common.Contracts.Kafka;
 using Common.Kafka.Services;
+using Common.Tests.AspNetCore;
+using Common.Tests.AspNetCore.Services;
 
 namespace EventsService.WebTests;
 
@@ -50,11 +52,19 @@ public class WebTestFactory : WebApplicationFactory<Program>, IAsyncLifetime
                     _postgres.GetConnectionString(),
                     x => x.MigrationsAssembly(typeof(EventsDbContext).Assembly));
             });
+
+            services.AddSingleton<ITokenGenerator, JwtTokenGenerator>();
         });
     }
 
     #region IAsyncLifetime
     Task IAsyncLifetime.InitializeAsync() => _postgres.StartAsync();
     Task IAsyncLifetime.DisposeAsync() => _postgres.DisposeAsync().AsTask();
+    #endregion
+
+    #region Token generator
+    public ITokenGenerator TokenGenerator => _tokenGenerator 
+        ??= Services.GetRequiredService<ITokenGenerator>();
+    ITokenGenerator? _tokenGenerator;
     #endregion
 }

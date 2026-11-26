@@ -7,6 +7,8 @@ using Microsoft.Extensions.Hosting;
 using BookingService.Database;
 using BookingService.Infrastructure.Services;
 using Common.Kafka;
+using Common.Tests.AspNetCore;
+using Common.Tests.AspNetCore.Services;
 
 namespace BookingService.WebTests;
 
@@ -50,6 +52,8 @@ public class WebTestFactory : WebApplicationFactory<Program>, IAsyncLifetime
                     _postgres.GetConnectionString(),
                     x => x.MigrationsAssembly(typeof(BookingsDbContext).Assembly));
             });
+
+            services.AddSingleton<ITokenGenerator, JwtTokenGenerator>();
         });
     }
 
@@ -57,5 +61,11 @@ public class WebTestFactory : WebApplicationFactory<Program>, IAsyncLifetime
     Task IAsyncLifetime.InitializeAsync() => _postgres.StartAsync();
 
     Task IAsyncLifetime.DisposeAsync() => _postgres.DisposeAsync().AsTask();
+    #endregion
+
+    #region Token generator
+    public ITokenGenerator TokenGenerator => _tokenGenerator 
+        ??= Services.GetRequiredService<ITokenGenerator>();
+    ITokenGenerator? _tokenGenerator;
     #endregion
 }

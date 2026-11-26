@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Net.Mime;
 using System.Text;
 using System.Text.Json;
+using Authorization.Domain;
 using EventsService.Application.DTO;
 
 namespace EventsService.WebTests;
@@ -54,32 +55,12 @@ public abstract class WebTestBase(WebTestFactory factory) : IClassFixture<WebTes
         return await client.DeleteAsync(uri, CancellationToken.None);
     }
 
-    /*
-    protected async Task CreateUser(string login, string? password)
-    {
-        
-        UserRequest request = new()
-        {
-            Login = login,
-            Password = password,
-        };
-        var response = await PostAsync("auth/register", request);
-        response.EnsureSuccessStatusCode();
-    }
-    */
-
     protected async Task<string> LoginUser(string login, string? password)
-    {
-        /*
-        UserRequest request = new() { Login = login, Password = password };
-        var response = await PostAsync("/auth/login", request);
-        response.EnsureSuccessStatusCode();
-        var result = await response.Content.ReadFromJsonAsync<AuthResult>();
-        Assert.NotNull(result);
-        return result.AccessToken;
-        */
-        return string.Empty;
-    }
+        => login switch
+        { 
+            "admin" => factory.TokenGenerator.GenerateTokens(Guid.Empty, login,  UserRole.Admin),
+            _ => factory.TokenGenerator.GenerateTokens(Guid.Empty, login,  UserRole.User)
+        };
 
     protected async Task<EventOutputData?> CreateEvent(EventInputData data)
     {
