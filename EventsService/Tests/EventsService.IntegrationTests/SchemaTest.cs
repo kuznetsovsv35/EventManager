@@ -330,11 +330,10 @@ public class SchemaTest(ContainerWrapper testContainer) : DatabaseTestBase(testC
                     ""EventId"" = {Guid.Empty}
                 WHERE ""BookingId"" = {booking.BookingId}"));
 
-        var eventIdKey = await Assert.throw<PostgresException>(async() 
-            => await db.Database.ExecuteSqlInterpolatedAsync($@"
+        await db.Database.ExecuteSqlInterpolatedAsync($@"
                 UPDATE ""event-bookings"" SET
-                    ""EventId"" = {Guid.Empty}
-                WHERE ""BookingId"" = {booking.BookingId}"));
+                    ""EventId"" = NULL
+                WHERE ""BookingId"" = {booking.BookingId}");
         // Then
         bookingIdNull.CheckNullConstraint("event-bookings", "BookingId");
         reservedSeatsNull.CheckNullConstraint("event-bookings", "ReservedSeats");
