@@ -67,10 +67,10 @@ public abstract class WebTestBase(WebTestFactory factory) : IClassFixture<WebTes
     }
     */
 
-    protected async Task<string> LoginUser(string login, string? password)
+    protected string LoginUser(string login, string? password)
         => login switch
         { 
-            "admin" => factory.TokenGenerator.GenerateTokens(Guid.Empty, login,  UserRole.Admin),
-            _ => factory.TokenGenerator.GenerateTokens(Guid.Empty, login,  UserRole.User)
+            "admin" => factory.TokenGenerator.GenerateTokens(Guid.NewGuid(), login,  UserRole.Admin),
+            _ => factory.TokenGenerator.GenerateTokens(Guid.NewGuid(), login,  UserRole.User)
         };
 }

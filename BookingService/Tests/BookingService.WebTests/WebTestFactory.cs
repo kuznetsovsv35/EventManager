@@ -9,6 +9,7 @@ using BookingService.Infrastructure.Services;
 using Common.Kafka;
 using Common.Tests.AspNetCore;
 using Common.Tests.AspNetCore.Services;
+using Moq;
 
 namespace BookingService.WebTests;
 
@@ -54,6 +55,7 @@ public class WebTestFactory : WebApplicationFactory<Program>, IAsyncLifetime
             });
 
             services.AddSingleton<ITokenGenerator, JwtTokenGenerator>();
+            services.AddSingleton(_ => new Mock<IEventPublisher>().Object);
         });
     }
 
