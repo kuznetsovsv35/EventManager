@@ -66,7 +66,7 @@
 # Сборка и запуск проекта.
 1. Клонирование репозитория:
    ```bash
-   git clone -b sprint-8 https://github.com/kuznetsovsv35/EventManager.git
+   git clone -b sprint-9 https://github.com/kuznetsovsv35/EventManager.git
    ```
 2. Перейти в паку "EventManager":
    ```bash
@@ -151,7 +151,7 @@
    ./test-users.sh
 
    # Запуск тестов End-to-end.
-   dotnet test --filter "Category=web"
+   dotnet test --filter "Category=Web"
    # или
    ./test-web.sh
    ```
@@ -159,10 +159,14 @@
 6. запуск приложения:
    ```bash
    # Вариант 1.
-   dotnet run --project EventManager
+   dotnet run --project UsersService   # Запуска сервиса пользователей.
+   dotnet run --project EventsService  # Запуска сервиса управления бронирования.
+   dotnet run --project BookingService # Запуска сервиса бронирование.
    
    # Вариант 2 (убедиться, что у файла скрипта есть атрибут выполнения).
-   ./run.sh
+   ./run.sh UsersService   # Запуска сервиса пользователей.
+   ./run.sh EventsService  # Запуска сервиса управления событиями.
+   ./run.sh BookingService # Запуска сервиса бронирование.
    ```
 7. Работа с миграциями.
    # Подготовка
@@ -174,21 +178,25 @@
    # Создание миграция
    ```bash
    # Создание миграции создания БД.
-   dotnet ef migrations add InitialCreate -p EventManager.Database -s EventManager
-   
-   $ Создание пользователей.
-   dotnet ef migrations add CreateUsers -p EventManager.Database -s EventManager
+   ./efc-migration.sh UsersService InitialCreate   # Создание миграция в БД сервиса пользователей.
+   ./efc-migration.sh EventsService InitialCreate  # Создание миграции в БД сервиса управления событиями.
+   ./efc-migration.sh BookingService InitialCreate # Создание миграции в БД сервиса бронирования.
    ```
 
-   # Обновление БД.
+   # Обновление БД (только при локальном запуске).
    ```bash
-   dotnet ef database update -p EventManager.Database -s EventManager
+   ./efc-update.sh UsersService InitialCreate   # Обновление БД сервиса пользователей.
+   ./efc-update.sh EventsService InitialCreate  # Обновление БД сервиса управления событиями.
+   ./efc-update.sh BookingService InitialCreate # Обновление БД сервиса бронирования.
    ```
 
    Примечание: поскольку миграция уже создана и хранится в проектном репозитории, после клонирования нужно только обновить БД.
 
-8. В браузере открыть: http://localhost:5108/swagger
-9. На странице можно увидеть описание API и попробовать его в деле.
+8. В браузере открыть: 
+   Сервис авторизации и управления пользователями: http://localhost:5231/swagger
+   Сервис управления событиями: http://localhost:5232/swagger
+   сервис бронирования: http://localhost:5233/swagger
+9. На страницах можно увидеть описание API и попробовать его в деле.
 
 # Описание API.
 
@@ -285,9 +293,10 @@ pageSize|int|Количество событий на запрошенной с�
 В таблице 8 приведено описание назначения сборок решения.
 
 Таблица 8. Проекты (сборки) решения.
-| Имя проекта | Пространства имен | Описание |
-| --- | --- | --- |
-| EventManager.Domain | *.ValueObjects | Реализованы основные сущности БЛ (событие и бронь). |
+| Имя проекта | Описание |
+| --- | --- |
+| BookingService.Domain | Реализованы основные сущности БЛ (бронь) и классы исключений бизнес-логики. |
+
 | EventManager.Domain | *.Exceptions | Исключения, генерируемые в ходе проверки действий бизнес-логики. |
 | EventManager.Common | *.Interfaces | Объекты общего назначения (фильтры, синхронизация) |
 | EventManager.Common | *.Private | Вспомогательные классы для реализации интерфейсов общего назначения. |
