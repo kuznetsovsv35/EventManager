@@ -8,6 +8,7 @@
     <Project Path="BookingService/BookingService/BookingService.csproj" />
   </Folder>
   <Folder Name="/BookingService/Tests/">
+    <Project Path="BookingService/Tests/BookingService.IntegrationTests/BookingService.IntegrationTests.csproj" />
     <Project Path="BookingService/Tests/BookingService.UnitTests/BookingService.UnitTests.csproj" />
     <Project Path="BookingService/Tests/BookingService.WebTests/BookingService.WebTests.csproj" />
   </Folder>
