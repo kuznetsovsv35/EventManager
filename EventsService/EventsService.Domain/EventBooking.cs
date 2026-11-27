@@ -108,6 +108,9 @@ public class EventBooking
         if (IsConfirmed)
             Event?.ReleaseSeats(ReservedSeats);
 
+        if (Event is null)
+            EventId = null;
+
         CancelledAt = DateTime.UtcNow;
         return true;
     }

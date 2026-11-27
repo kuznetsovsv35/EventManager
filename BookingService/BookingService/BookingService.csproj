@@ -20,6 +20,7 @@
     <ProjectReference Include="../BookingService.Database/BookingService.Database.csproj" />
     <ProjectReference Include="../BookingService.Infrastructure/BookingService.Infrastructure.csproj" />
     <ProjectReference Include="../BookingService.Kafka/BookingService.Kafka.csproj" />
+    <ProjectReference Include="..\..\Common\Common.Infrastructure\Common.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

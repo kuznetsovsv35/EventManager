@@ -2,6 +2,7 @@ using Authorization.AspNetCore.DI;
 using Authorization.Domain;
 using BookingService.Application.Security;
 using BookingService.Middleware;
+using Common.Infrastructure.DI;
 using Common.Middleware.DI;
 using Common.Swagger;
 
@@ -21,7 +22,8 @@ public static partial class DependencyInjection
                 .AddPolicy(Policy.CancelBooking, UserRole.Admin, UserRole.User);
         });
 
-        services.AddControllers();
+        services.AddControllers().ConfigureJsonSerializer();
+
         services.AddEndpointsApiExplorer();
         services.ConfigureSwagger();
         return services;
