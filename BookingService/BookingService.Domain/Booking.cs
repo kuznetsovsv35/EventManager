@@ -84,7 +84,7 @@ public class Booking
     /// </summary>
     /// <returns></returns>
     public bool Confirm()
-    { 
+    {
         if (Status == BookingStatus.Pending)
         {
             ChangeStatus(BookingStatus.Confirmed);
@@ -97,8 +97,8 @@ public class Booking
     /// Отклоняет бронь.
     /// </summary>
     /// <returns></returns>
-    public bool Reject() 
-    { 
+    public bool Reject()
+    {
         if (Status == BookingStatus.Pending)
         {
             ChangeStatus(BookingStatus.Rejected);
@@ -111,9 +111,9 @@ public class Booking
     /// Отменяет бронь.
     /// </summary>
     /// <returns></returns>
-    public bool Cancel() 
+    public bool Cancel()
     {
-        if (this is { Status: BookingStatus.Pending or BookingStatus.Confirmed } ) 
+        if (this is { Status: BookingStatus.Pending or BookingStatus.Confirmed })
         {
             ChangeStatus(BookingStatus.Cancelled);
             return true;

@@ -12,6 +12,6 @@ public class BookingsProblemDetailsMapper : IProblemDetailsMapper
             ActiveUserBookingException activeUserBooking => ProblemDetailsFactory.Conflict(activeUserBooking.Message),
             InvalidBookingOperationException invalidBookingOperation => ProblemDetailsFactory.Conflict(invalidBookingOperation.Message),
             _ => null
-        
+
         };
 }

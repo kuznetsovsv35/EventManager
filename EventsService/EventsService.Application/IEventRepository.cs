@@ -49,7 +49,7 @@ public interface IEventRepository
     /// <param name="cancellation"></param>
     /// <returns></returns>
     Task ExecuteEventBookingAsync(
-        Guid bookingId, 
-        Guid EventId, Guid userId, 
+        Guid bookingId,
+        Guid EventId, Guid userId,
         Func<EventBooking, bool> action, CancellationToken cancellation);
 }

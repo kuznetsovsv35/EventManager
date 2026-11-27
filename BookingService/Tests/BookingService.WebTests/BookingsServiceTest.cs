@@ -12,7 +12,7 @@ public class BookingsServiceTest(WebTestFactory factory) : WebTestBase(factory)
     public async Task Bookings_Post_Success()
     {
         // Given
-        Guid eventId = Guid.NewGuid();;
+        Guid eventId = Guid.NewGuid(); ;
         string accessToken = LoginUser("user", "user");
 
         // When

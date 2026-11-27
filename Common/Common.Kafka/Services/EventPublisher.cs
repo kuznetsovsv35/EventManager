@@ -35,7 +35,7 @@ public class EventPublisher(IEventPublisherConfig config, ILogger<EventPublisher
         };
 
         var result = await _producer.ProduceAsync(topic, msg, cancellation);
-        
+
         logger.LogInformation(
             "Event {E} published: partition={P}, offset={O}",
             nameof(T), result.Partition, result.Offset);
@@ -45,7 +45,7 @@ public class EventPublisher(IEventPublisherConfig config, ILogger<EventPublisher
     {
         if (string.IsNullOrWhiteSpace(config.Topic))
             throw new InvalidOperationException("Invalid destination topic");
-        
+
         return PublishAsync(config.Topic, message, keyFactory, cancellation);
     }
 }

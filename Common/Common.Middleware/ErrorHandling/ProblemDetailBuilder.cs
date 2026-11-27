@@ -8,7 +8,7 @@ public class ProblemDetailsBuilder
 
     ProblemDetailsBuilder(ProblemDetails details) => Details = details;
 
-    public static ProblemDetailsBuilder Create<T>(int status, Action<T>? builder = null) where T: ProblemDetails, new()
+    public static ProblemDetailsBuilder Create<T>(int status, Action<T>? builder = null) where T : ProblemDetails, new()
     {
         var details = new T() { Status = status };
         ProblemDetailsBuilder b = new(details);
@@ -16,7 +16,7 @@ public class ProblemDetailsBuilder
         return b;
     }
 
-    public static ProblemDetailsBuilder Create(int status) 
+    public static ProblemDetailsBuilder Create(int status)
         => Create<ProblemDetails>(status);
 
     public ProblemDetailsBuilder AddInstance(string instance)

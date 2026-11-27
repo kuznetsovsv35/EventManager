@@ -24,7 +24,7 @@ public static partial class DependencyInjection
         services.AddControllers();
         services.AddEndpointsApiExplorer();
         services.ConfigureSwagger();
-        return services;        
+        return services;
     }
 
     public static IApplicationBuilder ConfigureMiddleware(this IApplicationBuilder application)

@@ -306,25 +306,25 @@ public class SchemaTest(ContainerWrapper testContainer) : DatabaseTestBase(testC
         // When
         await using var db = CreateDbContext();
 
-        var bookingIdNull = await Assert.ThrowsAnyAsync<PostgresException>(async() 
+        var bookingIdNull = await Assert.ThrowsAnyAsync<PostgresException>(async ()
             => await db.Database.ExecuteSqlInterpolatedAsync($@"
                 UPDATE ""event-bookings"" SET
                     ""BookingId"" = NULL
                 WHERE ""BookingId"" = {booking.BookingId}"));
 
-        var reservedSeatsNull = await Assert.ThrowsAnyAsync<PostgresException>(async() 
+        var reservedSeatsNull = await Assert.ThrowsAnyAsync<PostgresException>(async ()
             => await db.Database.ExecuteSqlInterpolatedAsync($@"
                 UPDATE ""event-bookings"" SET
                     ""ReservedSeats"" = NULL
                 WHERE ""BookingId"" = {booking.BookingId}"));
 
-        var reservedSeatsCheck = await Assert.ThrowsAnyAsync<PostgresException>(async() 
+        var reservedSeatsCheck = await Assert.ThrowsAnyAsync<PostgresException>(async ()
             => await db.Database.ExecuteSqlInterpolatedAsync($@"
                 UPDATE ""event-bookings"" SET
                     ""ReservedSeats"" = -1
                 WHERE ""BookingId"" = {booking.BookingId}"));
 
-        var eventIdKey = await Assert.ThrowsAnyAsync<PostgresException>(async() 
+        var eventIdKey = await Assert.ThrowsAnyAsync<PostgresException>(async ()
             => await db.Database.ExecuteSqlInterpolatedAsync($@"
                 UPDATE ""event-bookings"" SET
                     ""EventId"" = {Guid.Empty}

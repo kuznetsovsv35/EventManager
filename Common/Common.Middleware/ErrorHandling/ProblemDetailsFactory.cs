@@ -15,7 +15,7 @@ public static class ProblemDetailsFactory
 
     public static ProblemDetails ValidationProblem(ValidationResult result, string message, string? detail = null, string? title = null)
         => ProblemDetailsBuilder.Create<ValidationProblemDetails>(StatusCodes.Status400BadRequest, d =>
-        {           
+        {
             foreach (var member in result.MemberNames)
                 d.Errors[member] = [result.ErrorMessage ?? message];
         })
@@ -58,5 +58,5 @@ public static class ProblemDetailsFactory
         .UseTitle(title ?? "Ошибка аутентификации пользователя")
         .UseDetail(detail ?? "Логин или пароль указан неверно")
         .Details;
-            
+
 }

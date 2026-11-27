@@ -53,4 +53,4 @@ public static partial class DependencyInjection
 
         return application;
     }
-}    
+}

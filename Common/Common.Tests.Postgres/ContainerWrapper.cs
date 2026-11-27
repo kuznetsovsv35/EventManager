@@ -4,7 +4,7 @@ using Testcontainers.PostgreSql;
 
 namespace Common.Tests.Postgres;
 
-public class ContainerWrapper<T>  where T : DbContext
+public class ContainerWrapper<T> where T : DbContext
 {
     static readonly string PostgresImage = "postgres:16-alpine";
     static readonly string DatabaseName = "test-db";

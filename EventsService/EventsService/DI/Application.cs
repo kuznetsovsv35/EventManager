@@ -12,6 +12,6 @@ public static partial class DependencyInjection
     {
         services.AddScoped<IFilter<Event>, FilterService<Event>>();
         services.AddScoped<IEventService, EventService>();
-        return services;        
+        return services;
     }
 }

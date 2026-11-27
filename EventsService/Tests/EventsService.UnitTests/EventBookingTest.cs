@@ -23,7 +23,7 @@ public class EventBookingTest(TestContext context) : IClassFixture<TestContext>
         var bookedAt = @event.StartAt.AddDays(-1);
         var subscriber = services.GetRequiredService<IEventSubscriber<BookingActionMessage>>();
         var bookingId = Guid.NewGuid();
-    
+
         // When
         BookingActionMessage message = new(bookingId, eventId, seats, Guid.Empty, bookedAt, BookingAction.Confirm);
         await subscriber.HandleMessage(message, CancellationToken.None);
@@ -35,7 +35,7 @@ public class EventBookingTest(TestContext context) : IClassFixture<TestContext>
             .AsNoTracking()
             .Include(x => x.Event)
             .SingleAsync(x => x.BookingId == bookingId);
-        
+
         // Then
         Assert.Equal(eventId, booking.EventId);
         Assert.True(booking.IsEventValid);
@@ -59,7 +59,7 @@ public class EventBookingTest(TestContext context) : IClassFixture<TestContext>
         var bookedAt = @event.StartAt.AddDays(-1);
         var subscriber = services.GetRequiredService<IEventSubscriber<BookingActionMessage>>();
         var bookingId = Guid.NewGuid();
-    
+
         // When
         BookingActionMessage confirmMessage = new(bookingId, eventId, seats, Guid.Empty, bookedAt, BookingAction.Confirm);
         await subscriber.HandleMessage(confirmMessage, CancellationToken.None);
@@ -74,7 +74,7 @@ public class EventBookingTest(TestContext context) : IClassFixture<TestContext>
             .AsNoTracking()
             .Include(x => x.Event)
             .SingleAsync(x => x.BookingId == bookingId);
-        
+
         // Then
         Assert.Equal(eventId, booking.EventId);
         Assert.True(booking.IsEventValid);
@@ -94,7 +94,7 @@ public class EventBookingTest(TestContext context) : IClassFixture<TestContext>
         var bookedAt = TestDbContext.StartAt.AddDays(-1);
         var subscriber = services.GetRequiredService<IEventSubscriber<BookingActionMessage>>();
         var bookingId = Guid.NewGuid();
-    
+
         // When
         BookingActionMessage message = new(bookingId, eventId, 1, Guid.Empty, bookedAt, BookingAction.Confirm);
         await subscriber.HandleMessage(message, CancellationToken.None);
@@ -104,7 +104,7 @@ public class EventBookingTest(TestContext context) : IClassFixture<TestContext>
         var booking = await verifyDb.EventBookings
             .AsNoTracking()
             .SingleAsync(x => x.BookingId == bookingId);
-        
+
         // Then
         Assert.Equal(eventId, booking.EventId);
         Assert.True(booking.IsProcessed);
@@ -126,7 +126,7 @@ public class EventBookingTest(TestContext context) : IClassFixture<TestContext>
         var bookedAt = @event.StartAt.AddDays(+1);
         var subscriber = services.GetRequiredService<IEventSubscriber<BookingActionMessage>>();
         var bookingId = Guid.NewGuid();
-    
+
         // When
         BookingActionMessage message = new(bookingId, eventId, seats, Guid.Empty, bookedAt, BookingAction.Confirm);
         await subscriber.HandleMessage(message, CancellationToken.None);
@@ -138,7 +138,7 @@ public class EventBookingTest(TestContext context) : IClassFixture<TestContext>
             .AsNoTracking()
             .Include(x => x.Event)
             .SingleAsync(x => x.BookingId == bookingId);
-        
+
         // Then
         Assert.Equal(eventId, booking.EventId);
         Assert.True(booking.IsEventValid);
@@ -162,7 +162,7 @@ public class EventBookingTest(TestContext context) : IClassFixture<TestContext>
         var bookedAt = @event.StartAt.AddDays(-1);
         var subscriber = services.GetRequiredService<IEventSubscriber<BookingActionMessage>>();
         var bookingId = Guid.NewGuid();
-    
+
         // When
         BookingActionMessage message = new(bookingId, eventId, seats + 1, Guid.Empty, bookedAt, BookingAction.Confirm);
         await subscriber.HandleMessage(message, CancellationToken.None);
@@ -174,7 +174,7 @@ public class EventBookingTest(TestContext context) : IClassFixture<TestContext>
             .AsNoTracking()
             .Include(x => x.Event)
             .SingleAsync(x => x.BookingId == bookingId);
-        
+
         // Then
         Assert.Equal(eventId, booking.EventId);
         Assert.True(booking.IsEventValid);

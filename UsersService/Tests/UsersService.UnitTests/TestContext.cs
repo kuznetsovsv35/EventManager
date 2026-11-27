@@ -54,5 +54,5 @@ public class TestContext
             .AddSingleton<IPasswordHasher>(_ => passwordHasher.Object);
     }
 
-    public IServiceProvider CreateServiceProvider() => _services.BuildServiceProvider();    
+    public IServiceProvider CreateServiceProvider() => _services.BuildServiceProvider();
 }

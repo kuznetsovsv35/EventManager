@@ -27,9 +27,9 @@ public class BookingService(
 
             cancellation.ThrowIfCancellationRequested();
 
-                var booking = new Booking(eventId, appAuthorization.CurrentUser.Id);
-                await bookings.AddBookingAsync(booking, cancellation);
-                return booking;
+            var booking = new Booking(eventId, appAuthorization.CurrentUser.Id);
+            await bookings.AddBookingAsync(booking, cancellation);
+            return booking;
         }, cancellation);
 
         await bookingServiceNotifier.BookingCreatedAsync(booking.Id, cancellation);

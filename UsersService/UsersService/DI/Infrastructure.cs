@@ -15,13 +15,13 @@ public static partial class DependencyInjection
     {
         services.ConfigureDatabase<UsersDbContext>(configuration!, environment.IsDevelopment());
         services.AddScoped<IUserRepository, UserRepository>();
-        
+
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
 
         return services;
     }
 
     public static Task RunInfrastructure(this IServiceProvider serviceProvider, CancellationToken cancellation)
-        => serviceProvider.PrepareDatabase<UsersDbContext>(cancellation, async (dbContext, cancellation) 
-            => await dbContext.SeedAsync(new PasswordHasher().Hash, cancellation));    
+        => serviceProvider.PrepareDatabase<UsersDbContext>(cancellation, async (dbContext, cancellation)
+            => await dbContext.SeedAsync(new PasswordHasher().Hash, cancellation));
 }

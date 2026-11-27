@@ -3,7 +3,7 @@ namespace Common.Exceptions;
 /// <summary>
 /// Исключение - ошибка валидации параметров разбивки на страницы.
 /// </summary>
-public class PaginatorParamException(string paramName, int paramValue, Exception? innerException) 
+public class PaginatorParamException(string paramName, int paramValue, Exception? innerException)
     : ArgumentException("Неверное значение параметра разбивки на страницы", paramName, innerException)
 {
     public int ParamValue { get; } = paramValue;

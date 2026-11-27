@@ -19,16 +19,16 @@ public class BookingActionSubscriber(
         {
             if (
                 message.Action switch
-                { 
-                    BookingAction.Confirm  => eventBooking.IsProcessed,
+                {
+                    BookingAction.Confirm => eventBooking.IsProcessed,
                     BookingAction.Cancel => eventBooking.IsCancelled,
-                    _ => true 
+                    _ => true
                 }) return false;
 
             try
             {
-                switch(message.Action)
-                {   
+                switch (message.Action)
+                {
                     case BookingAction.Confirm:
                         eventBooking.Confirm(message.Seats, message.CreatedAt);
                         break;
@@ -39,7 +39,7 @@ public class BookingActionSubscriber(
                         return false;
                 }
             }
-            catch (InvalidEventOperationException ex )
+            catch (InvalidEventOperationException ex)
             {
                 eventBooking.Cancel();
                 logger.LogError(ex.Message);

@@ -19,7 +19,7 @@ public class EventRepository(EventsDbContext dbContext) : IEventRepository
     Task<Event?> IEventRepository.GetEventAsync(Guid id, CancellationToken cancellation)
         => dbContext.Events.AsNoTracking().SingleOrDefaultAsync(e => e.Id == id, cancellation);
 
-    
+
     async Task<Event> IEventRepository.AddEventAsync(Event @event, CancellationToken cancellation)
     {
         dbContext.Events.Add(@event);
@@ -42,7 +42,7 @@ public class EventRepository(EventsDbContext dbContext) : IEventRepository
         }
         return null;
     }
-    
+
     async Task IEventRepository.ExecuteEventBookingAsync(
         Guid bookingId, Guid eventId, Guid userId,
         Func<EventBooking, bool> action, CancellationToken cancellation)
@@ -51,7 +51,7 @@ public class EventRepository(EventsDbContext dbContext) : IEventRepository
 
         if (eventBooking is null)
         {
-            var @event = await dbContext.Events.FindAsync([eventId], cancellation);            
+            var @event = await dbContext.Events.FindAsync([eventId], cancellation);
             eventBooking = @event is not null ? new EventBooking(@event, bookingId) : new EventBooking(eventId, bookingId);
             dbContext.EventBookings.Add(eventBooking);
         }

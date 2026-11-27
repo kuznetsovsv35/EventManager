@@ -11,7 +11,7 @@ public class EventBookingConfiguration : IEntityTypeConfiguration<EventBooking>
         {
             t.HasCheckConstraint("CK_ReservedSeats", $@"""{nameof(EventBooking.ReservedSeats)}"" >= 0");
         });
-        
+
         builder.Property(eb => eb.BookingId).IsRequired();
         builder.Property(eb => eb.EventId);
         builder.Property(eb => eb.ReservedSeats).IsRequired().HasDefaultValue(0);

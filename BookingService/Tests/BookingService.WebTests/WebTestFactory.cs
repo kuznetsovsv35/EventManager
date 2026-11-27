@@ -66,7 +66,7 @@ public class WebTestFactory : WebApplicationFactory<Program>, IAsyncLifetime
     #endregion
 
     #region Token generator
-    public ITokenGenerator TokenGenerator => _tokenGenerator 
+    public ITokenGenerator TokenGenerator => _tokenGenerator
         ??= Services.GetRequiredService<ITokenGenerator>();
     ITokenGenerator? _tokenGenerator;
     #endregion

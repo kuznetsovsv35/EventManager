@@ -9,5 +9,5 @@ public static partial class DependencyInjection
     {
         services.AddScoped<IUserService, UserService>();
         return services;
-    }    
+    }
 }

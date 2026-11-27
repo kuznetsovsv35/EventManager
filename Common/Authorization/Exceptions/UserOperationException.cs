@@ -19,7 +19,7 @@ public class UserOperationException : ApplicationException
         Login = login ?? Login;
         Role = role.ToString() ?? Role;
     }
-    public UserOperationException(string message, ICurrentUser? user, Exception? innerException) : this(message, user?.Login, user?.Role, innerException ) { }
+    public UserOperationException(string message, ICurrentUser? user, Exception? innerException) : this(message, user?.Login, user?.Role, innerException) { }
 
     static readonly string DefaultRole = UserRole.User.ToString();
 }

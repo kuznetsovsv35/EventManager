@@ -28,7 +28,7 @@ public static partial class DependencyInjection
     }
 
     public static async Task PrepareDatabase<TContext>(
-        this IServiceProvider serviceProvider, 
+        this IServiceProvider serviceProvider,
         CancellationToken cancellation,
         Func<TContext, CancellationToken, Task> seeder) where TContext : DbContext
     {

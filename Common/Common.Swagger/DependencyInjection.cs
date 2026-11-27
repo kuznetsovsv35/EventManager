@@ -42,7 +42,7 @@ public static partial class DependencyInjection
     {
         application.UseSwagger();
         application.UseSwaggerUI();
-        
+
         return application;
     }
 }

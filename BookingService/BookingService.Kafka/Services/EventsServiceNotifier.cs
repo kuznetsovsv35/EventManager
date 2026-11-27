@@ -9,10 +9,10 @@ public class EventsServiceNotifier(IEventPublisher publisher) : IEventsServiceNo
 {
     public Task BookingConfirmedAsync(Booking booking, Guid? userId, CancellationToken cancellation)
         => publisher.PublishAsync(
-            Topics.BookingAction, 
+            Topics.BookingAction,
             new BookingActionMessage(
-                booking.Id, booking.EventId, 1, 
-                userId ?? booking.UserId, booking.CreatedAt, BookingAction.Confirm), 
+                booking.Id, booking.EventId, 1,
+                userId ?? booking.UserId, booking.CreatedAt, BookingAction.Confirm),
             () => booking.EventId.ToString(),
             cancellation);
 
@@ -20,7 +20,7 @@ public class EventsServiceNotifier(IEventPublisher publisher) : IEventsServiceNo
         => publisher.PublishAsync(
             Topics.BookingAction,
             new BookingActionMessage(
-                booking.Id, booking.EventId, 1,  
+                booking.Id, booking.EventId, 1,
                 userId ?? booking.UserId, booking.CreatedAt, BookingAction.Cancel),
             () => booking.EventId.ToString(),
             cancellation);

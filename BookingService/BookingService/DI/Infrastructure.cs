@@ -13,7 +13,7 @@ namespace BookingService.DI;
 public static partial class DependencyInjection
 {
     public static IServiceCollection ConfigureInfrastructure(this IServiceCollection services,
-        IConfiguration config, 
+        IConfiguration config,
         IWebHostEnvironment environment)
         => services
             .ConfigureDatabase<BookingsDbContext>(config, environment.IsDevelopment())
@@ -24,6 +24,6 @@ public static partial class DependencyInjection
             .ConfigureKafka(config);
 
     public static Task RunInfrastructure(this IServiceProvider serviceProvider, CancellationToken cancellation)
-        => serviceProvider.PrepareDatabase<BookingsDbContext>(cancellation, (dbContext, cancellation) 
-            => Task.CompletedTask);    
+        => serviceProvider.PrepareDatabase<BookingsDbContext>(cancellation, (dbContext, cancellation)
+            => Task.CompletedTask);
 }

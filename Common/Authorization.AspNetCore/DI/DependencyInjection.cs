@@ -40,7 +40,7 @@ public static partial class DependencyInjection
     }
 
     public static IServiceCollection ConfigureJwtAuthorization(
-        this IServiceCollection services, 
+        this IServiceCollection services,
         IConfiguration configuration,
         Action<AuthorizationOptions> configurePolicies)
     {

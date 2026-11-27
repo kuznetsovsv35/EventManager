@@ -8,7 +8,7 @@ namespace EventsService.Domain;
 /// </summary>
 public class EventBooking
 {
-    EventBooking() {}
+    EventBooking() { }
     /// <summary>
     /// Идентификатор бронирования
     /// </summary>
@@ -21,7 +21,7 @@ public class EventBooking
     /// <summary>
     /// Ссылка на событие.
     /// </summary>
-    public Event? Event { get; private set; } 
+    public Event? Event { get; private set; }
     /// <summary>
     /// Количество резервированных мест.
     /// </summary>
@@ -29,7 +29,7 @@ public class EventBooking
     /// <summary>
     /// Идентификатор пользователя.
     /// </summary>
-    public Guid? UserId {get; set; }
+    public Guid? UserId { get; set; }
     /// <summary>
     /// Момент времени подтверждения.
     /// </summary>
@@ -91,7 +91,7 @@ public class EventBooking
             throw new InvalidEventOperationException("Недостаточно свободных мест на событии", eventId);
 
         ReservedSeats = reservedSeats;
-        
+
         Event.TryReserveSeats(ReservedSeats);
         ConfirmedAt = DateTime.UtcNow;
         return true;
@@ -107,7 +107,7 @@ public class EventBooking
 
         if (IsConfirmed)
             Event?.ReleaseSeats(ReservedSeats);
-        
+
         CancelledAt = DateTime.UtcNow;
         return true;
     }

@@ -23,9 +23,9 @@ public class TestContext
     public TestContext()
     {
         var currentUser = new Mock<ICurrentUser>();
-        
+
         var publisher = new Mock<IEventsServiceNotifier>();
-        
+
         publisher
             .Setup(x => x.BookingCancelledAsync(It.IsAny<Booking>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .Returns(() => Task.CompletedTask);

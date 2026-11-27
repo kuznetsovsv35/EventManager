@@ -12,8 +12,8 @@ public static class DependencyInjection
     {
         services.AddEventConsumer<BookingActionMessage, BookingActionSubscriber>(config, config =>
         {
-           config.Topic = Topics.BookingAction;
-           config.GroupId = "events-service";
+            config.Topic = Topics.BookingAction;
+            config.GroupId = "events-service";
         });
 
         return services;

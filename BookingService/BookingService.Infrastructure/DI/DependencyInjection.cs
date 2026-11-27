@@ -6,5 +6,5 @@ namespace BookingService.Infrastructure.DI;
 public static class DependencyInjection
 {
     public static IServiceCollection AddBackgroundServices(this IServiceCollection services)
-        => services.AddHostedService<AppBackgroundService>();        
+        => services.AddHostedService<AppBackgroundService>();
 }

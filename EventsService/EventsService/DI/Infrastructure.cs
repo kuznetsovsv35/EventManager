@@ -23,9 +23,9 @@ public static partial class DependencyInjection
         services.ConfigureKafka(config);
 
         return services;
-        
+
     }
     public static Task RunInfrastructure(this IServiceProvider serviceProvider, CancellationToken cancellation)
         => serviceProvider.PrepareDatabase<EventsDbContext>(cancellation, (dbContext, cancellation)
-            => Task.CompletedTask);    
+            => Task.CompletedTask);
 }

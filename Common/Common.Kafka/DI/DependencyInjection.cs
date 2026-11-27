@@ -10,7 +10,7 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddEventConsumer<TContract, TSubscriber>(
         this IServiceCollection services,
-        IConfiguration config, 
+        IConfiguration config,
         Action<EventConsumerConfig<TContract>>? builder = null) where TSubscriber : class, IEventSubscriber<TContract>
     {
         var consumer = new EventConsumerConfig<TContract>(config);
@@ -24,8 +24,8 @@ public static class DependencyInjection
     }
 
     public static IServiceCollection AddEventPublisher(
-        this IServiceCollection services, 
-        IConfiguration config, 
+        this IServiceCollection services,
+        IConfiguration config,
         Action<EventPublisherConfig>? builder = null)
     {
         var publisher = new EventPublisherConfig(config);
@@ -46,7 +46,7 @@ public static class DependencyInjection
                 return new EventPublisher(config, logger);
             });
         }
-        
+
         return services;
     }
 }
