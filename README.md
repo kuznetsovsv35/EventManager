@@ -310,9 +310,9 @@
 
    # Обновление БД (только при локальном запуске).
    ```bash
-   ./efc-update.sh UsersService InitialCreate   # Обновление БД сервиса пользователей.
-   ./efc-update.sh EventsService InitialCreate  # Обновление БД сервиса управления событиями.
-   ./efc-update.sh BookingService InitialCreate # Обновление БД сервиса бронирования.
+   ./efc-updatedb.sh UsersService InitialCreate   # Обновление БД сервиса пользователей.
+   ./efc-updatedb.sh EventsService InitialCreate  # Обновление БД сервиса управления событиями.
+   ./efc-updatedb.sh BookingService InitialCreate # Обновление БД сервиса бронирования.
    ```
 
    Примечание: поскольку миграция уже создана и хранится в проектном репозитории, после клонирования нужно только обновить БД.
@@ -390,7 +390,7 @@ pageSize|int|Количество событий на запрошенной с�
 |---|---|---|
 |id|string($uuid)|Идентификатор брони, по которому можно получать состояние.| 
 |eventId|string(uuid)|Идентификатор события, для которого создана роль|
-|status|BookingStatus{$int}|Текущий статус брони: 0-ожидание обработки, 1-подтверждена, 2-отклонена.|
+|status|BookingStatus{string[]}|Текущий статус брони: `"pending"`, `"confirmed"`, `"rejected"`, `"cancelled"`.|
 |createdAt|string($date-time)|Дата/время создания брони.|
 |processedAt|string($date-time)|Дата/время обработки брони.|
 
@@ -411,7 +411,7 @@ pageSize|int|Количество событий на запрошенной с�
 | Поле | Тип данных | Описание |
 |---|---|---|
 |login|string|Логин пользователя.|
-|role|int|Роль: 0 - пользователь, 1 - администратор.|
+|role|string[]|Роль: `"user"`, `"admin"`.|
 |password|string|Пароль, если не указан или null - пароль не устанавливается.|
 
 # Описание структуры решения.
