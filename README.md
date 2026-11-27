@@ -164,19 +164,30 @@
    ./test-web.sh
    ```
 
-6. запуск приложения:
+6. Запуск приложения (локально, СУБД в контейнере):
    ```bash
+   # Запуск контейнеров СУБД.
+   docker compose up -d users-db       # БД пользователе.
+   docker compose up -d events-db      # БД событий.
+   docker compose up -d bookings-db    # БД бронирования.
+
    # Вариант 1.
-   dotnet run --project UsersService   # Запуска сервиса пользователей.
-   dotnet run --project EventsService  # Запуска сервиса управления бронирования.
-   dotnet run --project BookingService # Запуска сервиса бронирование.
+   dotnet run --project UsersService/UsersService        # Запуска сервиса пользователей.
+   dotnet run --project EventsService/EventsService      # Запуска сервиса управления бронирования.
+   dotnet run --project BookingService/BookingService    # Запуска сервиса бронирование.
    
    # Вариант 2 (убедиться, что у файла скрипта есть атрибут выполнения).
    ./run.sh UsersService   # Запуска сервиса пользователей.
    ./run.sh EventsService  # Запуска сервиса управления событиями.
    ./run.sh BookingService # Запуска сервиса бронирование.
    ```
-7. Работа с миграциями.
+7. Запуск приложения (БД и сервисы в контейнерах):
+   ```bash
+   # сборка контейнеров БД и сервисов.
+   docker compose up -d
+   ```
+
+7. Работа с миграциями (используется для работы с изменениями схем БД).
    # Подготовка
    Для работы с миграциями необходимо установить инструмент dotnet-ef
    ```bash
