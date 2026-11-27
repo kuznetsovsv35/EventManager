@@ -69,6 +69,58 @@ services:
       timeout: 5s
       retries: 10
 
+  users-service:
+    build: 
+      context: .
+      dockerfile: UsersService/dockerfile
+    ports: ["5231:8080"]
+    environment:
+      ConnectionStrings__Default: "Host=users-db;Database=users;Username=postgres;Password=postgres"
+      Jwt__Issuer: "Events-API"
+      Jwt__Audience: "Events-API-Clients"
+      Jwt__AccessTokenExpiredAfter: "15"
+      Jwt__RefreshTokenExpiredAfter: "7"
+      Jwt__SigningKey: "super-secret-key-min-32-characters!!"
+    depends_on:
+      users-db: { condition: service_started }
+
+  events-service:
+    build:
+      context: .
+      dockerfile: EventsService/dockerfile
+    ports: ["5232:8080"]
+    environment:
+      ConnectionStrings__Default: "Host=events-db;Database=events;Username=postgres;Password=postgres"
+      Kafka__BootstrapServers: "kafka:29092"
+      Kafka__Topic: "booking-action"
+      Jwt__Issuer: "Events-API"
+      Jwt__Audience: "Events-API-Clients"
+      Jwt__AccessTokenExpiredAfter: "15"
+      Jwt__RefreshTokenExpiredAfter: "7"
+      Jwt__SigningKey: "super-secret-key-min-32-characters!!"
+    depends_on:
+      events-db: { condition: service_started }
+      kafka: { condition: service_healthy }
+      users-service: { condition: service_started }
+
+  booking-service:
+    build:
+      context: .
+      dockerfile: BookingService/dockerfile
+    ports: ["5233:8080"]
+    environment:
+      ConnectionStrings__Default: "Host=bookings-db;Database=bookings;Username=postgres;Password=postgres"
+      Kafka__BootstrapServers: "kafka:29092"
+      Jwt__Issuer: "Events-API"
+      Jwt__Audience: "Events-API-Clients"
+      Jwt__AccessTokenExpiredAfter: "15"
+      Jwt__RefreshTokenExpiredAfter: "7"
+      Jwt__SigningKey: "super-secret-key-min-32-characters!!"
+    depends_on:
+      bookings-db: { condition: service_started }
+      kafka: { condition: service_healthy }
+      users-service: { condition: service_started }
+
 volumes:
   users-db-data:
   events-db-data:

@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <ProjectReference Include="../../Common/Authorization.AspNetCore/Authorization.AspNetCore.csproj" />
-    <ProjectReference Include="../../EventsService/EventsService.Application/EventsService.Application.csproj" />
     <ProjectReference Include="../UsersService.Application/UsersService.Application.csproj" />
   </ItemGroup>
 
