@@ -82,7 +82,7 @@ services:
       Jwt__RefreshTokenExpiredAfter: "7"
       Jwt__SigningKey: "super-secret-key-min-32-characters!!"
     depends_on:
-      users-db: { condition: service_started }
+      users-db: { condition: service_healthy }
 
   events-service:
     build:
@@ -99,7 +99,7 @@ services:
       Jwt__RefreshTokenExpiredAfter: "7"
       Jwt__SigningKey: "super-secret-key-min-32-characters!!"
     depends_on:
-      events-db: { condition: service_started }
+      events-db: { condition: service_healthy }
       kafka: { condition: service_healthy }
       users-service: { condition: service_started }
 
@@ -117,7 +117,7 @@ services:
       Jwt__RefreshTokenExpiredAfter: "7"
       Jwt__SigningKey: "super-secret-key-min-32-characters!!"
     depends_on:
-      bookings-db: { condition: service_started }
+      bookings-db: { condition: service_healthy }
       kafka: { condition: service_healthy }
       users-service: { condition: service_started }
 
