@@ -31,8 +31,8 @@ services:
       - users-db-data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 5s
+      interval: 10s
+      timeout: 10s
       retries: 10
 
   events-db:
@@ -48,8 +48,8 @@ services:
       - events-db-data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 5s
+      interval: 10s
+      timeout: 10s
       retries: 10
 
   bookings-db:
@@ -65,8 +65,8 @@ services:
       - bookings-db-data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 5s
+      interval: 10s
+      timeout: 10s
       retries: 10
 
   users-service:
@@ -83,6 +83,13 @@ services:
       Jwt__SigningKey: "super-secret-key-min-32-characters!!"
     depends_on:
       users-db: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 15s
+    restart: unless-stopped
 
   events-service:
     build:
@@ -102,7 +109,14 @@ services:
     depends_on:
       events-db: { condition: service_healthy }
       kafka: { condition: service_healthy }
-      users-service: { condition: service_started }
+      users-service: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 15s
+    restart: unless-stopped
 
   booking-service:
     build:
@@ -121,7 +135,14 @@ services:
     depends_on:
       bookings-db: { condition: service_healthy }
       kafka: { condition: service_healthy }
-      users-service: { condition: service_started }
+      users-service: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 15s
+    restart: unless-stopped
 
 volumes:
   users-db-data:
