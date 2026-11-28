@@ -93,6 +93,7 @@ services:
       ConnectionStrings__Default: "Host=events-db;Database=events;Username=postgres;Password=postgres"
       Kafka__BootstrapServers: "kafka:29092"
       Kafka__Topic: "booking-action"
+      Kafka__ConsumerGroup: "events-ap"
       Jwt__Issuer: "Events-API"
       Jwt__Audience: "Events-API-Clients"
       Jwt__AccessTokenExpiredAfter: "15"
@@ -111,6 +112,7 @@ services:
     environment:
       ConnectionStrings__Default: "Host=bookings-db;Database=bookings;Username=postgres;Password=postgres"
       Kafka__BootstrapServers: "kafka:29092"
+      Kafka__Topic: "booking-action"
       Jwt__Issuer: "Events-API"
       Jwt__Audience: "Events-API-Clients"
       Jwt__AccessTokenExpiredAfter: "15"
