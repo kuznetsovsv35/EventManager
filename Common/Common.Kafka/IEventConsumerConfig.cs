@@ -3,8 +3,8 @@ namespace Common.Kafka;
 public interface IEventConsumerConfig
 {
     string BootstrapServers { get; }
-    string GroupId { get; }
     string Topic { get; }
+    string ConsumerGroup { get;}
 }
 
-public interface IEventConsumerConfig<T> : IEventConsumerConfig { }
+public interface IEventConsumerConfig<T> : IEventConsumerConfig;

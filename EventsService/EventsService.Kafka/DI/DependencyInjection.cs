@@ -9,13 +9,5 @@ namespace EventsService.Kafka.DI;
 public static class DependencyInjection
 {
     public static IServiceCollection ConfigureKafka(this IServiceCollection services, IConfiguration config)
-    {
-        services.AddEventConsumer<BookingActionMessage, BookingActionSubscriber>(config, config =>
-        {
-            config.Topic = Topics.BookingAction;
-            config.GroupId = "events-service";
-        });
-
-        return services;
-    }
+        => services.AddEventConsumer<BookingActionMessage, BookingActionSubscriber>(config);
 }

@@ -8,6 +8,7 @@ namespace Common.Kafka.Services;
 
 public class EventConsumer<T>(
     IEventConsumerConfig<T> config,
+    JsonSerializerOptions jsonSerializerOptions,
     ILogger<EventConsumer<T>> logger,
     IEventSubscriber<T> subscriber) : BackgroundService
 {
@@ -24,7 +25,7 @@ public class EventConsumer<T>(
         using var consumer = new ConsumerBuilder<string, string>(new ConsumerConfig
         {
             BootstrapServers = config.BootstrapServers,
-            GroupId = config.GroupId,
+            GroupId = config.ConsumerGroup,
             AutoOffsetReset = AutoOffsetReset.Earliest,
             EnableAutoCommit = false
         }).Build();
@@ -40,7 +41,7 @@ public class EventConsumer<T>(
 
                 try
                 {
-                    if (JsonSerializer.Deserialize<T>(result.Message.Value) is T message)
+                    if (JsonSerializer.Deserialize<T>(result.Message.Value, jsonSerializerOptions) is T message)
                         await subscriber.HandleMessage(message, cancellation);
 
                     consumer.Commit(result);
