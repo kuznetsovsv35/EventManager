@@ -10,8 +10,7 @@ namespace EventsService.DI;
 public static partial class DependencyInjection
 {
     public static IServiceCollection ConfigurePresentation(this IServiceCollection services, IConfiguration configuration)
-    {
-        services
+        => services
             .UseProblemDetailsMapper<EventsProblemDetailsMapper>()
             .ConfigureJwtAuthentication(configuration)
             .ConfigureJwtAuthorization(configuration, options =>
@@ -22,13 +21,9 @@ public static partial class DependencyInjection
                     .AddPolicy(Policy.GetEvents, UserRole.Admin, UserRole.User)
                     .AddPolicy(Policy.ModifyEvent, UserRole.Admin);
             })
-            .AddControllers();
-        services
+            .AddControllers().Services
             .AddEndpointsApiExplorer()
             .ConfigureSwagger();
-
-        return services;
-    }
 
     public static IApplicationBuilder ConfigureMiddleware(this IApplicationBuilder application)
     {
@@ -48,6 +43,7 @@ public static partial class DependencyInjection
         application.UseAuthorization();
         // Контролеры.
         (application as IEndpointRouteBuilder)?.MapControllers();
+        (application as IEndpointRouteBuilder)?.MapHealthChecks("/health");
 
         // API в веб-интерфейсе.
         application.RunSwagger();

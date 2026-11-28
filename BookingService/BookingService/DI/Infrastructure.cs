@@ -23,7 +23,9 @@ public static partial class DependencyInjection
             .AddSingleton<IBookingServiceNotifier, BookingServiceNotifier>()
             .AddBackgroundServices()
             .ConfigureKafka(config)
-            .AddControllers().ConfigureJsonSerializer().Services;
+            .AddControllers().ConfigureJsonSerializer().Services
+            .AddHealthChecks()
+            .AddNpgSql(config.GetConnectionString("Default")!).Services;
 
     public static Task RunInfrastructure(this IServiceProvider serviceProvider, CancellationToken cancellation)
         => serviceProvider.PrepareDatabase<BookingsDbContext>(cancellation, (dbContext, cancellation)

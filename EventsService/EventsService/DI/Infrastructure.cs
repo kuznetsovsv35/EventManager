@@ -20,7 +20,9 @@ public static partial class DependencyInjection
             .AddScoped<IPaginator<Event>, PaginateService<Event>>()
             .AddScoped<IEventRepository, EventRepository>()
             .ConfigureKafka(config)
-            .AddControllers().ConfigureJsonSerializer().Services;
+            .AddControllers().ConfigureJsonSerializer().Services
+            .AddHealthChecks()
+            .AddNpgSql(config.GetConnectionString("Default")!).Services;
 
     public static Task RunInfrastructure(this IServiceProvider serviceProvider, CancellationToken cancellation)
         => serviceProvider.PrepareDatabase<EventsDbContext>(cancellation, (dbContext, cancellation)

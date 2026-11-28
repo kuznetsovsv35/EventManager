@@ -47,6 +47,7 @@ public static partial class DependencyInjection
         application.UseAuthorization();
         // Контролеры.
         (application as IEndpointRouteBuilder)?.MapControllers();
+        (application as IEndpointRouteBuilder)?.MapHealthChecks("/health");
 
         // API в веб-интерфейсе.
         application.RunSwagger();

@@ -11,13 +11,15 @@ namespace UsersService.DI;
 public static partial class DependencyInjection
 {
     public static IServiceCollection ConfigureInfrastructure(this IServiceCollection services,
-        IConfiguration configuration,
-        IWebHostEnvironment environment)
+        IConfiguration config,
+        IWebHostEnvironment env)
         => services
-            .ConfigureDatabase<UsersDbContext>(configuration!, environment.IsDevelopment())
+            .ConfigureDatabase<UsersDbContext>(config!, env.IsDevelopment())
             .AddScoped<IUserRepository, UserRepository>()
             .AddSingleton<IPasswordHasher, PasswordHasher>()
-            .AddControllers().ConfigureJsonSerializer().Services;
+            .AddControllers().ConfigureJsonSerializer().Services
+            .AddHealthChecks()
+            .AddNpgSql(config.GetConnectionString("Default")!).Services;
 
     public static Task RunInfrastructure(this IServiceProvider serviceProvider, CancellationToken cancellation)
         => serviceProvider.PrepareDatabase<UsersDbContext>(cancellation, async (dbContext, cancellation)
