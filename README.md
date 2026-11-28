@@ -75,7 +75,7 @@
 
 ## Стек
 
-- C#, .NET 8, ASP.NET Core Web API
+- C#, .NET 10, ASP.NET Core Web API
 - PostgreSQL — отдельная БД у каждого сервиса
 - Apache Kafka (Confluent, KRaft без Zookeeper)
 - Docker / docker-compose
@@ -87,7 +87,7 @@
 |---|---|---|---|
 | **UsersService** | 5231 → 8080 | `users` | Регистрация, вход, выдача и подпись JWT |
 | **EventsService** | 5232 → 8080 | `events` | CRUD событий, учёт доступных мест, подписчик Kafka |
-| **BookingService** | 5233 → 8080 | `bookings` | Создание и отмена броней, издтель Kafka |
+| **BookingService** | 5233 → 8080 | `bookings` | Создание и отмена броней, издатель Kafka |
 | **Kafka** | 9092 (внешний) / 29092 (внутренний) | — | Шина событий между сервисами |
 
 Обмен идёт только через Kafka.
@@ -131,11 +131,11 @@
    ```json
    {
       BookingId: "Id бронирования (Guid)",
-      Guid: "Id ",
+      EventId: "Id события",
       Seats: "Кол-во мест",
       UserId: "Id пользователя",
       CreatedAt: "Момент создания брони",
-      BookingAction: "BookingAction - Confirm (подтверждение), Cancel (отмена)"
+      Action: "BookingAction - Confirm (подтверждение), Cancel (отмена)"
    }
    ```
 
@@ -148,7 +148,7 @@
 
 | Поток | Откуда → Куда | Канал | Данные | Синхронно |
 |---|---|---|---|---|
-| Вход/регистрация | Клиент → `UsersServoce` | HTTP | логин, пароль | да |
+| Вход/регистрация | Клиент → `UsersService` | HTTP | логин, пароль | да |
 | Выдача токена | `UsersService` → Клиент | HTTP-ответ | JWT | да |
 | Валидация токена | `EventsService` / `BookingService` (локально) | — | подпись, claims | локально |
 | CRUD событий | Клиент → `EventsServce` | HTTP | данные события, роль Admin | да |
@@ -175,7 +175,8 @@
 - `ConnectionStrings__Default` — строка подключения к своей БД каждого сервиса;
 - `Jwt__Issuer`, `Jwt__Audience`, `Jwt__SigningKey` — **идентичны у всех трёх сервисов**;
 - `Kafka__BootstrapServers` — для сервисов в compose: `kafka:29092` (внутренний listener).
-- `Kafks__Topic` - идентификатор топика.
+- `Kafka__Topic` - идентификатор топика.
+- `Kafka__ConsumerGroup` - группа подписчиков (для EventsService). 
 
 # Сборка и запуск проекта.
 1. Клонирование репозитория:
