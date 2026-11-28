@@ -11,7 +11,7 @@ public class EventsServiceNotifier(IEventPublisher publisher) : IEventsServiceNo
         => publisher.PublishAsync(
             new BookingActionMessage(
                 booking.Id, booking.EventId, 1,
-                userId ?? booking.UserId, booking.ProcessedAt ?? booking.CreatedAt!, BookingAction.Confirm),
+                userId ?? booking.UserId, booking.ProcessedAt ?? booking.CreatedAt, BookingAction.Confirm),
             () => booking.EventId.ToString(),
             cancellation);
 
