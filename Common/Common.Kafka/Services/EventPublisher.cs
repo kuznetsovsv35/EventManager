@@ -38,7 +38,7 @@ public class EventPublisher(IEventPublisherConfig config, ILogger<EventPublisher
 
         logger.LogInformation(
             "Event {E} published: partition={P}, offset={O}",
-            nameof(T), result.Partition, result.Offset);
+            typeof(T).Name, result.Partition, result.Offset);
     }
 
     public Task PublishAsync<T>(T message, Func<string> keyFactory, CancellationToken cancellation)

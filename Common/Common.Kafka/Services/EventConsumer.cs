@@ -47,7 +47,7 @@ public class EventConsumer<T>(
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(ex, "Failed to process {M}", nameof(T));
+                    logger.LogError(ex, "Failed to process {M}", typeof(T).Name);
                 }
             }
             catch (OperationCanceledException)
