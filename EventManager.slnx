@@ -1,12 +1,53 @@
 <Solution>
-  <Project Path="EventManager/EventManager.csproj" />
-  <Project Path="EventManager.Domain/EventManager.Domain.csproj" />
-  <Project Path="EventManager.Common/EventManager.Common.csproj" />
-  <Project Path="EventManager.Application/EventManager.Application.csproj" />
-  <Project Path="EventManager.Database/EventManager.Database.csproj" />
-  <Project Path="EventManager.Infrastructure/EventManager.Infrastructure.csproj" />
-  <Project Path="EventManager.Presentation/EventManager.Presentation.csproj" />
-  <Project Path="Tests/EventManager.IntegrationTests/EventManager.IntegrationTests.csproj" />
-  <Project Path="Tests/EventManager.Tests/EventManager.Tests.csproj" />
-  <Project Path="Tests/EventManager.WebTests/EventManager.WebTests.csproj" />
+  <Folder Name="/BookingService/">
+    <Project Path="BookingService/BookingService.Application/BookingService.Application.csproj" />
+    <Project Path="BookingService/BookingService.Database/BookingService.Database.csproj" />
+    <Project Path="BookingService/BookingService.Domain/BookingService.Domain.csproj" />
+    <Project Path="BookingService/BookingService.Infrastructure/BookingService.Infrastructure.csproj" />
+    <Project Path="BookingService/BookingService.Kafka/BookingService.Kafka.csproj" />
+    <Project Path="BookingService/BookingService/BookingService.csproj" />
+  </Folder>
+  <Folder Name="/BookingService/Tests/">
+    <Project Path="BookingService/Tests/BookingService.IntegrationTests/BookingService.IntegrationTests.csproj" />
+    <Project Path="BookingService/Tests/BookingService.UnitTests/BookingService.UnitTests.csproj" />
+    <Project Path="BookingService/Tests/BookingService.WebTests/BookingService.WebTests.csproj" />
+  </Folder>
+  <Folder Name="/Common/">
+    <Project Path="Common/Authorization.AspNetCore/Authorization.AspNetCore.csproj" />
+    <Project Path="Common/Authorization/Authorization.csproj" />
+    <Project Path="Common/Common.Contracts/Common.Contracts.csproj" />
+    <Project Path="Common/Common.Infrastructure/Common.Infrastructure.csproj" />
+    <Project Path="Common/Common.Kafka/Common.Kafka.csproj" />
+    <Project Path="Common/Common.Middleware/Common.Middleware.csproj" />
+    <Project Path="Common/Common.Swagger/Common.Swagger.csproj" />
+    <Project Path="Common/Common.Tests.AspNetCore/Common.Tests.AspNetCore.csproj" />
+    <Project Path="Common/Common.Tests.Postgres/Common.Tests.Postgres.csproj" />
+    <Project Path="Common/Common.Tests/Common.Tests.csproj" />
+    <Project Path="Common/Common/Common.csproj" />
+    <Project Path="Common/Database.Postgres/Database.Postgres.csproj" />
+  </Folder>
+  <Folder Name="/EventsService/">
+    <Project Path="EventsService/EventsService.Application/EventsService.Application.csproj" />
+    <Project Path="EventsService/EventsService.Database/EventsService.Database.csproj" />
+    <Project Path="EventsService/EventsService.Domain/EventsService.Domain.csproj" />
+    <Project Path="EventsService/EventsService.Kafka/EventsService.Kafka.csproj" />
+    <Project Path="EventsService/EventsService/EventsService.csproj" />
+  </Folder>
+  <Folder Name="/EventsService/Tests/">
+    <Project Path="EventsService/Tests/EventsService.IntegrationTests/EventsService.IntegrationTests.csproj" />
+    <Project Path="EventsService/Tests/EventsService.UnitTests/EventsService.UnitTests.csproj" />
+    <Project Path="EventsService/Tests/EventsService.WebTests/EventsService.WebTests.csproj" />
+  </Folder>
+  <Folder Name="/UsersService/">
+    <Project Path="UsersService/UsersService.Application/UsersService.Application.csproj" />
+    <Project Path="UsersService/UsersService.Database/UsersService.Database.csproj" />
+    <Project Path="UsersService/UsersService.Domain/UsersService.Domain.csproj" />
+    <Project Path="UsersService/UsersService.Infrastructure/UsersService.Infrastructure.csproj" />
+    <Project Path="UsersService/UsersService/UsersService.csproj" />
+  </Folder>
+  <Folder Name="/UsersService/Tests/">
+    <Project Path="UsersService/Tests/UsersService.IntegrationTests/UsersService.IntegrationTests.csproj" />
+    <Project Path="UsersService/Tests/UsersService.UnitTests/UsersService.UnitTests.csproj" />
+    <Project Path="UsersService/Tests/UsersService.WebTests/UsersService.WebTests.csproj" />
+  </Folder>
 </Solution>

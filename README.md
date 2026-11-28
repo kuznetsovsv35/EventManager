@@ -63,10 +63,125 @@
 7. Создана миграция схемы БД.
 8. Сценарии работы с пользователями и новые правила бизнес-логики покрыты тестами.
 
+## Спринт 9.
+1. Монолит разделен на три самостоятельных сервиса, каждый со своей базой данных и жизненным циклом.
+2. Общий контракт сообщения (BookingActionMessage) и имена топиков (booking-action) в отдельный разделяемый проект.
+3. Настроено подключение к Apache Kafka и реализована публикация события действий с бронями в сервисе Bookings.
+4. Реализована подписка на топик в сервисе Events и обработка событий — уменьшение/возврата доступных мест.
+5. Настроена проверка одного и того же JWT-токена в каждом сервисе.
+6. Вся система (Kafka три базы данных + три сервиса) собрана  в docker-compose и запускается одной командой.
+
+# Микросервисная архитектура
+
+## Стек
+
+- C#, .NET 10, ASP.NET Core Web API
+- PostgreSQL — отдельная БД у каждого сервиса
+- Apache Kafka (Confluent, KRaft без Zookeeper)
+- Docker / docker-compose
+- Swagger (OpenAPI) у каждого сервиса
+
+## Сервисы
+
+| Сервис | Порт | БД | Зона ответственности |
+|---|---|---|---|
+| **UsersService** | 5231 → 8080 | `users` | Регистрация, вход, выдача и подпись JWT |
+| **EventsService** | 5232 → 8080 | `events` | CRUD событий, учёт доступных мест, подписчик Kafka |
+| **BookingService** | 5233 → 8080 | `bookings` | Создание и отмена броней, издатель Kafka |
+| **Kafka** | 9092 (внешний) / 29092 (внутренний) | — | Шина событий между сервисами |
+
+Обмен идёт только через Kafka.
+Общий контракт событий и имена топиков вынесены в отдельный проект `Common.Contracts`,
+на который ссылаются издатель и подписчик.
+
+## Потоки информации
+
+### 1. Аутентификация (синхронный: Клиент ↔ Users)
+
+1. Клиент отправляет `POST /auth/login` (логин/пароль) в UsersService.
+2. UsersService проверяет учётные данные в БД `users`, генерирует JWT:
+   подписывает общим секретом, проставляет `issuer` и `audience`, claims `NameIdentifier` (userId) и `role`.
+3. Токен возвращается клиенту. Другие сервисы при выдаче токена не участвуют.
+
+### 2. Проверка токена (локальная, в каждом сервисе)
+
+1. Клиент передаёт `Authorization: Bearer <JWT>` во все запросы к `EventsService` и `BookingService`.
+2. Каждый сервис валидирует токен **локально**: подпись (общий секрет), issuer, audience, срок жизни.
+3. Обращений к `UsersService` за проверкой нет — `UsersService` и остальные сервисы вообще не связаны сетью.
+4. Авторизация по ролям: `POST/PUT/DELETE /events` — только `Admin`; эндпоинты броней — любой аутентифицированный.
+
+### 3. Управление событиями (синхронный: Клиент ↔ EventsService)
+
+1. `GET /events` — список/карточка события с полем `AvailableSeats` (доступен без токена).
+2. `POST/PUT/DELETE /events` — только роль `Admin`. Пишется в БД `events`.
+3. Kafka в этом потоке не участвует: CRUD событий не порождает событий шины.
+
+### 4. Бронирование (двухфазный: HTTP + асинхронное событие)
+
+**Фаза А — синхронная, Клиент ↔ BookingService:**
+
+1. Клиент отправляет `POST /bookings` (`eventId`, количество мест) с JWT.
+2. `BookingService` проверяет токен локально, сохраняет бронь в БД `bookings`.
+3. Ответ клиенту уходит сразу — проверять наличие мест в Events через HTTP нельзя по условию.
+
+**Фаза Б — асинхронная, Kafka:**
+
+4. `BookingService` публикует в топик `booking-action` событие `BookingActionMessage`:
+
+   ```json
+   {
+      BookingId: "Id бронирования (Guid)",
+      EventId: "Id события",
+      Seats: "Кол-во мест",
+      UserId: "Id пользователя",
+      CreatedAt: "Момент создания брони",
+      Action: "BookingAction - Confirm (подтверждение), Cancel (отмена)"
+   }
+   ```
+
+5. Подписчик в EventsService (группа `events-service`, ручной коммит offset) забирает сообщение.
+6. EventsService уменьшает (действие подтверждения) или увеличивает (отмена брони) `availableSeats` в БД `events` (защита от отрицательного остатка),
+   записывает обработанный `bookingId` в inbox-таблицу (`event-bookings`) — защита от дублей при ретраях.
+7. Коммитит offset. Если обработка упала — offset не коммитится, Kafka доставит сообщение повторно.
+
+## Сводка потоков
+
+| Поток | Откуда → Куда | Канал | Данные | Синхронно |
+|---|---|---|---|---|
+| Вход/регистрация | Клиент → `UsersService` | HTTP | логин, пароль | да |
+| Выдача токена | `UsersService` → Клиент | HTTP-ответ | JWT | да |
+| Валидация токена | `EventsService` / `BookingService` (локально) | — | подпись, claims | локально |
+| CRUD событий | Клиент → `EventsServce` | HTTP | данные события, роль Admin | да |
+| Создание брони | Клиент → Bookings | HTTP | eventId, seats, userId | да |
+| Подтверждение брони | `BookingService` → `EventsService` | Kafka, топик `booking-action` | `BookingAction.Confirm` | нет |
+| Уменьшение мест | `EventsService` (внутренняя операция) | — | UPDATE availableSeats | локально |
+| Отмена брони | `BookingService` → `EventsService` | Kafka | `BookingAction.Cancel` | нет |
+
+## Известные компромиссы дизайна
+
+- **Нет предварительной проверки мест.** `BookingsService` не проверяет остаток через HTTP,
+  поэтому счётчик может временно уйти в минус; `EventsService` защищает UPDATE-условием
+  (`AvailableSeats` >= `ReservedSeats`). Это осознанная цена развязки сервисов.
+- **Публикация события** происходит после успешного коммита транзакции в БД.
+  Строгий вариант — Transactional Outbox (событие пишется в таблицу в той же
+  транзакции, фоновый воркер публикует).
+- **Идемпотентность консьюмера** обеспечена inbox-таблицей обработанных `bookingId`.
+- **Порядок сообщений** гарантирован внутри партиции: ключ сообщения = `eventId`.
+
+## Конфигурация
+
+Ключевые переменные окружения (передаются через docker-compose):
+
+- `ConnectionStrings__Default` — строка подключения к своей БД каждого сервиса;
+- `Jwt__Issuer`, `Jwt__Audience`, `Jwt__SigningKey` — **идентичны у всех трёх сервисов**;
+- `Kafka__BootstrapServers` — для сервисов в compose: `kafka:29092` (внутренний listener).
+- `Kafka__Topic` - идентификатор топика.
+- `Kafka__ConsumerGroup` - группа подписчиков (для EventsService). 
+
 # Сборка и запуск проекта.
 1. Клонирование репозитория:
    ```bash
-   git clone -b sprint-8 https://github.com/kuznetsovsv35/EventManager.git
+   git clone -b sprint-9 https://github.com/kuznetsovsv35/EventManager.git
    ```
 2. Перейти в паку "EventManager":
    ```bash
@@ -151,20 +266,35 @@
    ./test-users.sh
 
    # Запуск тестов End-to-end.
-   dotnet test --filter "Category=web"
+   dotnet test --filter "Category=Web"
    # или
    ./test-web.sh
    ```
 
-6. запуск приложения:
+6. Запуск приложения (локально, СУБД в контейнере):
    ```bash
+   # Запуск контейнеров СУБД.
+   docker compose up -d users-db       # БД пользователе.
+   docker compose up -d events-db      # БД событий.
+   docker compose up -d bookings-db    # БД бронирования.
+
    # Вариант 1.
-   dotnet run --project EventManager
+   dotnet run --project UsersService/UsersService        # Запуска сервиса пользователей.
+   dotnet run --project EventsService/EventsService      # Запуска сервиса управления бронирования.
+   dotnet run --project BookingService/BookingService    # Запуска сервиса бронирование.
    
    # Вариант 2 (убедиться, что у файла скрипта есть атрибут выполнения).
-   ./run.sh
+   ./run.sh UsersService   # Запуска сервиса пользователей.
+   ./run.sh EventsService  # Запуска сервиса управления событиями.
+   ./run.sh BookingService # Запуска сервиса бронирование.
    ```
-7. Работа с миграциями.
+7. Запуск приложения (БД и сервисы в контейнерах):
+   ```bash
+   # сборка контейнеров БД и сервисов.
+   docker compose up -d
+   ```
+
+7. Работа с миграциями (используется для работы с изменениями схем БД).
    # Подготовка
    Для работы с миграциями необходимо установить инструмент dotnet-ef
    ```bash
@@ -174,21 +304,25 @@
    # Создание миграция
    ```bash
    # Создание миграции создания БД.
-   dotnet ef migrations add InitialCreate -p EventManager.Database -s EventManager
-   
-   $ Создание пользователей.
-   dotnet ef migrations add CreateUsers -p EventManager.Database -s EventManager
+   ./efc-migration.sh UsersService InitialCreate   # Создание миграция в БД сервиса пользователей.
+   ./efc-migration.sh EventsService InitialCreate  # Создание миграции в БД сервиса управления событиями.
+   ./efc-migration.sh BookingService InitialCreate # Создание миграции в БД сервиса бронирования.
    ```
 
-   # Обновление БД.
+   # Обновление БД (только при локальном запуске).
    ```bash
-   dotnet ef database update -p EventManager.Database -s EventManager
+   ./efc-updatedb.sh UsersService InitialCreate   # Обновление БД сервиса пользователей.
+   ./efc-updatedb.sh EventsService InitialCreate  # Обновление БД сервиса управления событиями.
+   ./efc-updatedb.sh BookingService InitialCreate # Обновление БД сервиса бронирования.
    ```
 
    Примечание: поскольку миграция уже создана и хранится в проектном репозитории, после клонирования нужно только обновить БД.
 
-8. В браузере открыть: http://localhost:5108/swagger
-9. На странице можно увидеть описание API и попробовать его в деле.
+8. В браузере открыть: 
+   Сервис авторизации и управления пользователями: http://localhost:5231/swagger
+   Сервис управления событиями: http://localhost:5232/swagger
+   сервис бронирования: http://localhost:5233/swagger
+9. На страницах можно увидеть описание API и попробовать его в деле.
 
 # Описание API.
 
@@ -257,7 +391,7 @@ pageSize|int|Количество событий на запрошенной с�
 |---|---|---|
 |id|string($uuid)|Идентификатор брони, по которому можно получать состояние.| 
 |eventId|string(uuid)|Идентификатор события, для которого создана роль|
-|status|BookingStatus{$int}|Текущий статус брони: 0-ожидание обработки, 1-подтверждена, 2-отклонена.|
+|status|BookingStatus{string[]}|Текущий статус брони: `"pending"`, `"confirmed"`, `"rejected"`, `"cancelled"`.|
 |createdAt|string($date-time)|Дата/время создания брони.|
 |processedAt|string($date-time)|Дата/время обработки брони.|
 
@@ -278,32 +412,51 @@ pageSize|int|Количество событий на запрошенной с�
 | Поле | Тип данных | Описание |
 |---|---|---|
 |login|string|Логин пользователя.|
-|role|int|Роль: 0 - пользователь, 1 - администратор.|
+|role|string[]|Роль: `"user"`, `"admin"`.|
 |password|string|Пароль, если не указан или null - пароль не устанавливается.|
 
 # Описание структуры решения.
 В таблице 8 приведено описание назначения сборок решения.
 
 Таблица 8. Проекты (сборки) решения.
-| Имя проекта | Пространства имен | Описание |
-| --- | --- | --- |
-| EventManager.Domain | *.ValueObjects | Реализованы основные сущности БЛ (событие и бронь). |
-| EventManager.Domain | *.Exceptions | Исключения, генерируемые в ходе проверки действий бизнес-логики. |
-| EventManager.Common | *.Interfaces | Объекты общего назначения (фильтры, синхронизация) |
-| EventManager.Common | *.Private | Вспомогательные классы для реализации интерфейсов общего назначения. |
-| EventManager.Common | *.Services | Реализация интерфейсов общего назначения. |
-| EventManager.Database | *.Configuration | Описание модели схемы БД. |
-| EventManager.Database | *.Migrations | Миграции модели схемы БД. |
-| EventManager.Database | * | Класс контекста БД для выполнения операций с БД. |
-| EventManager.Infrastructure | *.Repositories | Реализация интерфейсов репозиториев на основе БД. |
-| EventManager.Infrastructure | *.Services | Реализация интерфейсов бизнес-логики, требующих частных технологий. |
-| EventManager.Application | *.DataTransferObject | Реализация объектов входных параметров запросов и выходных параметров ответов. |
-| EventManager.Application | *.Interfaces | Интерфейсы взаимодействия с бизнес логикой и доступа к данным через репозитории. |
-| EventManager.Application | *.services | Реализация моделей взаимодействия с бизнес логикой. |
-| EventManager.Application | *.Validators | Реализация ограничений и правил применения входных параметров запросов. |
-| EventManager | * | Сборка DI контейнера из слоев и запуск процесса веб-приложения. |
-| EventManager.Tests | * | Юнит-тесты базовой логики. |
-| EventManager.IntegrationTests | * | Интеграционные тесты бизнес-логики и отдельных подсистем.. |
-| EventManager.WebTests | * | End-to-end case тесты. |
+| Имя проекта | Описание |
+| --- | --- |
+| BookingService | Исполняемая сборка сервиса бронирования. |
+| BookingService.Application | Определения интерфейса, DTO, схемы безопасности, реализация сервисов слоя приложения бронирования. |
+| BookingService.Database | Определение схемы БД и миграции для сервиса бронирования. |
+| BookingService.Domain | Определение сущностей бизнес-логики бронирования. |
+| BookingService.Infrastructure | Реализация инфраструктуры (фоновый процесс обработки броней). |
+| BookingService.Kafka | Реализация инфраструктуры (взаимодействие с серверов Kafka). |
+| BookingService.IntegrationTests | Интеграционные тесты сервиса бронирования. |
+| BookingService.UnitTests | Модульные тесты сервиса бронирования. |
+| BookingService.WebTests | E2E тесты сервиса бронирования. |
+| Authorization | Определение сущностей и интерфейсы подсистемы авторизации. |
+| Authorization.AspNetCore | Общая микроструктура обеспечения авторизации на основе ASP .NET Core. |
+| Common | Общие компоненты работы с данными и базовые исключения. |
+| Common.Contracts | Определение контрактов взаимодействия сервисов. |
+| Common.Infrastructure | Базовые сервисы инфраструктуры. |
+| Common.Kafka | Базовые сервисы инфраструктуры взаимодействия библиотеками Kafka, определение конфигурации. |
+| Common.Middleware | Обработчики базовый исключений. |
+| Common.Swagger | Инфраструктура подключения и конфигурирования Swagger. |
+| Common.Tests | Общие определения для проектов тестирования. |
+| Common.Tests.AspNetCore | Общая инфраструктура для проектов тестирования для ASP .NET Core. |
+| Common.Tests.Postgres | Общая инфраструктура для проектов тестирования для СУБД Postgres. |
+| Database.Postgres | Подключение поддержки и конфигурирования БД Postgres. |
+| EventsService | Исполняемая сборка сервиса управления событиями. |
+| EventsService.Application | Определения интерфейса, DTO, схемы безопасности, реализация сервисов слоя приложения управления событиями. |
+| EventsService.Database | Определение схемы БД и миграции для сервиса управления событиями. |
+| EventsService.Domain | Определение сущностей бизнес-логики управления событиями. |
+| EventsService.Kafka | Реализация инфраструктуры (взаимодействие с серверов Kafka). |
+| EventsService.IntegrationTests | Интеграционные тесты сервиса управления событиями. |
+| EventsService.UnitTests | Модульные тесты сервиса управления событиями. |
+| EventsService.WebTests | E2E тесты сервиса управления событиями. |
+| UsersService | Исполняемая сборка сервиса аутентификации и управления пользователями. |
+| UsersService.Application | Определения интерфейса, DTO, схемы безопасности, реализация сервисов слоя приложения управления пользователями. |
+| UsersService.Database | Определение схемы БД и миграции для сервиса управления пользователями. |
+| UsersService.Domain | Определение сущностей бизнес-логики управления пользователями. |
+| UsersService.Infrastructure | Реализация инфраструктуры (взаимодействие с ASP .NET Core). |
+| UsersService.IntegrationTests | Интеграционные тесты сервиса управления пользователями. |
+| UsersService.UnitTests | Модульные тесты сервиса управления пользователями. |
+| UsersService.WebTests | E2E тесты сервиса управления пользователями. |
 
 ## Продолжение следует...

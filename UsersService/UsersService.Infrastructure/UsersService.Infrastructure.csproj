@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../Common/Authorization.AspNetCore/Authorization.AspNetCore.csproj" />
+    <ProjectReference Include="../../Common/Common.Infrastructure/Common.Infrastructure.csproj" />
+    <ProjectReference Include="../UsersService.Application/UsersService.Application.csproj" />
+  </ItemGroup>
+
+</Project>

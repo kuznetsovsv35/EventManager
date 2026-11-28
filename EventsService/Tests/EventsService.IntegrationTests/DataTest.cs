@@ -1,0 +1,35 @@
+using EventsService.Domain;
+
+namespace EventsService.IntegrationTests;
+
+public abstract class DataTest(ContainerWrapper testContainer) : DatabaseTestBase(testContainer), IAsyncLifetime
+{
+    public async Task InitializeAsync()
+    {
+        await ResetDatabase();
+        await LoadTestData();
+    }
+    public Task DisposeAsync() => Task.CompletedTask;
+
+    public const int EventCount = 30;
+    const int EventDuration = 45;
+    const int MinTotalSeats = 10;
+    const int MaxTotalSeats = 100;
+    static readonly DateTime StartAt = new DateTime(2026, 6, 28, 10, 0, 0).ToUniversalTime();
+    static readonly DateTime EndAt = StartAt.AddDays(EventCount);
+    async Task LoadTestData()
+    {
+        await using var db = CreateDbContext();
+        db.Events.AddRange(
+            [.. Enumerable.Range(1, EventCount)
+            .Select(i => new Event(Random.Shared.Next(MinTotalSeats, MaxTotalSeats))
+            {
+                Title = $"Event Title {i}",
+                StartAt = StartAt.AddDays(i - 1),
+                EndAt = StartAt.AddDays(i - 1).AddMinutes(EventDuration),
+                Description = $"Event Description {i}",
+            })]
+        );
+        await db.SaveChangesAsync();
+    }
+}
