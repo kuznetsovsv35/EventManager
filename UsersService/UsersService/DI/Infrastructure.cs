@@ -1,3 +1,4 @@
+using Common.Infrastructure.DI;
 using Database.Postgres.DI;
 using UsersService.Application;
 using UsersService.Application.Cryptography;
@@ -12,14 +13,11 @@ public static partial class DependencyInjection
     public static IServiceCollection ConfigureInfrastructure(this IServiceCollection services,
         IConfiguration configuration,
         IWebHostEnvironment environment)
-    {
-        services.ConfigureDatabase<UsersDbContext>(configuration!, environment.IsDevelopment());
-        services.AddScoped<IUserRepository, UserRepository>();
-
-        services.AddSingleton<IPasswordHasher, PasswordHasher>();
-
-        return services;
-    }
+        => services
+            .ConfigureDatabase<UsersDbContext>(configuration!, environment.IsDevelopment())
+            .AddScoped<IUserRepository, UserRepository>()
+            .AddSingleton<IPasswordHasher, PasswordHasher>()
+            .AddControllers().ConfigureJsonSerializer().Services;
 
     public static Task RunInfrastructure(this IServiceProvider serviceProvider, CancellationToken cancellation)
         => serviceProvider.PrepareDatabase<UsersDbContext>(cancellation, async (dbContext, cancellation)

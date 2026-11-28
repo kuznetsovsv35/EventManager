@@ -4,6 +4,7 @@ using BookingService.Database;
 using BookingService.Database.Repositories;
 using BookingService.Kafka.DI;
 using BookingService.Infrastructure.DI;
+using Common.Infrastructure.DI;
 using Common.Services;
 using Common.Synchronization;
 using Database.Postgres.DI;
@@ -21,7 +22,8 @@ public static partial class DependencyInjection
             .AddSingleton<ISyncContextFactory, SyncContextFactory>()
             .AddSingleton<IBookingServiceNotifier, BookingServiceNotifier>()
             .AddBackgroundServices()
-            .ConfigureKafka(config);
+            .ConfigureKafka(config)
+            .AddControllers().ConfigureJsonSerializer().Services;
 
     public static Task RunInfrastructure(this IServiceProvider serviceProvider, CancellationToken cancellation)
         => serviceProvider.PrepareDatabase<BookingsDbContext>(cancellation, (dbContext, cancellation)

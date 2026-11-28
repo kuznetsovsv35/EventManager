@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../../Common/Authorization.AspNetCore/Authorization.AspNetCore.csproj" />
+    <ProjectReference Include="../../Common/Common.Infrastructure/Common.Infrastructure.csproj" />
     <ProjectReference Include="../UsersService.Application/UsersService.Application.csproj" />
   </ItemGroup>
 

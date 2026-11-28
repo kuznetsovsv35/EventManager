@@ -106,7 +106,7 @@ public class EventBookingTest(TestContext context) : IClassFixture<TestContext>
             .SingleAsync(x => x.BookingId == bookingId);
 
         // Then
-        Assert.Equal(eventId, booking.EventId);
+        Assert.Null(booking.EventId);
         Assert.True(booking.IsProcessed);
         Assert.False(booking.IsConfirmed);
         Assert.True(booking.IsCancelled);

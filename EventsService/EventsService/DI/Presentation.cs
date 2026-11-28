@@ -1,6 +1,5 @@
 using Authorization.AspNetCore.DI;
 using Authorization.Domain;
-using Common.Infrastructure.DI;
 using Common.Middleware.DI;
 using Common.Swagger;
 using EventsService.Application.Security;
@@ -12,21 +11,22 @@ public static partial class DependencyInjection
 {
     public static IServiceCollection ConfigurePresentation(this IServiceCollection services, IConfiguration configuration)
     {
-        services.UseProblemDetailsMapper<EventsProblemDetailsMapper>();
-        services.ConfigureJwtAuthentication(configuration);
-        services.ConfigureJwtAuthorization(configuration, options =>
-        {
-            options
-                .AddPolicy(Policy.CreateEvent, UserRole.Admin)
-                .AddPolicy(Policy.DeleteEvent, UserRole.Admin)
-                .AddPolicy(Policy.GetEvents, UserRole.Admin, UserRole.User)
-                .AddPolicy(Policy.ModifyEvent, UserRole.Admin);
-        });
+        services
+            .UseProblemDetailsMapper<EventsProblemDetailsMapper>()
+            .ConfigureJwtAuthentication(configuration)
+            .ConfigureJwtAuthorization(configuration, options =>
+            {
+                options
+                    .AddPolicy(Policy.CreateEvent, UserRole.Admin)
+                    .AddPolicy(Policy.DeleteEvent, UserRole.Admin)
+                    .AddPolicy(Policy.GetEvents, UserRole.Admin, UserRole.User)
+                    .AddPolicy(Policy.ModifyEvent, UserRole.Admin);
+            })
+            .AddControllers();
+        services
+            .AddEndpointsApiExplorer()
+            .ConfigureSwagger();
 
-        services.AddControllers().ConfigureJsonSerializer();
-
-        services.AddEndpointsApiExplorer();
-        services.ConfigureSwagger();
         return services;
     }
 

@@ -2,8 +2,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Testcontainers.PostgreSql;
 using Microsoft.Extensions.Hosting;
+using Testcontainers.PostgreSql;
 using BookingService.Database;
 using BookingService.Infrastructure.Services;
 using Common.Kafka;
@@ -66,7 +66,7 @@ public class WebTestFactory : WebApplicationFactory<Program>, IAsyncLifetime
     #endregion
 
     #region Token generator
-    public ITokenGenerator TokenGenerator => _tokenGenerator
+    internal ITokenGenerator TokenGenerator => _tokenGenerator
         ??= Services.GetRequiredService<ITokenGenerator>();
     ITokenGenerator? _tokenGenerator;
     #endregion

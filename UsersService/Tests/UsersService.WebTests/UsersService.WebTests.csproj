@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="../../../Common/Common.Tests.AspNetCore/Common.Tests.AspNetCore.csproj" />
     <ProjectReference Include="../../../Common/Common.Tests/Common.Tests.csproj" />
     <ProjectReference Include="../../UsersService/UsersService.csproj" />
   </ItemGroup>

@@ -7,13 +7,9 @@ namespace Common.Infrastructure.DI;
 public static class DependencyInjection
 {
     public static IMvcBuilder ConfigureJsonSerializer(this IMvcBuilder builder)
-    {
-        builder.AddJsonOptions(options =>
+        => builder.AddJsonOptions(options =>
         {
             options.JsonSerializerOptions.Converters.Add(
-            new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
+                new JsonStringEnumConverter(JsonNamingPolicy.CamelCase));
         });
-
-        return builder;
-    }
 }

@@ -1,5 +1,4 @@
 using System.Net;
-using System.Net.Http.Json;
 using BookingService.Application.DTO;
 using Common.Tests;
 
@@ -13,15 +12,16 @@ public class BookingsServiceTest(WebTestFactory factory) : WebTestBase(factory)
     {
         // Given
         Guid eventId = Guid.NewGuid(); ;
-        string accessToken = LoginUser("user", "user");
+        string accessToken = LoginUser("user");
 
         // When
         var postResponse = await PostAsync($"/events/{eventId}/book", (object)null!, accessToken);
         postResponse?.EnsureSuccessStatusCode();
 
         BookingInfo? created = postResponse?.Content is not null
-            ? await postResponse.Content.ReadFromJsonAsync<BookingInfo>()
+            ? await ReadJsonAsync<BookingInfo>(postResponse.Content)
             : null;
+        
         var location = postResponse?.Headers.Location?.ToString();
 
         var getResponse = location is not null
@@ -31,7 +31,7 @@ public class BookingsServiceTest(WebTestFactory factory) : WebTestBase(factory)
         getResponse?.EnsureSuccessStatusCode();
 
         BookingInfo? located = getResponse is not null
-            ? await getResponse.Content.ReadFromJsonAsync<BookingInfo>()
+            ? await ReadJsonAsync<BookingInfo>(getResponse.Content)
             : null;
 
         // Then
@@ -68,13 +68,12 @@ public class BookingsServiceTest(WebTestFactory factory) : WebTestBase(factory)
         // Given
         string userName_1 = $"{nameof(Bookings_Delete_Success)}_1";
         string userName_2 = $"{nameof(Bookings_Delete_Success)}_2"; ;
-        const string password = nameof(password);
 
         Guid eventId = Guid.NewGuid();
 
         // When
-        string accessToken_1 = LoginUser(userName_1, password);
-        string accessToken_2 = LoginUser(userName_2, password);
+        string accessToken_1 = LoginUser(userName_1);
+        string accessToken_2 = LoginUser(userName_2);
 
         var booking_1 = await PostAsync($"/events/{eventId}/book", (object)null!, accessToken_1);
         var booking_2 = await PostAsync($"/events/{eventId}/book", (object)null!, accessToken_2);
@@ -82,8 +81,8 @@ public class BookingsServiceTest(WebTestFactory factory) : WebTestBase(factory)
         booking_1.EnsureSuccessStatusCode();
         booking_2.EnsureSuccessStatusCode();
 
-        BookingInfo? bookingInfo_1 = await booking_1.Content.ReadFromJsonAsync<BookingInfo>();
-        BookingInfo? bookingInfo_2 = await booking_2.Content.ReadFromJsonAsync<BookingInfo>();
+        BookingInfo? bookingInfo_1 = await ReadJsonAsync<BookingInfo>(booking_1.Content);
+        BookingInfo? bookingInfo_2 = await ReadJsonAsync<BookingInfo>(booking_2.Content);
 
         var cancel_1 = bookingInfo_1 is not null
             ? await DeleteAsync($"/bookings/{bookingInfo_1.Id}", accessToken_1)
@@ -109,14 +108,13 @@ public class BookingsServiceTest(WebTestFactory factory) : WebTestBase(factory)
         // Given
         string userName_1 = $"{nameof(Bookings_Delete_Forbidden)}_1";
         string userName_2 = $"{nameof(Bookings_Delete_Forbidden)}_2"; ;
-        const string password = nameof(password);
 
         Guid eventId = Guid.NewGuid();
 
         // When
-        string accessToken_1 = LoginUser(userName_1, password);
-        string accessToken_2 = LoginUser(userName_2, password);
-        string adminToken = LoginUser("admin", "admin");
+        string accessToken_1 = LoginUser(userName_1);
+        string accessToken_2 = LoginUser(userName_2);
+        string adminToken = LoginUser("admin");
 
         var booking_1 = await PostAsync($"/events/{eventId}/book", (object)null!, accessToken_1);
         var booking_2 = await PostAsync($"/events/{eventId}/book", (object)null!, accessToken_2);
@@ -124,8 +122,8 @@ public class BookingsServiceTest(WebTestFactory factory) : WebTestBase(factory)
         booking_1.EnsureSuccessStatusCode();
         booking_2.EnsureSuccessStatusCode();
 
-        BookingInfo? bookingInfo_1 = await booking_1.Content.ReadFromJsonAsync<BookingInfo>();
-        BookingInfo? bookingInfo_2 = await booking_2.Content.ReadFromJsonAsync<BookingInfo>();
+        BookingInfo? bookingInfo_1 = await ReadJsonAsync<BookingInfo>(booking_1.Content);
+        BookingInfo? bookingInfo_2 = await ReadJsonAsync<BookingInfo>(booking_2.Content);
 
         var failure_1 = bookingInfo_1 is not null
             ? await DeleteAsync($"/bookings/{bookingInfo_1.Id}", accessToken_2)
@@ -160,7 +158,7 @@ public class BookingsServiceTest(WebTestFactory factory) : WebTestBase(factory)
     public async Task Bookings_Delete_NotFound()
     {
         // Given
-        string accessToken = LoginUser("user", "user");
+        string accessToken = LoginUser("user");
 
         // When
         var response = await DeleteAsync($"/bookings/{Guid.Empty}", accessToken);
@@ -176,7 +174,7 @@ public class BookingsServiceTest(WebTestFactory factory) : WebTestBase(factory)
     {
         // Given
         Guid eventId = Guid.NewGuid();
-        string bookingToken = LoginUser("user", "user");
+        string bookingToken = LoginUser("user");
         string deleteToken = null!;
 
         // When
@@ -184,7 +182,7 @@ public class BookingsServiceTest(WebTestFactory factory) : WebTestBase(factory)
 
         booking.EnsureSuccessStatusCode();
 
-        BookingInfo? bookingInfo = await booking.Content.ReadFromJsonAsync<BookingInfo>();
+        BookingInfo? bookingInfo = await ReadJsonAsync<BookingInfo>(booking.Content);
 
         var cancel = bookingInfo is not null
             ? await DeleteAsync($"/bookings/{bookingInfo.Id}", deleteToken)

@@ -1,6 +1,5 @@
 using Authorization.AspNetCore.DI;
 using Authorization.Domain;
-using Common.Infrastructure.DI;
 using Common.Middleware.DI;
 using Common.Swagger;
 using UsersService.Application.Security;
@@ -23,9 +22,8 @@ public static partial class DependencyInjection
                 .AddPolicy(Policy.ChangePassword, UserRole.Admin, UserRole.User)
                 .AddPolicy(Policy.DeleteUser, UserRole.Admin);
         });
-
-        services.AddControllers().ConfigureJsonSerializer();
-
+        
+        services.AddControllers();
         services.AddEndpointsApiExplorer();
         services.ConfigureSwagger();
         return services;

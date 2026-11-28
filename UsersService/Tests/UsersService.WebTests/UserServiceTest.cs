@@ -1,15 +1,11 @@
 ﻿using System.Net;
-using System.Net.Http.Json;
 using Common.Tests;
-using Microsoft.AspNetCore.Http;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using UsersService.Application.DTO;
 
 namespace UsersService.WebTests;
 
 public class UserServiceTest(WebTestFactory factory) : WebTestBase(factory)
 {
-
     [Trait(Category.Name, Category.Web)]
     [Fact]
     public async Task Auth_Register_Success()
@@ -84,7 +80,7 @@ public class UserServiceTest(WebTestFactory factory) : WebTestBase(factory)
 
         // When
         var response = await PostAsync("/auth/login", loginRequest);
-        var authResult = await response.Content.ReadFromJsonAsync<AuthResult>();
+        var authResult = await ReadJsonAsync<AuthResult>(response.Content);
 
         // Then
         response.EnsureSuccessStatusCode();
@@ -107,7 +103,7 @@ public class UserServiceTest(WebTestFactory factory) : WebTestBase(factory)
 
         // When
         var response = await PostAsync("/auth/login", loginRequest);
-        var authResult = await response.Content.ReadFromJsonAsync<AuthResult>();
+        var authResult = await ReadJsonAsync<AuthResult>(response.Content);
 
         // Then
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);

@@ -1,61 +1,12 @@
-using System.Net.Http.Headers;
-using System.Net.Http.Json;
-using System.Net.Mime;
-using System.Text;
-using System.Text.Json;
 using Authorization.Domain;
+using Common.Tests.AspNetCore;
 using EventsService.Application.DTO;
 
 namespace EventsService.WebTests;
 
-public abstract class WebTestBase(WebTestFactory factory) : IClassFixture<WebTestFactory>
+public abstract class WebTestBase(WebTestFactory factory) : WebTestBase<Program>(factory), IClassFixture<WebTestFactory>
 {
-    protected async Task<HttpResponseMessage> PostAsync<TPayload>(string uri, TPayload? payload, string? token = null) where TPayload : class
-    {
-        using var client = factory.CreateClient();
-
-        if (token is not null)
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-        return await client.PostAsync(
-            uri,
-            payload is not null
-                ? new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, MediaTypeNames.Application.Json)
-                : null,
-            CancellationToken.None);
-    }
-
-    protected async Task<HttpResponseMessage> PutAsync<TPayload>(string uri, TPayload payload, string? token = null) where TPayload : class
-    {
-        using var client = factory.CreateClient();
-
-        if (token is not null)
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-        return await client.PutAsJsonAsync(uri, payload, CancellationToken.None);
-    }
-
-    protected async Task<HttpResponseMessage> GetAsync(string uri, string? token = null)
-    {
-        using var client = factory.CreateClient();
-
-        if (token is not null)
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-        return await client.GetAsync(uri, CancellationToken.None);
-    }
-
-    protected async Task<HttpResponseMessage> DeleteAsync(string uri, string? token = null)
-    {
-        using var client = factory.CreateClient();
-
-        if (token is not null)
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-
-        return await client.DeleteAsync(uri, CancellationToken.None);
-    }
-
-    protected async Task<string> LoginUser(string login, string? password)
+    protected async Task<string> LoginUser(string login)
         => login switch
         {
             "admin" => factory.TokenGenerator.GenerateTokens(Guid.Empty, login, UserRole.Admin),
@@ -64,11 +15,11 @@ public abstract class WebTestBase(WebTestFactory factory) : IClassFixture<WebTes
 
     protected async Task<EventOutputData?> CreateEvent(EventInputData data)
     {
-        string accessToken = await LoginUser("admin", "admin");
+        string accessToken = await LoginUser("admin");
 
         var response = await PostAsync("/events", data, accessToken);
         response.EnsureSuccessStatusCode();
-        return await response.Content.ReadFromJsonAsync<EventOutputData>();
+        return await ReadJsonAsync<EventOutputData>(response.Content);
     }
 
     protected Task<EventOutputData?> CreateRandomEvent()

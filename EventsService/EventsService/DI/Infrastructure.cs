@@ -1,4 +1,5 @@
 using Common.Data;
+using Common.Infrastructure.DI;
 using Common.Infrastructure.Services;
 using Database.Postgres.DI;
 using EventsService.Application;
@@ -14,17 +15,13 @@ public static partial class DependencyInjection
     public static IServiceCollection ConfigureInfrastructure(this IServiceCollection services,
         IConfiguration config,
         IWebHostEnvironment environment)
-    {
-        services.ConfigureDatabase<EventsDbContext>(config, environment.IsDevelopment());
+        => services
+            .ConfigureDatabase<EventsDbContext>(config, environment.IsDevelopment())
+            .AddScoped<IPaginator<Event>, PaginateService<Event>>()
+            .AddScoped<IEventRepository, EventRepository>()
+            .ConfigureKafka(config)
+            .AddControllers().ConfigureJsonSerializer().Services;
 
-        services.AddScoped<IPaginator<Event>, PaginateService<Event>>();
-        services.AddScoped<IEventRepository, EventRepository>();
-
-        services.ConfigureKafka(config);
-
-        return services;
-
-    }
     public static Task RunInfrastructure(this IServiceProvider serviceProvider, CancellationToken cancellation)
         => serviceProvider.PrepareDatabase<EventsDbContext>(cancellation, (dbContext, cancellation)
             => Task.CompletedTask);

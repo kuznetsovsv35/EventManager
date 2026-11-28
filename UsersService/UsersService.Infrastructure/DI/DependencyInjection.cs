@@ -1,4 +1,5 @@
 using Authorization.AspNetCore.DI;
+using Common.Infrastructure.DI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using UsersService.Application;
@@ -10,9 +11,11 @@ public static partial class DependencyInjection
 {
     public static IServiceCollection ConfigureUserAuthentication(this IServiceCollection services, IConfiguration configuration)
     {
-        services.ConfigureJwtAuthentication(configuration);
-        services.AddScoped<IAuthenticationService, AuthenticationService>();
-        services.AddSingleton<ITokenService, JwtTokenService>();
+        services
+            .ConfigureJwtAuthentication(configuration)
+            .AddScoped<IAuthenticationService, AuthenticationService>()
+            .AddSingleton<ITokenService, JwtTokenService>()
+            .AddControllers().ConfigureJsonSerializer();
         return services;
     }
 }
